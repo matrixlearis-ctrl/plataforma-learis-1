@@ -36,7 +36,8 @@ export interface OrderRequest {
   clientName: string;
   category: string;
   description: string;
-  location: string;
+  location: string; // Cidade, UF
+  neighborhood?: string; // Bairro
   deadline: string;
   status: OrderStatus;
   createdAt: string;

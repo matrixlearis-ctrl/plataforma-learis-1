@@ -10,15 +10,56 @@ import AdminDashboard from './pages/AdminDashboard';
 import NewRequest from './pages/NewRequest';
 import ProfessionalLeads from './pages/ProfessionalLeads';
 import ProfileSettings from './pages/ProfileSettings';
-import { User, UserRole, ProfessionalProfile } from './types';
+import { User, UserRole, ProfessionalProfile, OrderRequest, OrderStatus } from './types';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [proProfile, setProProfile] = useState<ProfessionalProfile | null>(null);
+  const [orders, setOrders] = useState<OrderRequest[]>([]);
 
-  // Mock initial session check
+  // Carregar dados iniciais
   useEffect(() => {
     const savedUser = localStorage.getItem('samej_user');
+    const savedOrders = localStorage.getItem('samej_orders');
+    
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
+    } else {
+      // Pedidos iniciais para o mercado não parecer vazio
+      const initialOrders: OrderRequest[] = [
+        {
+          id: 'ord-init-1',
+          clientId: 'c123',
+          clientName: 'Roberto Silva',
+          category: 'eletrica',
+          description: 'Troca de fiação completa em apartamento antigo de 3 quartos, incluindo quadro de força.',
+          location: 'São Paulo, SP',
+          neighborhood: 'Jardins',
+          deadline: 'imediato',
+          status: OrderStatus.OPEN,
+          createdAt: new Date().toISOString(),
+          leadPrice: 5,
+          unlockedBy: []
+        },
+        {
+          id: 'ord-init-2',
+          clientId: 'c456',
+          clientName: 'Maria Oliveira',
+          category: 'pintura',
+          description: 'Pintura de sala e corredor, cerca de 40m2 de parede. Já tenho a tinta.',
+          location: 'Rio de Janeiro, RJ',
+          neighborhood: 'Copacabana',
+          deadline: '15_dias',
+          status: OrderStatus.OPEN,
+          createdAt: new Date().toISOString(),
+          leadPrice: 5,
+          unlockedBy: []
+        }
+      ];
+      setOrders(initialOrders);
+      localStorage.setItem('samej_orders', JSON.stringify(initialOrders));
+    }
+
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
       setUser(parsed);
@@ -26,10 +67,10 @@ const App: React.FC = () => {
         setProProfile({
           userId: parsed.id,
           description: "Profissional experiente em reformas residenciais.",
-          categories: ['obras', 'pintura'],
+          categories: ['obras', 'pintura', 'eletrica'],
           region: "São Paulo",
           rating: 4.8,
-          credits: 45,
+          credits: 50,
           completedJobs: 12,
           phone: "+55 11 98888-7777"
         });
@@ -43,6 +84,18 @@ const App: React.FC = () => {
     setProProfile(null);
   };
 
+  const addOrder = (newOrder: OrderRequest) => {
+    const updatedOrders = [newOrder, ...orders];
+    setOrders(updatedOrders);
+    localStorage.setItem('samej_orders', JSON.stringify(updatedOrders));
+  };
+
+  const updateOrder = (updatedOrder: OrderRequest) => {
+    const updatedOrders = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
+    setOrders(updatedOrders);
+    localStorage.setItem('samej_orders', JSON.stringify(updatedOrders));
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -53,23 +106,30 @@ const App: React.FC = () => {
             <Route path="/auth" element={<Auth onLogin={setUser} />} />
             
             {/* Customer Routes */}
-            <Route path="/pedir-orcamento" element={<NewRequest user={user} />} />
+            <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={addOrder} />} />
             <Route path="/cliente/dashboard" element={
-              user?.role === UserRole.CLIENT ? <CustomerDashboard user={user} /> : <Navigate to="/auth" />
+              user?.role === UserRole.CLIENT ? <CustomerDashboard user={user} orders={orders} /> : <Navigate to="/auth" />
             } />
 
             {/* Professional Routes */}
             <Route path="/profissional/dashboard" element={
-              user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} /> : <Navigate to="/auth" />
+              user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} orders={orders} /> : <Navigate to="/auth" />
             } />
             <Route path="/profissional/leads" element={
-              user?.role === UserRole.PROFESSIONAL ? <ProfessionalLeads user={user} profile={proProfile} onUpdateProfile={setProProfile} /> : <Navigate to="/auth" />
+              user?.role === UserRole.PROFESSIONAL ? 
+              <ProfessionalLeads 
+                user={user} 
+                profile={proProfile} 
+                orders={orders}
+                onUpdateProfile={setProProfile} 
+                onUpdateOrder={updateOrder}
+              /> : <Navigate to="/auth" />
             } />
             <Route path="/configuracoes" element={<ProfileSettings user={user} profile={proProfile} />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={
-              user?.role === UserRole.ADMIN ? <AdminDashboard /> : <Navigate to="/" />
+              user?.role === UserRole.ADMIN ? <AdminDashboard orders={orders} /> : <Navigate to="/" />
             } />
 
             <Route path="*" element={<Navigate to="/" />} />

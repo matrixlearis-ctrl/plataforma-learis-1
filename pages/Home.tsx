@@ -25,7 +25,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
       <section className="bg-[#1e3a8a] text-white py-24 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-            Tudo o que precisa para a sua casa num só lugar.
+            Encontre profissionais qualificados perto de Você
           </h1>
           <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto opacity-90">
             Receba orçamentos gratuitos dos melhores profissionais da sua região para obras, limpezas, reparações e muito mais.
