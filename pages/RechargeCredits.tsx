@@ -4,6 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { CREDIT_PACKAGES } from '../constants';
 import { Coins, Check, ShieldCheck, Zap, ArrowLeft, Loader2, QrCode } from 'lucide-react';
 
+/* 
+  NOTA PARA O DESENVOLVEDOR:
+  Para produção, você deve instalar: npm install @stripe/stripe-js @stripe/react-stripe-js
+  E usar o componente <Elements> para envolver este fluxo.
+*/
+
 interface RechargeCreditsProps {
   onAddCredits: (amount: number) => void;
 }
@@ -14,10 +20,17 @@ const RechargeCredits: React.FC<RechargeCreditsProps> = ({ onAddCredits }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handlePurchase = (pkg: typeof CREDIT_PACKAGES[0]) => {
+  const handlePurchase = async (pkg: typeof CREDIT_PACKAGES[0]) => {
     setSelectedPackage(pkg.id);
     setLoading(true);
     
+    /* 
+      FLUXO REAL STRIPE:
+      1. Chamar seu backend: const { sessionId } = await fetch('/create-checkout-session', { method: 'POST', body: JSON.stringify({ pkgId: pkg.id }) });
+      2. Redirecionar: const stripe = await loadStripe('sua_chave_publicavel');
+      3. await stripe.redirectToCheckout({ sessionId });
+    */
+
     // Simular processamento de pagamento via Stripe (PIX)
     setTimeout(() => {
       onAddCredits(pkg.credits);
