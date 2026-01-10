@@ -23,7 +23,7 @@ export const CATEGORIES = [
 ];
 
 export const CREDIT_PACKAGES = [
-  { id: 'p1', name: 'Pack Básico', credits: 10, price: 29.90 },
-  { id: 'p2', name: 'Pack Profissional', credits: 30, price: 79.90 },
-  { id: 'p3', name: 'Pack Premium', credits: 100, price: 199.90 },
+  { id: 'p1', name: 'Pack Inicial', credits: 15, price: 45.00 },
+  { id: 'p2', name: 'Pack Intermediário', credits: 30, price: 75.00 },
+  { id: 'p3', name: 'Pack Avançado', credits: 50, price: 135.00 },
 ];

@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import NewRequest from './pages/NewRequest';
 import ProfessionalLeads from './pages/ProfessionalLeads';
 import ProfileSettings from './pages/ProfileSettings';
+import RechargeCredits from './pages/RechargeCredits';
 import { User, UserRole, ProfessionalProfile, OrderRequest, OrderStatus } from './types';
 
 const App: React.FC = () => {
@@ -25,7 +26,6 @@ const App: React.FC = () => {
     if (savedOrders) {
       setOrders(JSON.parse(savedOrders));
     } else {
-      // Pedidos iniciais para o mercado não parecer vazio
       const initialOrders: OrderRequest[] = [
         {
           id: 'ord-init-1',
@@ -96,6 +96,12 @@ const App: React.FC = () => {
     localStorage.setItem('samej_orders', JSON.stringify(updatedOrders));
   };
 
+  const handleAddCredits = (amount: number) => {
+    if (proProfile) {
+      setProProfile({ ...proProfile, credits: proProfile.credits + amount });
+    }
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -105,15 +111,13 @@ const App: React.FC = () => {
             <Route path="/" element={<Home user={user} />} />
             <Route path="/auth" element={<Auth onLogin={setUser} />} />
             
-            {/* Customer Routes */}
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={addOrder} />} />
             <Route path="/cliente/dashboard" element={
               user?.role === UserRole.CLIENT ? <CustomerDashboard user={user} orders={orders} /> : <Navigate to="/auth" />
             } />
 
-            {/* Professional Routes */}
             <Route path="/profissional/dashboard" element={
-              user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} orders={orders} /> : <Navigate to="/auth" />
+              user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} /> : <Navigate to="/auth" />
             } />
             <Route path="/profissional/leads" element={
               user?.role === UserRole.PROFESSIONAL ? 
@@ -125,11 +129,14 @@ const App: React.FC = () => {
                 onUpdateOrder={updateOrder}
               /> : <Navigate to="/auth" />
             } />
+            <Route path="/profissional/recarregar" element={
+              user?.role === UserRole.PROFESSIONAL ? 
+              <RechargeCredits onAddCredits={handleAddCredits} /> : <Navigate to="/auth" />
+            } />
             <Route path="/configuracoes" element={<ProfileSettings user={user} profile={proProfile} />} />
 
-            {/* Admin Routes */}
             <Route path="/admin" element={
-              user?.role === UserRole.ADMIN ? <AdminDashboard orders={orders} /> : <Navigate to="/" />
+              user?.role === UserRole.ADMIN ? <AdminDashboard /> : <Navigate to="/" />
             } />
 
             <Route path="*" element={<Navigate to="/" />} />
