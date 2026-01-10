@@ -1,14 +1,17 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UserRole } from '../types';
-import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, Mail } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, KeyRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  
   const [role, setRole] = useState<UserRole>(UserRole.CLIENT);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,22 +20,33 @@ const Auth: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Tradutor de erros do Supabase para PT-BR
+  useEffect(() => {
+    // Detecta se o usuário clicou no link de recuperação enviado por e-mail
+    const hash = window.location.hash;
+    if (hash.includes('type=recovery') || searchParams.get('mode') === 'reset') {
+      setIsResettingPassword(true);
+    }
+  }, [searchParams]);
+
+  // Tradutor universal de erros do Supabase para Português do Brasil
   const translateError = (err: any): string => {
-    const message = err.message || '';
-    if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
-    if (message.includes('User already registered')) return 'Este e-mail já está cadastrado no sistema.';
+    const message = err?.message || String(err);
+    
+    if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos. Verifique e tente novamente.';
+    if (message.includes('User already registered')) return 'Este e-mail já está em uso por outra conta.';
     if (message.includes('security purposes')) {
       const seconds = message.match(/\d+/);
-      return `Por motivos de segurança, aguarde ${seconds ? seconds[0] : 'alguns'} segundos antes de tentar novamente.`;
+      return `Por segurança, você só pode solicitar isso novamente após ${seconds ? seconds[0] : 'alguns'} segundos.`;
     }
     if (message.includes('row-level security policy')) {
-      return 'Erro de permissão: Verifique as políticas RLS da tabela "profiles" no seu painel do Supabase.';
+      return 'Erro de permissão no servidor. Por favor, aplique as políticas RLS no Editor SQL do Supabase.';
     }
-    if (message.includes('Email not confirmed')) return 'Por favor, confirme seu e-mail antes de acessar.';
-    if (message.includes('Password should be at least 6 characters')) return 'A senha deve ter pelo menos 6 caracteres.';
+    if (message.includes('Email not confirmed')) return 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada ou spam.';
+    if (message.includes('Password should be at least 6 characters')) return 'A senha deve conter no mínimo 6 caracteres.';
+    if (message.includes('Database error saving profile')) return 'Conta criada com sucesso, mas houve uma falha ao configurar seu perfil. Entre em contato com o suporte.';
+    if (message.includes('network error')) return 'Erro de conexão. Verifique sua internet.';
     
-    return 'Ocorreu um erro inesperado. Tente novamente em instantes.';
+    return 'Ocorreu um erro inesperado no sistema. Por favor, tente novamente em alguns instantes.';
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -46,7 +60,30 @@ const Auth: React.FC = () => {
         redirectTo: `${window.location.origin}/#/auth?mode=reset`,
       });
       if (resetError) throw resetError;
-      setSuccessMsg("Link de recuperação enviado para o seu e-mail!");
+      setSuccessMsg("Link enviado! Verifique seu e-mail para cadastrar uma nova senha.");
+    } catch (err: any) {
+      setError(translateError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password
+      });
+      if (updateError) throw updateError;
+      setSuccessMsg("Senha atualizada com sucesso! Agora você já pode entrar na sua conta.");
+      setTimeout(() => {
+        setIsResettingPassword(false);
+        setIsLogin(true);
+      }, 3000);
     } catch (err: any) {
       setError(translateError(err));
     } finally {
@@ -104,7 +141,7 @@ const Auth: React.FC = () => {
             ]);
           
           if (profileError) throw profileError;
-          setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail ou faça login.");
+          setSuccessMsg("Tudo pronto! Enviamos um e-mail de confirmação. Por favor, valide sua conta para entrar.");
           setIsLogin(true);
         }
       }
@@ -115,45 +152,42 @@ const Auth: React.FC = () => {
     }
   };
 
-  if (isForgotPassword) {
+  // TELA: REDEFINIR SENHA (Vindo do link do e-mail)
+  if (isResettingPassword) {
     return (
       <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
-        <button 
-          onClick={() => { setIsForgotPassword(false); setError(null); setSuccessMsg(null); }}
-          className="flex items-center text-gray-400 hover:text-blue-600 font-bold mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao Login
-        </button>
-        
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-blue-900 tracking-tighter">RECUPERAR SENHA</h2>
-          <p className="text-gray-500 mt-2 font-medium">Enviaremos um link de acesso para o seu e-mail.</p>
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <KeyRound className="w-8 h-8" />
+          </div>
+          <h2 className="text-3xl font-black text-blue-900 tracking-tighter">CADASTRAR NOVA SENHA</h2>
+          <p className="text-gray-500 mt-2 font-medium">Digite sua nova senha de acesso abaixo.</p>
         </div>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
             <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-            {error}
+            <span className="leading-tight">{error}</span>
           </div>
         )}
 
         {successMsg && (
           <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
             <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" />
-            {successMsg}
+            <span className="leading-tight">{successMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleForgotPassword} className="space-y-5">
+        <form onSubmit={handleUpdatePassword} className="space-y-5">
           <div>
-            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">E-mail cadastrado</label>
+            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Sua nova senha</label>
             <input 
-              type="email" 
+              type="password" 
               required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres" 
               className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none bg-gray-50 text-gray-900 font-medium transition-all"
             />
           </div>
@@ -162,23 +196,79 @@ const Auth: React.FC = () => {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all mt-4 shadow-xl active:scale-95 flex items-center justify-center disabled:opacity-70"
           >
-            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'ENVIAR LINK'}
+            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'DEFINIR SENHA'}
           </button>
         </form>
       </div>
     );
   }
 
+  // TELA: ESQUECI MINHA SENHA (Solicitação)
+  if (isForgotPassword) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
+        <button 
+          onClick={() => { setIsForgotPassword(false); setError(null); setSuccessMsg(null); }}
+          className="flex items-center text-gray-400 hover:text-blue-600 font-bold mb-6 transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Voltar para o Login
+        </button>
+        
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-blue-900 tracking-tighter">RECUPERAR ACESSO</h2>
+          <p className="text-gray-500 mt-2 font-medium">Informe seu e-mail para enviarmos o link de recuperação.</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+            <span className="leading-tight">{error}</span>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
+            <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" />
+            <span className="leading-tight">{successMsg}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleForgotPassword} className="space-y-5">
+          <div>
+            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">E-mail da sua conta</label>
+            <input 
+              type="email" 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="exemplo@gmail.com" 
+              className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none bg-gray-50 text-gray-900 font-medium transition-all"
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all mt-4 shadow-xl active:scale-95 flex items-center justify-center disabled:opacity-70"
+          >
+            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'ENVIAR INSTRUÇÕES'}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // TELA PRINCIPAL: LOGIN E CADASTRO
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
       
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-black text-blue-900 tracking-tighter">
-          {isLogin ? 'BEM-VINDO' : 'CRIE SUA CONTA'}
+        <h2 className="text-3xl font-black text-blue-900 tracking-tighter uppercase">
+          {isLogin ? 'Bem-vindo de volta' : 'Faça seu Cadastro'}
         </h2>
         <p className="text-gray-500 mt-2 font-medium">
-          {isLogin ? 'Acesse o ecossistema Samej' : 'Comece a escalar seus serviços'}
+          {isLogin ? 'Acesse o marketplace Samej' : 'Crie sua conta na maior rede de serviços'}
         </p>
       </div>
 
@@ -215,7 +305,7 @@ const Auth: React.FC = () => {
         {!isLogin && (
           <>
             <div>
-              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Tipo de Perfil</label>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Quem é você?</label>
               <div className="grid grid-cols-2 gap-3">
                 <button 
                   type="button"
@@ -240,7 +330,7 @@ const Auth: React.FC = () => {
                 required 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: João Silva" 
+                placeholder="Ex: João da Silva" 
                 className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none bg-gray-50 text-gray-900 font-medium transition-all"
               />
             </div>
@@ -248,19 +338,19 @@ const Auth: React.FC = () => {
         )}
         
         <div>
-          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">E-mail</label>
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Seu E-mail</label>
           <input 
             type="email" 
             required 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="seu@email.com" 
+            placeholder="exemplo@dominio.com" 
             className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none bg-gray-50 text-gray-900 font-medium transition-all"
           />
         </div>
         
         <div>
-          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Senha</label>
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Senha de Acesso</label>
           <input 
             type="password" 
             required 
@@ -273,8 +363,8 @@ const Auth: React.FC = () => {
             <div className="text-right mt-2">
               <button 
                 type="button"
-                onClick={() => { setIsForgotPassword(true); setError(null); }}
-                className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                onClick={() => { setIsForgotPassword(true); setError(null); setSuccessMsg(null); }}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-all"
               >
                 Esqueci minha senha
               </button>
@@ -290,10 +380,6 @@ const Auth: React.FC = () => {
           {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (isLogin ? 'ENTRAR' : 'CRIAR MINHA CONTA')}
         </button>
       </form>
-      
-      <p className="text-center mt-8 text-xs text-gray-400 font-medium">
-        Ao continuar, você concorda com os Termos de Uso e Política de Privacidade da Samej.
-      </p>
     </div>
   );
 };
