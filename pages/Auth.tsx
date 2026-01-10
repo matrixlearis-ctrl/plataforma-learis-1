@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
-import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [role, setRole] = useState<UserRole>(UserRole.CLIENT);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,6 +16,43 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Tradutor de erros do Supabase para PT-BR
+  const translateError = (err: any): string => {
+    const message = err.message || '';
+    if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
+    if (message.includes('User already registered')) return 'Este e-mail já está cadastrado no sistema.';
+    if (message.includes('security purposes')) {
+      const seconds = message.match(/\d+/);
+      return `Por motivos de segurança, aguarde ${seconds ? seconds[0] : 'alguns'} segundos antes de tentar novamente.`;
+    }
+    if (message.includes('row-level security policy')) {
+      return 'Erro de permissão: Verifique as políticas RLS da tabela "profiles" no seu painel do Supabase.';
+    }
+    if (message.includes('Email not confirmed')) return 'Por favor, confirme seu e-mail antes de acessar.';
+    if (message.includes('Password should be at least 6 characters')) return 'A senha deve ter pelo menos 6 caracteres.';
+    
+    return 'Ocorreu um erro inesperado. Tente novamente em instantes.';
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/#/auth?mode=reset`,
+      });
+      if (resetError) throw resetError;
+      setSuccessMsg("Link de recuperação enviado para o seu e-mail!");
+    } catch (err: any) {
+      setError(translateError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +68,6 @@ const Auth: React.FC = () => {
         });
         if (loginError) throw loginError;
         
-        // Buscar o perfil para saber para onde redirecionar
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
@@ -59,23 +97,77 @@ const Auth: React.FC = () => {
                 id: signUpData.user.id,
                 full_name: name,
                 role: role,
-                credits: role === UserRole.PROFESSIONAL ? 15 : 0, // Bônus inicial de 15 créditos
+                credits: role === UserRole.PROFESSIONAL ? 15 : 0,
                 completed_jobs: 0,
                 rating: 5.0
               }
             ]);
           
           if (profileError) throw profileError;
-          setSuccessMsg("Conta criada com sucesso! Você já pode fazer login.");
+          setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail ou faça login.");
           setIsLogin(true);
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro inesperado.');
+      setError(translateError(err));
     } finally {
       setLoading(false);
     }
   };
+
+  if (isForgotPassword) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
+        <button 
+          onClick={() => { setIsForgotPassword(false); setError(null); setSuccessMsg(null); }}
+          className="flex items-center text-gray-400 hover:text-blue-600 font-bold mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao Login
+        </button>
+        
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-blue-900 tracking-tighter">RECUPERAR SENHA</h2>
+          <p className="text-gray-500 mt-2 font-medium">Enviaremos um link de acesso para o seu e-mail.</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
+            <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" />
+            {successMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleForgotPassword} className="space-y-5">
+          <div>
+            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">E-mail cadastrado</label>
+            <input 
+              type="email" 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com" 
+              className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none bg-gray-50 text-gray-900 font-medium transition-all"
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all mt-4 shadow-xl active:scale-95 flex items-center justify-center disabled:opacity-70"
+          >
+            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'ENVIAR LINK'}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
@@ -92,30 +184,30 @@ const Auth: React.FC = () => {
 
       <div className="flex bg-gray-100 p-1.5 rounded-2xl mb-8">
         <button 
-          onClick={() => { setIsLogin(true); setError(null); }}
+          onClick={() => { setIsLogin(true); setError(null); setSuccessMsg(null); }}
           className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin ? 'bg-white shadow-lg text-blue-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700'}`}
         >
           Login
         </button>
         <button 
-          onClick={() => { setIsLogin(false); setError(null); }}
+          onClick={() => { setIsLogin(false); setError(null); setSuccessMsg(null); }}
           className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin ? 'bg-white shadow-lg text-blue-600 scale-[1.02]' : 'text-gray-500 hover:text-gray-700'}`}
         >
-          Registo
+          Cadastro
         </button>
       </div>
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-          {error}
+          <span className="leading-tight">{error}</span>
         </div>
       )}
 
       {successMsg && (
         <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
           <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" />
-          {successMsg}
+          <span className="leading-tight">{successMsg}</span>
         </div>
       )}
 
@@ -177,6 +269,17 @@ const Auth: React.FC = () => {
             placeholder="••••••••" 
             className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none bg-gray-50 text-gray-900 font-medium transition-all"
           />
+          {isLogin && (
+            <div className="text-right mt-2">
+              <button 
+                type="button"
+                onClick={() => { setIsForgotPassword(true); setError(null); }}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                Esqueci minha senha
+              </button>
+            </div>
+          )}
         </div>
 
         <button 

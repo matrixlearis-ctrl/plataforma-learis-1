@@ -177,7 +177,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-lg font-bold text-gray-800 mb-3">Telefone de Contacto</label>
+                  <label className="block text-lg font-bold text-gray-800 mb-3">Telefone de Contato</label>
                   <input type="tel" required value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="(00) 00000-0000" className="w-full p-5 border-2 border-gray-200 rounded-2xl outline-none text-gray-900 bg-white" />
                 </div>
                 <div>

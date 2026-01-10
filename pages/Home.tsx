@@ -15,7 +15,6 @@ const Home: React.FC<HomeProps> = ({ user }) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Em uma app real, filtraríamos as categorias ou redirecionaríamos com query
     navigate('/pedir-orcamento');
   };
 
@@ -25,10 +24,10 @@ const Home: React.FC<HomeProps> = ({ user }) => {
       <section className="bg-[#1e3a8a] text-white py-24 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-            Encontre profissionais qualificados perto de Você
+            Encontre profissionais qualificados perto de você
           </h1>
           <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto opacity-90">
-            Receba orçamentos gratuitos dos melhores profissionais da sua região para obras, limpezas, reparações e muito mais.
+            Receba orçamentos gratuitos dos melhores profissionais da sua região para obras, limpezas, reparos e muito mais.
           </p>
           
           <form 
@@ -93,13 +92,13 @@ const Home: React.FC<HomeProps> = ({ user }) => {
             </div>
             <div className="flex flex-col items-center text-center relative">
               <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-2xl mb-8 shadow-xl">2</div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Receba contactos</h3>
-              <p className="text-gray-600 text-lg leading-relaxed">Até 4 profissionais qualificados na sua região entrarão em contacto direto consigo para orçamentar.</p>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">Receba contatos</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Você receberá até 4 orçamentos de profissionais qualificados na sua região.</p>
             </div>
             <div className="flex flex-col items-center text-center relative">
               <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-2xl mb-8 shadow-xl">3</div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900">Compare e escolha</h3>
-              <p className="text-gray-600 text-lg leading-relaxed">Analise perfis, fotos de trabalhos e avaliações antes de fechar o melhor negócio para si.</p>
+              <p className="text-gray-600 text-lg leading-relaxed">Analise perfis, fotos de trabalhos e avaliações antes de fechar com o melhor profissional.</p>
             </div>
           </div>
         </div>
@@ -112,7 +111,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           <div className="md:w-2/3 mb-12 md:mb-0 md:pr-16 relative z-10">
             <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">É um profissional ou empresa de serviços?</h2>
             <p className="text-xl text-blue-100 mb-10 leading-relaxed">
-              Encontre novos clientes todos os dias. Na Samej você decide quais pedidos quer atender e paga apenas pelo contacto do cliente. Sem mensalidades!
+              Encontre novos clientes todos os dias. Na Samej você decide quais pedidos quer atender e paga apenas pelo contato do cliente. Sem mensalidades!
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
               <div className="flex items-center">
@@ -133,7 +132,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               </div>
             </div>
             <Link to="/auth" className="inline-block bg-white text-blue-900 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-1 active:translate-y-0">
-              Registe a sua Empresa Grátis
+              Registre sua Empresa Grátis
             </Link>
           </div>
           <div className="md:w-1/3 relative z-10">

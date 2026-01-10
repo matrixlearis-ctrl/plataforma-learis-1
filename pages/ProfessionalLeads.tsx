@@ -23,7 +23,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
       return;
     }
 
-    if (confirm(`Deseja desbloquear este contacto por ${order.leadPrice} créditos?`)) {
+    if (confirm(`Deseja desbloquear este contato por ${order.leadPrice} créditos?`)) {
       setPurchasingId(order.id);
       
       setTimeout(() => {
@@ -188,7 +188,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                           disabled={purchasingId === order.id}
                           className="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 flex items-center transition-all shadow-xl active:scale-95 disabled:opacity-50"
                         >
-                          {purchasingId === order.id ? 'A processar...' : 'Ver Contactos'}
+                          {purchasingId === order.id ? 'A processar...' : 'Ver Contatos'}
                           <Lock className="ml-3 w-5 h-5" />
                         </button>
                         <p className="text-[10px] text-gray-400 italic">Desbloqueio válido por 6 meses</p>

@@ -55,7 +55,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-gray-100">
                <div className="text-center">
                  <p className="text-2xl font-black text-blue-600">{pro.completedJobs}</p>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trabalhos</p>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Serviços</p>
                </div>
                <div className="text-center">
                  <p className="text-2xl font-black text-blue-600">100%</p>
@@ -74,12 +74,12 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
 
           <div className="bg-white p-8 md:p-12 rounded-[3rem] border shadow-sm">
             <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
-              <ImageIcon className="w-6 h-6 mr-3 text-blue-600" /> Galeria de Projectos
+              <ImageIcon className="w-6 h-6 mr-3 text-blue-600" /> Galeria de Projetos
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="aspect-square bg-gray-100 rounded-3xl overflow-hidden group cursor-pointer border-2 border-white shadow-sm">
-                  <img src={`https://picsum.photos/seed/${pro.id}-${i}/400`} alt="Projecto" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={`https://picsum.photos/seed/${pro.id}-${i}/400`} alt="Projeto" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
               ))}
             </div>
@@ -89,7 +89,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
         {/* Sidebar Actions */}
         <aside className="space-y-6">
           <div className="bg-white p-8 rounded-[2.5rem] border shadow-2xl sticky top-24">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Contactar agora</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Contatar agora</h3>
             <div className="space-y-4 mb-8">
               <div className="flex items-start">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
