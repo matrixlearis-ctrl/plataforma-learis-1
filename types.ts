@@ -19,16 +19,6 @@ export interface User {
   avatar?: string;
 }
 
-export interface Review {
-  id: string;
-  professionalId: string;
-  clientId: string;
-  clientName: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-}
-
 export interface ProfessionalProfile {
   userId: string;
   description: string;
@@ -46,13 +36,13 @@ export interface OrderRequest {
   clientName: string;
   category: string;
   description: string;
-  location: string; // Cidade, UF
-  neighborhood?: string; // Bairro
+  location: string;
+  neighborhood?: string;
   deadline: string;
   status: OrderStatus;
   createdAt: string;
   leadPrice: number;
-  unlockedBy: string[]; // List of professional IDs
+  unlockedBy: string[];
 }
 
 export interface Lead {

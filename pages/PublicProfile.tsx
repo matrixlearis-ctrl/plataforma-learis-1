@@ -1,22 +1,16 @@
 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ProfessionalProfile, Review } from '../types';
-import { Star, MapPin, ShieldCheck, CheckCircle2, Phone, MessageCircle, ArrowLeft, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { ProfessionalProfile } from '../types';
+import { Star, MapPin, ShieldCheck, Phone, MessageCircle, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
 interface PublicProfileProps {
   professionals: (ProfessionalProfile & { name: string, avatar: string, id: string })[];
-  reviews: Review[];
 }
 
-const PublicProfile: React.FC<PublicProfileProps> = ({ professionals, reviews }) => {
+const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
   const { id } = useParams();
   const pro = professionals.find(p => p.id === id);
-  const proReviews = reviews.filter(r => r.professionalId === id);
-  
-  const avgRating = proReviews.length > 0 
-    ? (proReviews.reduce((acc, r) => acc + r.rating, 0) / proReviews.length).toFixed(1)
-    : pro?.rating || "5.0";
 
   if (!pro) return <div className="text-center py-20">Profissional não encontrado.</div>;
 
@@ -42,7 +36,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals, reviews })
                  <h1 className="text-4xl font-black text-gray-900 mb-3">{pro.name}</h1>
                  <div className="flex items-center justify-center md:justify-start space-x-6 text-gray-400">
                     <div className="flex items-center text-amber-500 font-black text-xl">
-                      <Star className="w-6 h-6 mr-1 fill-current" /> {avgRating}
+                      <Star className="w-6 h-6 mr-1 fill-current" /> {pro.rating}
                     </div>
                     <div className="flex items-center font-bold">
                       <MapPin className="w-5 h-5 mr-2" /> {pro.region}
@@ -55,57 +49,6 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals, reviews })
                <h3 className="text-xl font-bold text-gray-900 mb-4">Sobre a Empresa</h3>
                <p>{pro.description}</p>
              </div>
-
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-gray-100">
-               <div className="text-center">
-                 <p className="text-2xl font-black text-blue-600">{pro.completedJobs}</p>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Serviços</p>
-               </div>
-               <div className="text-center">
-                 <p className="text-2xl font-black text-blue-600">{proReviews.length}</p>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Avaliações</p>
-               </div>
-               <div className="text-center">
-                 <p className="text-2xl font-black text-blue-600">24h</p>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Resposta</p>
-               </div>
-               <div className="text-center">
-                 <p className="text-2xl font-black text-blue-600">3</p>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Anos Exp.</p>
-               </div>
-             </div>
-          </div>
-
-          {/* Seção de Avaliações */}
-          <div className="bg-white p-8 md:p-12 rounded-[3rem] border shadow-sm">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
-              <MessageSquare className="w-6 h-6 mr-3 text-blue-600" /> Opiniões dos Clientes
-            </h3>
-            
-            <div className="space-y-6">
-              {proReviews.length === 0 ? (
-                <div className="text-center py-10 text-gray-400 font-medium bg-gray-50 rounded-2xl border-2 border-dashed">
-                  Nenhuma avaliação disponível ainda.
-                </div>
-              ) : (
-                proReviews.map(review => (
-                  <div key={review.id} className="p-6 bg-gray-50 rounded-3xl border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p className="font-black text-gray-900">{review.clientName}</p>
-                        <div className="flex text-amber-500 mt-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-gray-200'}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-gray-400 font-bold uppercase">{new Date(review.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <p className="text-gray-600 text-sm italic">"{review.comment}"</p>
-                  </div>
-                ))
-              )}
-            </div>
           </div>
 
           <div className="bg-white p-8 md:p-12 rounded-[3rem] border shadow-sm">
@@ -114,7 +57,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals, reviews })
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="aspect-square bg-gray-100 rounded-3xl overflow-hidden group cursor-pointer border-2 border-white shadow-sm">
+                <div key={i} className="aspect-square bg-gray-100 rounded-3xl overflow-hidden group border-2 border-white shadow-sm">
                   <img src={`https://picsum.photos/seed/${pro.id}-${i}/400`} alt="Projeto" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
               ))}

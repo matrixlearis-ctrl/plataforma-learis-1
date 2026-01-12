@@ -2,15 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
-import { ProfessionalProfile, Review } from '../types';
+import { ProfessionalProfile } from '../types';
 import { Search, MapPin, Star, ShieldCheck, ChevronRight, SlidersHorizontal } from 'lucide-react';
 
 interface DirectoryProps {
   professionals: (ProfessionalProfile & { name: string, avatar: string, id: string })[];
-  reviews: Review[];
 }
 
-const ProfessionalDirectory: React.FC<DirectoryProps> = ({ professionals, reviews }) => {
+const ProfessionalDirectory: React.FC<DirectoryProps> = ({ professionals }) => {
   const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState(searchParams.get('search') || '');
   const [catFilter, setCatFilter] = useState(searchParams.get('cat') || 'all');
@@ -67,52 +66,34 @@ const ProfessionalDirectory: React.FC<DirectoryProps> = ({ professionals, review
         <div className="lg:w-3/4 space-y-6">
           {filteredPros.length === 0 ? (
             <div className="bg-white p-20 text-center rounded-2xl border border-dashed">
-              <p className="text-gray-400 font-bold">Nenhum profissional encontrado para os filtros selecionados.</p>
-              <button onClick={() => {setFilter(''); setCatFilter('all');}} className="text-blue-600 font-bold mt-4 hover:underline">Limpar filtros</button>
+              <p className="text-gray-400 font-bold">Nenhum profissional encontrado.</p>
             </div>
           ) : (
-            filteredPros.map(pro => {
-              const proReviews = reviews.filter(r => r.professionalId === pro.id);
-              const avgRating = proReviews.length > 0 
-                ? (proReviews.reduce((acc, r) => acc + r.rating, 0) / proReviews.length).toFixed(1)
-                : pro.rating;
-
-              return (
-                <div key={pro.id} className="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm hover:shadow-xl hover:border-blue-200 transition-all group overflow-hidden">
-                  <div className="flex flex-col md:flex-row gap-8">
-                    <div className="relative flex-shrink-0">
-                      <img src={pro.avatar} alt={pro.name} className="w-24 h-24 md:w-32 md:h-32 rounded-3xl object-cover shadow-md" />
-                      <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1.5 rounded-xl border-4 border-white shadow-lg">
-                        <ShieldCheck className="w-5 h-5" />
-                      </div>
-                    </div>
-                    <div className="flex-grow">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h2 className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{pro.name}</h2>
-                          <div className="flex items-center space-x-3 mt-1 text-gray-400 text-sm font-bold">
-                            <div className="flex items-center text-amber-500">
-                              <Star className="w-4 h-4 mr-1 fill-current" /> {avgRating}
-                            </div>
-                            <span>•</span>
-                            <div className="flex items-center"><MapPin className="w-4 h-4 mr-1" /> {pro.region}</div>
-                            <span>•</span>
-                            <span className="text-blue-600">{proReviews.length} avaliações</span>
+            filteredPros.map(pro => (
+              <div key={pro.id} className="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm hover:shadow-xl hover:border-blue-200 transition-all group overflow-hidden">
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="relative flex-shrink-0">
+                    <img src={pro.avatar} alt={pro.name} className="w-24 h-24 md:w-32 md:h-32 rounded-3xl object-cover shadow-md" />
+                  </div>
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h2 className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{pro.name}</h2>
+                        <div className="flex items-center space-x-3 mt-1 text-gray-400 text-sm font-bold">
+                          <div className="flex items-center text-amber-500">
+                            <Star className="w-4 h-4 mr-1 fill-current" /> {pro.rating}
                           </div>
+                          <span>•</span>
+                          <div className="flex items-center"><MapPin className="w-4 h-4 mr-1" /> {pro.region}</div>
                         </div>
-                        <Link to={`/perfil/${pro.id}`} className="p-3 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all"><ChevronRight className="w-6 h-6" /></Link>
                       </div>
-                      <p className="text-gray-600 mt-4 line-clamp-2 leading-relaxed font-medium">{pro.description}</p>
-                      <div className="flex flex-wrap gap-2 mt-6">
-                        {pro.categories.map(cId => (
-                          <span key={cId} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest">{CATEGORIES.find(c => c.id === cId)?.name}</span>
-                        ))}
-                      </div>
+                      <Link to={`/perfil/${pro.id}`} className="p-3 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all"><ChevronRight className="w-6 h-6" /></Link>
                     </div>
+                    <p className="text-gray-600 mt-4 line-clamp-2 leading-relaxed font-medium">{pro.description}</p>
                   </div>
                 </div>
-              );
-            })
+              </div>
+            ))
           )}
         </div>
       </div>
