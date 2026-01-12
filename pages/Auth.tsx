@@ -29,25 +29,16 @@ const Auth: React.FC = () => {
 
   const translateError = (err: any): string => {
     const message = err?.message || String(err);
-    
-    if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos. Verifique e tente novamente.';
-    if (message.includes('User already registered')) return 'Este e-mail já está em uso por outra conta.';
-    if (message.includes('security purposes')) return 'Por segurança, aguarde alguns segundos antes de tentar novamente.';
-    if (message.includes('row-level security policy') || message.includes('permission denied')) {
-      return 'Erro de permissão no banco de dados. Certifique-se de ter executado as políticas RLS para a tabela "profiles" no Editor SQL do Supabase.';
-    }
-    if (message.includes('Email not confirmed')) return 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.';
-    if (message.includes('Password should be at least 6 characters')) return 'A senha deve conter no mínimo 6 caracteres.';
-    
-    return 'Erro ao processar solicitação. Tente novamente em instantes.';
+    if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
+    if (message.includes('User already registered')) return 'Este e-mail já está em uso.';
+    if (message.includes('security purposes')) return 'Aguarde alguns segundos antes de tentar novamente.';
+    return 'Erro ao processar solicitação. Tente novamente.';
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccessMsg(null);
-
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/#/auth?mode=reset`,
@@ -64,13 +55,10 @@ const Auth: React.FC = () => {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccessMsg(null);
-
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-      setSuccessMsg("Senha atualizada! Redirecionando...");
+      setSuccessMsg("Senha atualizada! Faça login.");
       setTimeout(() => {
         setIsResettingPassword(false);
         setIsLogin(true);
@@ -98,7 +86,6 @@ const Auth: React.FC = () => {
         else if (profile?.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
       } else {
-        // Cadastro de novo usuário
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -110,7 +97,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // Criar perfil manualmente se o trigger do banco não estiver ativo
+          // Inserção manual no perfil para garantir sincronia absoluta com as colunas SQL
           const { error: profileError } = await supabase
             .from('profiles')
             .upsert({
@@ -124,7 +111,7 @@ const Auth: React.FC = () => {
           
           if (profileError) throw profileError;
           
-          setSuccessMsg("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
+          setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail.");
           setIsLogin(true);
         }
       }
@@ -148,8 +135,8 @@ const Auth: React.FC = () => {
             <h2 className="text-3xl font-black text-blue-900 tracking-tighter">NOVA SENHA</h2>
           </div>
           <form onSubmit={handleUpdatePassword} className="space-y-5">
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nova senha (min. 6 caracteres)" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all" />
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl disabled:opacity-50">
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nova senha (mín. 6 caracteres)" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
+            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50">
               {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'ATUALIZAR SENHA'}
             </button>
           </form>
@@ -159,10 +146,10 @@ const Auth: React.FC = () => {
           <button onClick={() => setIsForgotPassword(false)} className="flex items-center text-gray-400 hover:text-blue-600 font-bold mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </button>
-          <h2 className="text-3xl font-black text-blue-900 tracking-tighter text-center mb-8">RECUPERAR SENHA</h2>
+          <h2 className="text-3xl font-black text-blue-900 tracking-tighter text-center mb-8 uppercase">Recuperar Senha</h2>
           <form onSubmit={handleForgotPassword} className="space-y-5">
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Seu e-mail cadastrado" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50" />
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl disabled:opacity-50">
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Seu e-mail cadastrado" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
+            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50">
               {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'ENVIAR LINK'}
             </button>
           </form>
@@ -171,7 +158,7 @@ const Auth: React.FC = () => {
         <div className="animate-in fade-in duration-500">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-blue-900 tracking-tighter uppercase">{isLogin ? 'Bem-vindo' : 'Cadastro'}</h2>
-            <p className="text-gray-500 mt-2 font-medium">{isLogin ? 'Acesse sua conta Samej' : 'Crie sua conta profissional ou cliente'}</p>
+            <p className="text-gray-500 mt-2 font-medium">{isLogin ? 'Acesse sua conta Samej' : 'Crie sua conta na plataforma'}</p>
           </div>
 
           <div className="flex bg-gray-100 p-1.5 rounded-2xl mb-8">
@@ -197,14 +184,14 @@ const Auth: React.FC = () => {
             {!isLogin && (
               <>
                 <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-bold text-xs ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-400'}`}>CLIENTE</button>
-                  <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-bold text-xs ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-400'}`}>PROFISSIONAL</button>
+                  <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-bold text-xs ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-400'}`}>SOU CLIENTE</button>
+                  <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-bold text-xs ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-400'}`}>SOU PROFISSIONAL</button>
                 </div>
-                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all" />
+                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo ou Empresa" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
               </>
             )}
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all" />
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all" />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
             
             {isLogin && (
               <div className="text-right">
@@ -212,8 +199,8 @@ const Auth: React.FC = () => {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl disabled:opacity-50 mt-4">
-              {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR' : 'CRIAR CONTA')}
+            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50 mt-4">
+              {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR AGORA' : 'CRIAR MINHA CONTA')}
             </button>
           </form>
         </div>

@@ -69,10 +69,18 @@ const App: React.FC = () => {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (!error && data) {
       setOrders(data.map(o => ({
-        id: o.id, clientId: o.client_id, clientName: o.client_name, category: o.category,
-        description: o.description, location: o.location, neighborhood: o.neighborhood,
-        deadline: o.deadline, status: o.status as OrderStatus, createdAt: o.created_at,
-        leadPrice: o.lead_price || 5, unlockedBy: o.unlocked_by || []
+        id: o.id, 
+        clientId: o.client_id, 
+        clientName: o.client_name, 
+        category: o.category,
+        description: o.description, 
+        location: o.location, 
+        neighborhood: o.neighborhood,
+        deadline: o.deadline, 
+        status: o.status as OrderStatus, 
+        createdAt: o.created_at,
+        leadPrice: o.lead_price || 5, 
+        unlockedBy: o.unlocked_by || []
       })));
     }
   };
@@ -81,10 +89,17 @@ const App: React.FC = () => {
     const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
     if (!error && data) {
       setProfessionals(data.map(p => ({
-        id: p.id, userId: p.id, name: p.full_name, avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
-        description: p.description || 'Profissional qualificado.', categories: p.categories || [],
-        region: p.region || 'Brasil', rating: p.rating || 5, credits: p.credits || 0,
-        completedJobs: p.completed_jobs || 0, phone: p.phone || ''
+        id: p.id, 
+        userId: p.id, 
+        name: p.full_name || 'Profissional', 
+        avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
+        description: p.description || 'Profissional qualificado.', 
+        categories: p.categories || [],
+        region: p.region || 'Brasil', 
+        rating: p.rating || 5, 
+        credits: p.credits || 0,
+        completedJobs: p.completed_jobs || 0, 
+        phone: p.phone || ''
       })));
     }
   };
@@ -93,12 +108,24 @@ const App: React.FC = () => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (!error && data) {
-        setUser({ id: data.id, name: data.full_name, email: '', role: data.role as UserRole, avatar: data.avatar_url });
+        setUser({ 
+          id: data.id, 
+          name: data.full_name || 'Usuário', 
+          email: '', 
+          role: data.role as UserRole, 
+          avatar: data.avatar_url 
+        });
+        
         if (data.role === UserRole.PROFESSIONAL) {
           setProProfile({
-            userId: data.id, description: data.description, categories: data.categories,
-            region: data.region, rating: data.rating, credits: data.credits,
-            completedJobs: data.completed_jobs, phone: data.phone
+            userId: data.id, 
+            description: data.description, 
+            categories: data.categories || [],
+            region: data.region, 
+            rating: data.rating || 5, 
+            credits: data.credits || 0,
+            completedJobs: data.completed_jobs || 0, 
+            phone: data.phone || ''
           });
         }
       }
@@ -133,9 +160,15 @@ const App: React.FC = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
               const { error } = await supabase.from('orders').insert([{
-                client_id: user?.id, client_name: o.clientName, category: o.category,
-                description: o.description, location: o.location, neighborhood: o.neighborhood,
-                deadline: o.deadline, status: o.status, lead_price: o.leadPrice
+                client_id: user?.id, 
+                client_name: o.clientName, 
+                category: o.category,
+                description: o.description, 
+                location: o.location, 
+                neighborhood: o.neighborhood,
+                deadline: o.deadline, 
+                status: o.status, 
+                lead_price: o.leadPrice
               }]);
               if (!error) await fetchOrders();
             }} />} />
@@ -144,7 +177,10 @@ const App: React.FC = () => {
             <Route path="/cliente/dashboard" element={user?.role === UserRole.CLIENT ? <CustomerDashboard user={user} orders={orders} /> : <Navigate to="/auth" />} />
             <Route path="/profissional/dashboard" element={user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} /> : <Navigate to="/auth" />} />
             <Route path="/profissional/leads" element={user?.role === UserRole.PROFESSIONAL ? <ProfessionalLeads user={user} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-              await supabase.from('profiles').update({ credits: p.credits }).eq('id', p.userId);
+              await supabase.from('profiles').update({ 
+                credits: p.credits,
+                completed_jobs: p.completedJobs 
+              }).eq('id', p.userId);
               setProProfile(p);
             }} onUpdateOrder={async (o) => {
               await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);

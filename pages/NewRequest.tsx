@@ -74,7 +74,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     try {
       const newOrder: OrderRequest = {
         id: crypto.randomUUID(),
-        clientId: user?.id || 'guest',
+        clientId: user?.id || '',
         clientName: formData.name,
         category: formData.category,
         description: formData.description,
@@ -219,11 +219,6 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                   </div>
                   <p className="text-gray-700 font-bold">{formData.address}, {formData.neighborhood}</p>
                   <p className="text-blue-600 text-xs font-black uppercase tracking-widest mt-1">{formData.location}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <input type="text" required value={formData.number} onChange={(e) => setFormData({...formData, number: e.target.value})} placeholder="Nº" className="w-full p-3 border-2 border-white rounded-xl bg-white/50" />
-                    <input type="text" value={formData.complement} onChange={(e) => setFormData({...formData, complement: e.target.value})} placeholder="Compl." className="w-full p-3 border-2 border-white rounded-xl bg-white/50" />
-                  </div>
                 </div>
               )}
 

@@ -44,18 +44,3 @@ export interface OrderRequest {
   leadPrice: number;
   unlockedBy: string[];
 }
-
-export interface Lead {
-  id: string;
-  orderId: string;
-  professionalId: string;
-  cost: number;
-  purchasedAt: string;
-}
-
-export interface CreditPackage {
-  id: string;
-  name: string;
-  credits: number;
-  price: number;
-}
