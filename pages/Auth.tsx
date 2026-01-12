@@ -97,7 +97,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // Inserção manual no perfil para garantir sincronia absoluta com as colunas SQL
+          // Usando full_name para bater com a coluna do banco
           const { error: profileError } = await supabase
             .from('profiles')
             .upsert({
