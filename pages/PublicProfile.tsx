@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ProfessionalProfile } from '../types';
-import { Star, MapPin, ShieldCheck, Phone, MessageCircle, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, Phone, MessageCircle, ArrowLeft, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface PublicProfileProps {
   professionals: (ProfessionalProfile & { name: string, avatar: string, id: string })[];
@@ -11,8 +12,28 @@ interface PublicProfileProps {
 const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
   const { id } = useParams();
   const pro = professionals.find(p => p.id === id);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
-  if (!pro) return <div className="text-center py-20">Profissional não encontrado.</div>;
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!id) return;
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('professional_id', id)
+        .order('created_at', { ascending: false });
+      
+      if (!error && data) {
+        setReviews(data);
+      }
+      setLoadingReviews(false);
+    };
+
+    fetchReviews();
+  }, [id]);
+
+  if (!pro) return <div className="text-center py-20 font-bold">Profissional não encontrado.</div>;
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-4">
@@ -36,7 +57,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
                  <h1 className="text-4xl font-black text-gray-900 mb-3">{pro.name}</h1>
                  <div className="flex items-center justify-center md:justify-start space-x-6 text-gray-400">
                     <div className="flex items-center text-amber-500 font-black text-xl">
-                      <Star className="w-6 h-6 mr-1 fill-current" /> {pro.rating}
+                      <Star className="w-6 h-6 mr-1 fill-current" /> {pro.rating.toFixed(1)}
                     </div>
                     <div className="flex items-center font-bold">
                       <MapPin className="w-5 h-5 mr-2" /> {pro.region}
@@ -47,8 +68,38 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ professionals }) => {
 
              <div className="prose max-w-none text-gray-600 text-lg leading-relaxed mb-10">
                <h3 className="text-xl font-bold text-gray-900 mb-4">Sobre a Empresa</h3>
-               <p>{pro.description}</p>
+               <p>{pro.description || "Nenhuma descrição fornecida."}</p>
              </div>
+          </div>
+
+          <div className="bg-white p-8 md:p-12 rounded-[3rem] border shadow-sm">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+              <MessageSquare className="w-6 h-6 mr-3 text-blue-600" /> Avaliações de Clientes
+            </h3>
+            
+            {loadingReviews ? (
+              <div className="text-center py-8 text-gray-400 font-bold">Carregando avaliações...</div>
+            ) : reviews.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-2xl border-2 border-dashed text-gray-400 font-bold">
+                Nenhuma avaliação disponível ainda.
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {reviews.map((rev) => (
+                  <div key={rev.id} className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center text-amber-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-4 h-4 ${i < rev.rating ? 'fill-current' : 'text-gray-300'}`} />
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-400 font-bold">{new Date(rev.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-gray-700 font-medium italic">"{rev.comment}"</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-white p-8 md:p-12 rounded-[3rem] border shadow-sm">

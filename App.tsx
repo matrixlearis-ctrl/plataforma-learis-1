@@ -23,48 +23,6 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
 
-  useEffect(() => {
-    const initApp = async () => {
-      if (!supabaseIsConfigured) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
-          await fetchProfile(session.user.id);
-        }
-
-        await Promise.all([
-          fetchOrders(),
-          fetchProfessionals()
-        ]);
-
-      } catch (err) {
-        console.error("Erro ao carregar dados:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initApp();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        await fetchProfile(session.user.id);
-      } else {
-        setUser(null);
-        setProProfile(null);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
   const fetchOrders = async () => {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (!error && data) {
@@ -132,6 +90,42 @@ const App: React.FC = () => {
     } catch (e) {}
   };
 
+  useEffect(() => {
+    const initApp = async () => {
+      if (!supabaseIsConfigured) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await fetchProfile(session.user.id);
+        }
+        await Promise.all([fetchOrders(), fetchProfessionals()]);
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initApp();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        await fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+        setProProfile(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -160,7 +154,7 @@ const App: React.FC = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
               const { error } = await supabase.from('orders').insert([{
-                client_id: user?.id, 
+                client_id: user?.id || null, 
                 client_name: o.clientName, 
                 category: o.category,
                 description: o.description, 
@@ -177,14 +171,14 @@ const App: React.FC = () => {
             <Route path="/cliente/dashboard" element={user?.role === UserRole.CLIENT ? <CustomerDashboard user={user} orders={orders} /> : <Navigate to="/auth" />} />
             <Route path="/profissional/dashboard" element={user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} /> : <Navigate to="/auth" />} />
             <Route path="/profissional/leads" element={user?.role === UserRole.PROFESSIONAL ? <ProfessionalLeads user={user} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-              await supabase.from('profiles').update({ 
+              const { error } = await supabase.from('profiles').update({ 
                 credits: p.credits,
                 completed_jobs: p.completedJobs 
               }).eq('id', p.userId);
-              setProProfile(p);
+              if (!error) setProProfile(p);
             }} onUpdateOrder={async (o) => {
-              await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);
-              await fetchOrders();
+              const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);
+              if (!error) await fetchOrders();
             }} /> : <Navigate to="/auth" />} />
             <Route path="/profissional/recarregar" element={user?.role === UserRole.PROFESSIONAL ? <RechargeCredits onAddCredits={async (amt) => {
                const newCredits = (proProfile?.credits || 0) + amt;
