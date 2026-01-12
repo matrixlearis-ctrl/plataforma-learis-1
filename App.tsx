@@ -25,69 +25,78 @@ const App: React.FC = () => {
   const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
 
   useEffect(() => {
-    console.log("App: Iniciando verificação de conexão...");
+    console.log("🛠️ App: Iniciando verificação...");
     
+    // TIMEOUT DE SEGURANÇA: Se em 5 segundos não carregar, libera a tela.
+    const safetyTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn("⚠️ App: Timeout de segurança atingido. Forçando encerramento do loading.");
+        setLoading(false);
+      }
+    }, 5000);
+
     if (!supabaseIsConfigured) {
-      console.warn("App: Supabase não está configurado corretamente. Verifique as chaves.");
+      console.error("❌ App: Supabase não configurado!");
       setLoading(false);
+      clearTimeout(safetyTimeout);
       return;
     }
 
     const initApp = async () => {
       try {
-        console.log("App: Buscando sessão do usuário...");
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log("🔍 App: Verificando sessão ativa...");
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (sessionError) {
-          console.error("App: Erro ao buscar sessão:", sessionError);
-        }
-
         if (session) {
-          console.log("App: Sessão encontrada para:", session.user.id);
+          console.log("👤 App: Usuário logado detectado:", session.user.id);
           await fetchProfile(session.user.id);
+        } else {
+          console.log("ℹ️ App: Nenhum usuário logado.");
         }
 
-        console.log("App: Carregando dados globais...");
-        // Carregamos em paralelo, mas sem travar se um falhar
+        console.log("📦 App: Carregando dados do mercado...");
         await Promise.allSettled([
           fetchOrders(),
           fetchProfessionals(),
           fetchReviews()
         ]);
-
+        
+        console.log("✅ App: Dados carregados com sucesso.");
       } catch (err) {
-        console.error("App: Erro crítico na inicialização:", err);
+        console.error("❌ App: Erro na inicialização:", err);
       } finally {
-        console.log("App: Finalizando estado de loading.");
         setLoading(false);
+        clearTimeout(safetyTimeout);
+        console.log("🚀 App: Pronto para uso.");
       }
 
-      // Configurar canais de tempo real (opcional, não trava o carregamento)
-      const channel = supabase
-        .channel('schema-db-changes')
+      // Real-time
+      const channel = supabase.channel('db-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchOrders())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => fetchReviews())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchProfessionals())
         .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => { supabase.removeChannel(channel); };
     };
 
     initApp();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("App: Estado de autenticação mudou:", event);
+      console.log("🔑 App: Evento Auth:", event);
       if (session) {
         await fetchProfile(session.user.id);
+        setLoading(false); // Garante que sai do loading ao logar
       } else {
         setUser(null);
         setProProfile(null);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(safetyTimeout);
+    };
   }, []);
 
   const fetchOrders = async () => {
@@ -98,56 +107,44 @@ const App: React.FC = () => {
         id: o.id, clientId: o.client_id, clientName: o.client_name, category: o.category,
         description: o.description, location: o.location, neighborhood: o.neighborhood,
         deadline: o.deadline, status: o.status as OrderStatus, createdAt: o.created_at,
-        leadPrice: o.lead_price, unlockedBy: o.unlocked_by || []
+        lead_price: o.lead_price, unlockedBy: o.unlocked_by || [], leadPrice: o.lead_price || 5
       })));
-    } catch (e) { console.error("Erro ao buscar pedidos:", e); }
+    } catch (e) { console.error("Erro fetchOrders:", e); }
   };
 
   const fetchReviews = async () => {
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*, client:profiles!client_id(full_name)')
-        .order('created_at', { ascending: false });
-      
+      const { data, error } = await supabase.from('reviews').select('*, profiles!client_id(full_name)').order('created_at', { ascending: false });
       if (error) {
-        console.warn("Aviso: Falha ao buscar reviews detalhadas. Tentando busca simples...");
-        const { data: simpleData } = await supabase.from('reviews').select('*');
-        if (simpleData) {
-          setReviews(simpleData.map(r => ({
-            id: r.id, professionalId: r.professional_id, clientId: r.client_id,
-            clientName: 'Cliente Samej', rating: r.rating, comment: r.comment, createdAt: r.created_at
-          })));
-        }
+        const { data: fallback } = await supabase.from('reviews').select('*');
+        if (fallback) setReviews(fallback.map(r => ({
+          id: r.id, professionalId: r.professional_id, clientId: r.client_id,
+          clientName: 'Cliente Samej', rating: r.rating, comment: r.comment, createdAt: r.created_at
+        })));
         return;
       }
-      
       if (data) setReviews(data.map(r => ({
-        id: r.id,
-        professionalId: r.professional_id,
-        clientId: r.client_id,
-        clientName: (r as any).client?.full_name || 'Cliente Samej',
-        rating: r.rating,
-        comment: r.comment,
-        createdAt: r.created_at
+        id: r.id, professionalId: r.professional_id, clientId: r.client_id,
+        clientName: (r as any).profiles?.full_name || 'Cliente Samej',
+        rating: r.rating, comment: r.comment, createdAt: r.created_at
       })));
-    } catch (e) { console.error("Erro ao buscar avaliações:", e); }
+    } catch (e) { console.error("Erro fetchReviews:", e); }
   };
 
   const fetchProfessionals = async () => {
     try {
-      const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
-      if (error) throw error;
+      const { data } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
       if (data) setProfessionals(data.map(p => ({
         id: p.id, userId: p.id, name: p.full_name, avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
         description: p.description || 'Sem descrição.', categories: p.categories || [],
         region: p.region || 'Brasil', rating: p.rating || 5, credits: p.credits || 0,
         completedJobs: p.completed_jobs || 0, phone: p.phone || ''
       })));
-    } catch (e) { console.error("Erro ao buscar profissionais:", e); }
+    } catch (e) {}
   };
 
   const fetchProfile = async (userId: string) => {
+    console.log("👤 App: Buscando perfil detalhado...");
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
       if (error) throw error;
@@ -161,7 +158,7 @@ const App: React.FC = () => {
           });
         }
       }
-    } catch (e) { console.error("Erro ao carregar perfil:", e); }
+    } catch (e) { console.error("Erro fetchProfile:", e); }
   };
 
   const handleLogout = async () => {
@@ -208,8 +205,8 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-[#1e3a8a]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-6"></div>
-          <h1 className="text-white text-xl font-black tracking-tighter uppercase mb-2">Samej</h1>
-          <p className="text-blue-200 text-xs font-bold animate-pulse">Sincronizando dados...</p>
+          <h1 className="text-white text-2xl font-black tracking-tighter uppercase mb-2">Samej</h1>
+          <p className="text-blue-200 text-xs font-bold animate-pulse">Quase lá...</p>
         </div>
       </div>
     );
