@@ -14,7 +14,7 @@ import RechargeCredits from './pages/RechargeCredits';
 import ProfessionalDirectory from './pages/ProfessionalDirectory';
 import PublicProfile from './pages/PublicProfile';
 import { User, UserRole, ProfessionalProfile, OrderRequest, OrderStatus } from './types';
-import { supabase, supabaseIsConfigured } from './lib/supabase';
+import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -24,42 +24,46 @@ const App: React.FC = () => {
   const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
 
   const fetchOrders = async () => {
-    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (!error && data) {
-      setOrders(data.map(o => ({
-        id: o.id, 
-        clientId: o.client_id, 
-        clientName: o.client_name, 
-        category: o.category,
-        description: o.description, 
-        location: o.location, 
-        neighborhood: o.neighborhood,
-        deadline: o.deadline, 
-        status: o.status as OrderStatus, 
-        createdAt: o.created_at,
-        leadPrice: o.lead_price || 5, 
-        unlockedBy: o.unlocked_by || []
-      })));
-    }
+    try {
+      const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (!error && data) {
+        setOrders(data.map(o => ({
+          id: o.id, 
+          clientId: o.client_id, 
+          clientName: o.client_name, 
+          category: o.category,
+          description: o.description, 
+          location: o.location, 
+          neighborhood: o.neighborhood,
+          deadline: o.deadline, 
+          status: o.status as OrderStatus, 
+          createdAt: o.created_at,
+          leadPrice: o.lead_price || 5, 
+          unlockedBy: o.unlocked_by || []
+        })));
+      }
+    } catch (e) { console.error("Erro orders:", e); }
   };
 
   const fetchProfessionals = async () => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
-    if (!error && data) {
-      setProfessionals(data.map(p => ({
-        id: p.id, 
-        userId: p.id, 
-        name: p.full_name || 'Profissional', 
-        avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
-        description: p.description || 'Profissional qualificado.', 
-        categories: p.categories || [],
-        region: p.region || 'Brasil', 
-        rating: p.rating || 5, 
-        credits: p.credits || 0,
-        completedJobs: p.completed_jobs || 0, 
-        phone: p.phone || ''
-      })));
-    }
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
+      if (!error && data) {
+        setProfessionals(data.map(p => ({
+          id: p.id, 
+          userId: p.id, 
+          name: p.full_name || 'Profissional', 
+          avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
+          description: p.description || 'Profissional qualificado.', 
+          categories: p.categories || [],
+          region: p.region || 'Brasil', 
+          rating: p.rating || 5, 
+          credits: p.credits || 0,
+          completedJobs: p.completed_jobs || 0, 
+          phone: p.phone || ''
+        })));
+      }
+    } catch (e) { console.error("Erro professionals:", e); }
   };
 
   const fetchProfile = async (userId: string) => {
@@ -87,15 +91,15 @@ const App: React.FC = () => {
           });
         }
       }
-    } catch (e) {}
+    } catch (e) { console.error("Erro profile:", e); }
   };
 
   useEffect(() => {
     const initApp = async () => {
-      if (!supabaseIsConfigured) {
-        setLoading(false);
-        return;
-      }
+      // Timeout de segurança: se o Supabase não responder em 5s, libera a tela
+      const safetyTimeout = setTimeout(() => {
+        if (loading) setLoading(false);
+      }, 5000);
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -104,8 +108,9 @@ const App: React.FC = () => {
         }
         await Promise.all([fetchOrders(), fetchProfessionals()]);
       } catch (err) {
-        console.error("Erro ao carregar dados:", err);
+        console.error("Erro na inicialização:", err);
       } finally {
+        clearTimeout(safetyTimeout);
         setLoading(false);
       }
     };
@@ -139,6 +144,7 @@ const App: React.FC = () => {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
           <h1 className="text-white text-2xl font-black uppercase tracking-tighter">Samej</h1>
+          <p className="text-blue-200 text-xs mt-4 font-bold animate-pulse">Conectando ao banco de dados...</p>
         </div>
       </div>
     );
