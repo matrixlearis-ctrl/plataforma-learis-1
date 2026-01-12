@@ -3,7 +3,7 @@ import React from 'react';
 import { User, OrderStatus, OrderRequest } from '../types';
 import { CATEGORIES } from '../constants';
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle, ChevronRight, MessageSquare, Plus } from 'lucide-react';
+import { Clock, CheckCircle, ChevronRight, MessageSquare, Plus, Star } from 'lucide-react';
 
 interface CustomerDashboardProps {
   user: User;
@@ -52,9 +52,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, orders }) =
                     </div>
                   </div>
                   <div className="flex items-center justify-between md:justify-end flex-grow border-t md:border-t-0 pt-4 md:pt-0">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MessageSquare className="w-4 h-4 mr-2 text-blue-500" />
-                      <span className="font-bold text-gray-900 mr-1">{req.unlockedBy.length}</span> profissionais interessados
+                    <div className="flex flex-col items-end mr-4">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MessageSquare className="w-4 h-4 mr-2 text-blue-500" />
+                        <span className="font-bold text-gray-900 mr-1">{req.unlockedBy.length}</span> interessados
+                      </div>
+                      {req.unlockedBy.length > 0 && req.status === OrderStatus.OPEN && (
+                        <button className="text-[10px] font-black text-blue-600 hover:underline uppercase tracking-widest mt-1">Finalizar e Avaliar</button>
+                      )}
                     </div>
                     <button className="p-2 text-gray-400 hover:text-blue-600"><ChevronRight className="w-6 h-6" /></button>
                   </div>
