@@ -32,6 +32,7 @@ const Auth: React.FC = () => {
     if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
     if (message.includes('User already registered')) return 'Este e-mail já está em uso.';
     if (message.includes('security purposes')) return 'Aguarde alguns segundos antes de tentar novamente.';
+    if (message.includes('Database error saving new user')) return 'Erro ao criar perfil. Tente novamente.';
     return 'Erro ao processar solicitação. Tente novamente.';
   };
 
@@ -81,11 +82,14 @@ const Auth: React.FC = () => {
         const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
         if (loginError) throw loginError;
         
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+        // Pequeno delay para garantir que o perfil seja propagado
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+        
         if (profile?.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
         else if (profile?.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
       } else {
+        // Cadastro
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -97,10 +101,10 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // Usando full_name para bater com a coluna do banco
+          // Criar o perfil manualmente na tabela profiles para garantir o papel (role)
           const { error: profileError } = await supabase
             .from('profiles')
-            .upsert({
+            .insert({
               id: signUpData.user.id,
               full_name: name,
               role: role,
@@ -109,9 +113,14 @@ const Auth: React.FC = () => {
               rating: 5.0
             });
           
-          if (profileError) throw profileError;
+          if (profileError) {
+             console.error("Erro ao criar perfil:", profileError);
+             // Se falhar a criação do perfil mas o user foi criado, avisamos
+             setError("Usuário criado, mas houve um erro ao configurar seu perfil. Tente fazer login.");
+             return;
+          }
           
-          setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail.");
+          setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail ou faça login.");
           setIsLogin(true);
         }
       }
