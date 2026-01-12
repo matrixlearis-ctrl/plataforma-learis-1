@@ -19,6 +19,16 @@ export interface User {
   avatar?: string;
 }
 
+export interface Review {
+  id: string;
+  professionalId: string;
+  clientId: string;
+  clientName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
 export interface ProfessionalProfile {
   userId: string;
   description: string;

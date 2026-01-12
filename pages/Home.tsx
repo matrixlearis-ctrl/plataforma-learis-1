@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
-import { User, UserRole } from '../types';
+import { User } from '../types';
 import { Search, CheckCircle, ShieldCheck, Zap } from 'lucide-react';
 
 interface HomeProps {
@@ -15,7 +15,11 @@ const Home: React.FC<HomeProps> = ({ user }) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/pedir-orcamento');
+    if (searchTerm.trim()) {
+      navigate(`/profissionais?search=${encodeURIComponent(searchTerm)}`);
+    } else {
+      navigate('/pedir-orcamento');
+    }
   };
 
   return (
@@ -48,7 +52,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               type="submit"
               className="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all text-center shadow-lg hover:shadow-blue-500/30 active:scale-95"
             >
-              Pedir Orçamento Grátis
+              Procurar Profissionais
             </button>
           </form>
         </div>
@@ -64,7 +68,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           {CATEGORIES.map((cat) => (
             <Link 
               key={cat.id} 
-              to={`/pedir-orcamento?category=${cat.id}`}
+              to={`/profissionais?cat=${cat.id}`}
               className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all flex flex-col items-center text-center group"
             >
               <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
