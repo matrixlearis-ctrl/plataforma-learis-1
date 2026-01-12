@@ -25,19 +25,44 @@ const App: React.FC = () => {
   const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
 
   useEffect(() => {
+    console.log("App: Iniciando verificação de conexão...");
+    
     if (!supabaseIsConfigured) {
+      console.warn("App: Supabase não está configurado corretamente. Verifique as chaves.");
       setLoading(false);
       return;
     }
 
     const initApp = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await fetchProfile(session.user.id);
-      }
-      await Promise.all([fetchOrders(), fetchProfessionals(), fetchReviews()]);
-      setLoading(false);
+      try {
+        console.log("App: Buscando sessão do usuário...");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("App: Erro ao buscar sessão:", sessionError);
+        }
 
+        if (session) {
+          console.log("App: Sessão encontrada para:", session.user.id);
+          await fetchProfile(session.user.id);
+        }
+
+        console.log("App: Carregando dados globais...");
+        // Carregamos em paralelo, mas sem travar se um falhar
+        await Promise.allSettled([
+          fetchOrders(),
+          fetchProfessionals(),
+          fetchReviews()
+        ]);
+
+      } catch (err) {
+        console.error("App: Erro crítico na inicialização:", err);
+      } finally {
+        console.log("App: Finalizando estado de loading.");
+        setLoading(false);
+      }
+
+      // Configurar canais de tempo real (opcional, não trava o carregamento)
       const channel = supabase
         .channel('schema-db-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchOrders())
@@ -53,6 +78,7 @@ const App: React.FC = () => {
     initApp();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("App: Estado de autenticação mudou:", event);
       if (session) {
         await fetchProfile(session.user.id);
       } else {
@@ -79,13 +105,23 @@ const App: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      // Usamos a sintaxe !client_id para dizer ao Supabase qual chave estrangeira seguir
       const { data, error } = await supabase
         .from('reviews')
         .select('*, client:profiles!client_id(full_name)')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.warn("Aviso: Falha ao buscar reviews detalhadas. Tentando busca simples...");
+        const { data: simpleData } = await supabase.from('reviews').select('*');
+        if (simpleData) {
+          setReviews(simpleData.map(r => ({
+            id: r.id, professionalId: r.professional_id, clientId: r.client_id,
+            clientName: 'Cliente Samej', rating: r.rating, comment: r.comment, createdAt: r.created_at
+          })));
+        }
+        return;
+      }
+      
       if (data) setReviews(data.map(r => ({
         id: r.id,
         professionalId: r.professional_id,
@@ -100,14 +136,15 @@ const App: React.FC = () => {
 
   const fetchProfessionals = async () => {
     try {
-      const { data } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
+      const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
+      if (error) throw error;
       if (data) setProfessionals(data.map(p => ({
         id: p.id, userId: p.id, name: p.full_name, avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
         description: p.description || 'Sem descrição.', categories: p.categories || [],
         region: p.region || 'Brasil', rating: p.rating || 5, credits: p.credits || 0,
         completedJobs: p.completed_jobs || 0, phone: p.phone || ''
       })));
-    } catch (e) {}
+    } catch (e) { console.error("Erro ao buscar profissionais:", e); }
   };
 
   const fetchProfile = async (userId: string) => {
@@ -166,26 +203,13 @@ const App: React.FC = () => {
     await fetchReviews();
   };
 
-  if (!supabaseIsConfigured && !loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="max-w-lg w-full bg-white p-10 rounded-[3rem] border shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-4 tracking-tighter">CONEXÃO QUASE PRONTA</h2>
-          <button onClick={() => window.location.reload()} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black flex items-center justify-center hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
-            REVERIFICAR CONEXÃO
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1e3a8a]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-6"></div>
-          <h1 className="text-white text-xl font-black tracking-tighter uppercase">Samej</h1>
+          <h1 className="text-white text-xl font-black tracking-tighter uppercase mb-2">Samej</h1>
+          <p className="text-blue-200 text-xs font-bold animate-pulse">Sincronizando dados...</p>
         </div>
       </div>
     );
