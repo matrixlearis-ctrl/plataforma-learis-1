@@ -29,10 +29,10 @@ const Auth: React.FC = () => {
 
   const translateError = (err: any): string => {
     const message = err?.message || String(err);
+    if (message.includes('Email not confirmed')) return 'E-mail não confirmado. Verifique seu e-mail ou desative a confirmação no Supabase.';
     if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
     if (message.includes('User already registered')) return 'Este e-mail já está em uso.';
     if (message.includes('security purposes')) return 'Aguarde alguns segundos antes de tentar novamente.';
-    if (message.includes('Database error saving new user')) return 'Erro ao criar perfil. Tente novamente.';
     return 'Erro ao processar solicitação. Tente novamente.';
   };
 
@@ -59,11 +59,8 @@ const Auth: React.FC = () => {
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-      setSuccessMsg("Senha atualizada! Faça login.");
-      setTimeout(() => {
-        setIsResettingPassword(false);
-        setIsLogin(true);
-      }, 2000);
+      setSuccessMsg("Senha atualizada!");
+      setTimeout(() => navigate('/'), 2000);
     } catch (err: any) {
       setError(translateError(err));
     } finally {
@@ -82,7 +79,6 @@ const Auth: React.FC = () => {
         const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
         if (loginError) throw loginError;
         
-        // Pequeno delay para garantir que o perfil seja propagado
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
         
         if (profile?.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
@@ -101,7 +97,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // Criar o perfil manualmente na tabela profiles para garantir o papel (role)
+          // Criar perfil
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -113,15 +109,15 @@ const Auth: React.FC = () => {
               rating: 5.0
             });
           
-          if (profileError) {
-             console.error("Erro ao criar perfil:", profileError);
-             // Se falhar a criação do perfil mas o user foi criado, avisamos
-             setError("Usuário criado, mas houve um erro ao configurar seu perfil. Tente fazer login.");
-             return;
-          }
+          if (profileError) throw profileError;
           
-          setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail ou faça login.");
-          setIsLogin(true);
+          setSuccessMsg("Conta criada com sucesso!");
+          
+          // Como o e-mail confirm está OFF, ele já está logado. Redirecionamos direto.
+          setTimeout(() => {
+            if (role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
+            else navigate('/cliente/dashboard');
+          }, 1500);
         }
       }
     } catch (err: any) {
@@ -167,7 +163,7 @@ const Auth: React.FC = () => {
         <div className="animate-in fade-in duration-500">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-blue-900 tracking-tighter uppercase">{isLogin ? 'Bem-vindo' : 'Cadastro'}</h2>
-            <p className="text-gray-500 mt-2 font-medium">{isLogin ? 'Acesse sua conta Samej' : 'Crie sua conta na plataforma'}</p>
+            <p className="text-gray-500 mt-2 font-medium">{isLogin ? 'Acesse sua conta' : 'Crie sua conta na Samej'}</p>
           </div>
 
           <div className="flex bg-gray-100 p-1.5 rounded-2xl mb-8">
@@ -196,7 +192,7 @@ const Auth: React.FC = () => {
                   <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-bold text-xs ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-400'}`}>SOU CLIENTE</button>
                   <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-bold text-xs ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-400'}`}>SOU PROFISSIONAL</button>
                 </div>
-                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo ou Empresa" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
+                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome ou Empresa" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
               </>
             )}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
@@ -209,7 +205,7 @@ const Auth: React.FC = () => {
             )}
 
             <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50 mt-4">
-              {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR AGORA' : 'CRIAR MINHA CONTA')}
+              {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR' : 'CRIAR CONTA')}
             </button>
           </form>
         </div>
