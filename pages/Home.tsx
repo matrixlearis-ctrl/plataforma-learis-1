@@ -16,8 +16,10 @@ const Home: React.FC<HomeProps> = ({ user }) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      // Se o usuário digitar algo específico, busca no diretório
       navigate(`/profissionais?search=${encodeURIComponent(searchTerm)}`);
     } else {
+      // Se clicar com campo vazio, vai para o orçamento
       navigate('/pedir-orcamento');
     }
   };
@@ -68,7 +70,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           {CATEGORIES.map((cat) => (
             <Link 
               key={cat.id} 
-              to={`/profissionais?cat=${cat.id}`}
+              to={`/pedir-orcamento?category=${cat.id}`}
               className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all flex flex-col items-center text-center group"
             >
               <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
