@@ -103,7 +103,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
           <CheckCircle2 className="w-12 h-12" />
         </div>
         <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">PEDIDO ENVIADO!</h2>
-        <p className="text-gray-500 mb-8 text-lg font-medium leading-relaxed">
+        <p className="text-gray-700 mb-8 text-lg font-medium leading-relaxed">
           Sua solicitação já está disponível para os profissionais qualificados da Samej.
         </p>
         <button 
@@ -122,24 +122,24 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
         <div className="bg-[#1e3a8a] p-10 text-white relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
           <h2 className="text-3xl font-black mb-2 tracking-tight">ORÇAMENTO GRÁTIS</h2>
-          <p className="text-blue-200 font-medium">Receba até 4 propostas em poucos minutos.</p>
+          <p className="text-blue-100 font-bold">Receba até 4 propostas em poucos minutos.</p>
           
           <div className="flex mt-10 items-center space-x-6 relative z-10">
             <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all ${step >= 1 ? 'bg-blue-500 text-white shadow-lg scale-110' : 'bg-blue-800 text-blue-300'}`}>1</div>
-              <span className="ml-3 font-bold text-xs uppercase tracking-widest opacity-80">Categoria</span>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all ${step >= 1 ? 'bg-blue-500 text-white shadow-lg scale-110' : 'bg-blue-900 text-blue-300'}`}>1</div>
+              <span className="ml-3 font-bold text-xs uppercase tracking-widest opacity-100">Categoria</span>
             </div>
             <div className="h-0.5 w-12 bg-blue-800"></div>
             <div className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all ${step >= 2 ? 'bg-blue-500 text-white shadow-lg scale-110' : 'bg-blue-800 text-blue-300'}`}>2</div>
-              <span className="ml-3 font-bold text-xs uppercase tracking-widest opacity-80">Detalhes</span>
+              <span className="ml-3 font-bold text-xs uppercase tracking-widest opacity-100">Detalhes</span>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-10 space-y-8 bg-white">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center text-sm font-bold animate-pulse">
+            <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center text-sm font-bold animate-pulse">
               <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
               {error}
             </div>
@@ -156,13 +156,13 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                     className={`flex items-center px-6 py-5 border-2 rounded-2xl text-left transition-all group ${
                       formData.category === cat.id 
                       ? 'border-blue-600 bg-blue-50 ring-4 ring-blue-50' 
-                      : 'border-gray-100 bg-white hover:border-blue-300 hover:bg-gray-50'
+                      : 'border-gray-300 bg-white hover:border-blue-500 hover:bg-blue-50'
                     }`}
                   >
-                    <div className={`mr-4 transition-colors ${formData.category === cat.id ? 'text-blue-600' : 'text-gray-300 group-hover:text-blue-400'}`}>
+                    <div className={`mr-4 transition-colors ${formData.category === cat.id ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'}`}>
                       {cat.icon}
                     </div>
-                    <span className={`text-base font-black transition-colors ${formData.category === cat.id ? 'text-blue-900' : 'text-gray-500'}`}>
+                    <span className={`text-base font-black transition-colors ${formData.category === cat.id ? 'text-blue-900' : 'text-gray-700'}`}>
                       {cat.name}
                     </span>
                   </button>
@@ -174,70 +174,75 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
           {step === 2 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Seu Nome</label>
+                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Seu Nome</label>
                 <input 
                   type="text" 
                   required 
                   value={formData.name} 
                   onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                  placeholder="Nome completo" 
-                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none text-gray-900 font-medium transition-all bg-gray-50 focus:bg-white" 
+                  placeholder="Seu nome completo" 
+                  className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white placeholder-gray-500" 
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">O que você precisa?</label>
+                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">O que você precisa?</label>
                 <textarea 
                   required
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none text-gray-900 font-medium transition-all bg-gray-50 focus:bg-white resize-none"
+                  className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white resize-none placeholder-gray-500"
                   placeholder="Ex: Preciso pintar 3 quartos e uma sala com tinta acrílica..."
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">WhatsApp</label>
-                  <input type="tel" required value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="(00) 00000-0000" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none text-gray-900 bg-gray-50 font-medium" />
+                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">WhatsApp</label>
+                  <input type="tel" required value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="(00) 00000-0000" className="w-full p-4 border-2 border-gray-300 rounded-2xl outline-none text-gray-900 bg-white font-bold placeholder-gray-500" />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">CEP</label>
+                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">CEP</label>
                   <div className="relative">
-                    <input type="text" required maxLength={9} value={formData.cep} onChange={(e) => setFormData({...formData, cep: e.target.value})} placeholder="00000-000" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none text-gray-900 bg-gray-50 font-medium" />
-                    {loadingCep && <div className="absolute right-4 top-1/2 -translate-y-1/2"><Loader2 className="w-5 h-5 text-blue-500 animate-spin" /></div>}
+                    <input type="text" required maxLength={9} value={formData.cep} onChange={(e) => setFormData({...formData, cep: e.target.value})} placeholder="00000-000" className="w-full p-4 border-2 border-gray-300 rounded-2xl outline-none text-gray-900 bg-white font-bold placeholder-gray-500" />
+                    {loadingCep && <div className="absolute right-4 top-1/2 -translate-y-1/2"><Loader2 className="w-5 h-5 text-blue-600 animate-spin" /></div>}
                   </div>
                 </div>
               </div>
 
               {formData.location && (
-                <div className="bg-blue-50 p-6 rounded-[2rem] border-2 border-blue-100 animate-in fade-in zoom-in-95">
+                <div className="bg-blue-50 p-6 rounded-[2rem] border-2 border-blue-300 animate-in fade-in zoom-in-95">
                   <div className="flex items-center text-blue-900 font-black mb-2 text-sm uppercase tracking-tight">
                     <MapPin className="w-5 h-5 mr-2 text-blue-600" />
                     Localização Identificada
                   </div>
-                  <p className="text-gray-700 font-bold">{formData.address}, {formData.neighborhood}</p>
-                  <p className="text-blue-600 text-xs font-black uppercase tracking-widest mt-1">{formData.location}</p>
+                  <p className="text-blue-900 font-bold">{formData.address}, {formData.neighborhood}</p>
+                  <p className="text-blue-700 text-xs font-black uppercase tracking-widest mt-1">{formData.location}</p>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Urgência do Serviço</label>
-                <select value={formData.deadline} required onChange={(e) => setFormData({...formData, deadline: e.target.value})} className="w-full p-4 border-2 border-gray-100 rounded-2xl text-gray-900 bg-gray-50 font-bold cursor-pointer hover:border-blue-400 transition-all appearance-none">
-                  <option value="">Selecione...</option>
-                  <option value="imediato">O mais rápido possível</option>
-                  <option value="15_dias">Nos próximos 15 dias</option>
-                  <option value="um_mes">No próximo mês</option>
-                  <option value="mais_3_meses">Apenas planejando (3+ meses)</option>
-                </select>
+                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Urgência do Serviço</label>
+                <div className="relative">
+                  <select value={formData.deadline} required onChange={(e) => setFormData({...formData, deadline: e.target.value})} className="w-full p-4 border-2 border-gray-300 rounded-2xl text-gray-900 bg-white font-bold cursor-pointer hover:border-blue-600 transition-all appearance-none">
+                    <option value="">Selecione...</option>
+                    <option value="imediato">O mais rápido possível</option>
+                    <option value="15_dias">Nos próximos 15 dias</option>
+                    <option value="um_mes">No próximo mês</option>
+                    <option value="mais_3_meses">Apenas planejando (3+ meses)</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <ChevronRight className="w-5 h-5 text-gray-400 rotate-90" />
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          <div className="pt-8 flex justify-between items-center border-t border-gray-100">
+          <div className="pt-8 flex justify-between items-center border-t-2 border-gray-100">
             {step > 1 ? (
-              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 font-black text-gray-400 hover:text-blue-600 transition-colors uppercase text-sm tracking-widest">
+              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 font-black text-gray-500 hover:text-blue-600 transition-colors uppercase text-sm tracking-widest">
                 Voltar
               </button>
             ) : <div />}
@@ -245,7 +250,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-blue-600 text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center disabled:opacity-50"
+              className="bg-blue-600 text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-700 shadow-xl shadow-blue-500/30 transition-all active:scale-95 flex items-center disabled:opacity-50"
             >
               {isSubmitting ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
