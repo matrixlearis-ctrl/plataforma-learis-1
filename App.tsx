@@ -71,7 +71,7 @@ const App: React.FC = () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       
       if (error) {
-        console.error("Erro ao buscar perfil:", error);
+        console.error("Erro RLS/Database:", error.message);
         return;
       }
 
@@ -79,7 +79,7 @@ const App: React.FC = () => {
         setUser({ 
           id: data.id, 
           name: data.full_name || 'Usuário', 
-          email: '', // Email is handled by Supabase Auth, not profiles table usually
+          email: '', 
           role: data.role as UserRole, 
           avatar: data.avatar_url 
         });
@@ -96,12 +96,6 @@ const App: React.FC = () => {
             phone: data.phone || ''
           });
         }
-      } else {
-        // Se a sessão existe mas o perfil não, algo deu errado no cadastro.
-        // Desloga para permitir que o usuário tente novamente.
-        console.warn("Sessão ativa mas perfil não encontrado. Deslogando.");
-        await supabase.auth.signOut();
-        setUser(null);
       }
     } catch (e) { 
       console.error("Erro fatal no profile:", e); 
@@ -110,10 +104,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initApp = async () => {
-      const safetyTimeout = setTimeout(() => {
-        if (loading) setLoading(false);
-      }, 8000);
-
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
@@ -123,7 +113,6 @@ const App: React.FC = () => {
       } catch (err) {
         console.error("Erro na inicialização:", err);
       } finally {
-        clearTimeout(safetyTimeout);
         setLoading(false);
       }
     };
@@ -157,7 +146,6 @@ const App: React.FC = () => {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
           <h1 className="text-white text-2xl font-black uppercase tracking-tighter">Samej</h1>
-          <p className="text-blue-200 text-xs mt-4 font-bold animate-pulse">Conectando ao banco de dados...</p>
         </div>
       </div>
     );
