@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
           
           {!user && (
             <>
-              <Link to="/auth" className="text-gray-600 hover:text-blue-600 font-semibold text-sm">Sou Profissional</Link>
+              <Link to="/auth" className="text-gray-600 hover:text-blue-600 font-semibold text-sm">Entrar</Link>
               <Link to="/pedir-orcamento" className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 font-bold text-sm transition-all shadow-md">
                 Pedir Orçamento
               </Link>

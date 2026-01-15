@@ -45,7 +45,7 @@ const Auth: React.FC = () => {
         redirectTo: `${window.location.origin}/#/auth?mode=reset`,
       });
       if (resetError) throw resetError;
-      setSuccessMsg("Link enviado! Verifique seu e-mail.");
+      setSuccessMsg("Confira seu email");
     } catch (err: any) {
       setError(translateError(err));
     } finally {
