@@ -29,11 +29,21 @@ const Auth: React.FC = () => {
 
   const translateError = (err: any): string => {
     const message = err?.message || String(err);
-    if (message.includes('Email not confirmed')) return 'E-mail não confirmado. Verifique seu e-mail ou desative a confirmação no Supabase.';
-    if (message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
-    if (message.includes('User already registered')) return 'Este e-mail já está em uso.';
-    if (message.includes('security purposes')) return 'Aguarde alguns segundos antes de tentar novamente.';
-    return 'Erro ao processar solicitação. Tente novamente.';
+    console.error("Auth Error Detail:", err);
+    
+    if (message.includes('Email not confirmed')) {
+      return 'E-mail não confirmado. Por favor, verifique sua caixa de entrada ou spam para confirmar seu cadastro.';
+    }
+    if (message.includes('Invalid login credentials')) {
+      return 'E-mail ou senha incorretos. Verifique seus dados.';
+    }
+    if (message.includes('User already registered')) {
+      return 'Este e-mail já está cadastrado em nossa plataforma.';
+    }
+    if (message.includes('security purposes')) {
+      return 'Muitas tentativas. Por segurança, aguarde alguns minutos antes de tentar novamente.';
+    }
+    return 'Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.';
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -46,7 +56,7 @@ const Auth: React.FC = () => {
         redirectTo: `${window.location.origin}/#/auth?mode=reset`,
       });
       if (resetError) throw resetError;
-      setSuccessMsg("Confira seu email");
+      setSuccessMsg("Link de recuperação enviado! Confira seu email.");
     } catch (err: any) {
       setError(translateError(err));
     } finally {
@@ -62,8 +72,8 @@ const Auth: React.FC = () => {
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-      setSuccessMsg("Senha atualizada!");
-      setTimeout(() => navigate('/'), 2000);
+      setSuccessMsg("Sua senha foi atualizada com sucesso!");
+      setTimeout(() => navigate('/auth'), 2000);
     } catch (err: any) {
       setError(translateError(err));
     } finally {
@@ -79,15 +89,33 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
+        // 1. Tentar Login no Auth
         const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
         if (loginError) throw loginError;
         
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+        if (!data.user) throw new Error("Falha na autenticação.");
+
+        // 2. Tentar Buscar Perfil na tabela 'profiles'
+        const { data: profile, error: profileErr } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle();
         
-        if (profile?.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
-        else if (profile?.role === UserRole.ADMIN) navigate('/admin');
+        if (profileErr) throw new Error("Erro ao conectar com o banco de dados de perfis.");
+
+        if (!profile) {
+          // Se o usuário existe no Auth mas não no Profile, ele pode ter tido um erro no cadastro original
+          throw new Error("Usuário autenticado, mas perfil não encontrado. Por favor, realize o cadastro novamente.");
+        }
+        
+        // 3. Redirecionamento baseado no cargo
+        if (profile.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
+        else if (profile.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
+
       } else {
+        // CADASTRO
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -99,6 +127,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
+          // Criar perfil na tabela 'profiles'
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -110,14 +139,20 @@ const Auth: React.FC = () => {
               rating: 5.0
             });
           
-          if (profileError) throw profileError;
+          if (profileError) {
+            console.error("Profile creation error:", profileError);
+            throw new Error("Conta criada, mas houve um erro ao configurar seu perfil. Tente fazer login.");
+          }
           
-          setSuccessMsg("Conta criada com sucesso!");
-          
-          setTimeout(() => {
-            if (role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
-            else navigate('/cliente/dashboard');
-          }, 1500);
+          if (!signUpData.session) {
+            setSuccessMsg("Cadastro realizado! Por favor, verifique seu e-mail para confirmar a conta antes de entrar.");
+          } else {
+            setSuccessMsg("Conta criada com sucesso! Redirecionando...");
+            setTimeout(() => {
+              if (role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
+              else navigate('/cliente/dashboard');
+            }, 1500);
+          }
         }
       }
     } catch (err: any) {
@@ -128,20 +163,20 @@ const Auth: React.FC = () => {
   };
 
   const FeedbackAlerts = () => (
-    <>
+    <div className="space-y-4">
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-start text-xs font-bold animate-pulse">
-          <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-start text-sm font-bold animate-in fade-in slide-in-from-top-2">
+          <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
       {successMsg && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-start text-xs font-bold">
-          <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+        <div className="p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl flex items-start text-sm font-bold animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <span>{successMsg}</span>
         </div>
       )}
-    </>
+    </div>
   );
 
   return (
@@ -157,7 +192,7 @@ const Auth: React.FC = () => {
             <h2 className="text-3xl font-black text-blue-900 tracking-tighter">NOVA SENHA</h2>
           </div>
           <FeedbackAlerts />
-          <form onSubmit={handleUpdatePassword} className="space-y-5">
+          <form onSubmit={handleUpdatePassword} className="space-y-5 mt-6">
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nova senha (mín. 6 caracteres)" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
             <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50">
               {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'ATUALIZAR SENHA'}
@@ -171,7 +206,7 @@ const Auth: React.FC = () => {
           </button>
           <h2 className="text-3xl font-black text-blue-900 tracking-tighter text-center mb-8 uppercase">Recuperar Senha</h2>
           <FeedbackAlerts />
-          <form onSubmit={handleForgotPassword} className="space-y-5">
+          <form onSubmit={handleForgotPassword} className="space-y-5 mt-6">
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Seu e-mail cadastrado" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
             <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50">
               {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'ENVIAR LINK'}
@@ -182,17 +217,17 @@ const Auth: React.FC = () => {
         <div className="animate-in fade-in duration-500">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-blue-900 tracking-tighter uppercase">{isLogin ? 'Bem-vindo' : 'Cadastro'}</h2>
-            <p className="text-gray-500 mt-2 font-medium">{isLogin ? 'Acesse sua conta' : 'Crie sua conta na Samej'}</p>
+            <p className="text-gray-500 mt-2 font-medium">{isLogin ? 'Acesse sua conta Samej' : 'Crie sua conta profissional ou cliente'}</p>
           </div>
 
           <div className="flex bg-gray-100 p-1.5 rounded-2xl mb-8">
-            <button onClick={() => setIsLogin(true)} className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin ? 'bg-white shadow-lg text-blue-600' : 'text-gray-500'}`}>Login</button>
-            <button onClick={() => setIsLogin(false)} className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin ? 'bg-white shadow-lg text-blue-600' : 'text-gray-500'}`}>Cadastro</button>
+            <button onClick={() => { setIsLogin(true); setError(null); setSuccessMsg(null); }} className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin ? 'bg-white shadow-lg text-blue-600' : 'text-gray-500'}`}>Login</button>
+            <button onClick={() => { setIsLogin(false); setError(null); setSuccessMsg(null); }} className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin ? 'bg-white shadow-lg text-blue-600' : 'text-gray-500'}`}>Cadastro</button>
           </div>
 
           <FeedbackAlerts />
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5 mt-6">
             {!isLogin && (
               <>
                 <div className="grid grid-cols-2 gap-3">

@@ -69,11 +69,17 @@ const App: React.FC = () => {
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-      if (!error && data) {
+      
+      if (error) {
+        console.error("Erro ao buscar perfil:", error);
+        return;
+      }
+
+      if (data) {
         setUser({ 
           id: data.id, 
           name: data.full_name || 'Usuário', 
-          email: '', 
+          email: '', // Email is handled by Supabase Auth, not profiles table usually
           role: data.role as UserRole, 
           avatar: data.avatar_url 
         });
@@ -81,25 +87,32 @@ const App: React.FC = () => {
         if (data.role === UserRole.PROFESSIONAL) {
           setProProfile({
             userId: data.id, 
-            description: data.description, 
+            description: data.description || '', 
             categories: data.categories || [],
-            region: data.region, 
+            region: data.region || '', 
             rating: data.rating || 5, 
             credits: data.credits || 0,
             completedJobs: data.completed_jobs || 0, 
             phone: data.phone || ''
           });
         }
+      } else {
+        // Se a sessão existe mas o perfil não, algo deu errado no cadastro.
+        // Desloga para permitir que o usuário tente novamente.
+        console.warn("Sessão ativa mas perfil não encontrado. Deslogando.");
+        await supabase.auth.signOut();
+        setUser(null);
       }
-    } catch (e) { console.error("Erro profile:", e); }
+    } catch (e) { 
+      console.error("Erro fatal no profile:", e); 
+    }
   };
 
   useEffect(() => {
     const initApp = async () => {
-      // Timeout de segurança: se o Supabase não responder em 5s, libera a tela
       const safetyTimeout = setTimeout(() => {
         if (loading) setLoading(false);
-      }, 5000);
+      }, 8000);
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
