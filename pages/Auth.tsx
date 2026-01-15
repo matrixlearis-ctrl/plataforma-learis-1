@@ -40,6 +40,7 @@ const Auth: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/#/auth?mode=reset`,
@@ -56,6 +57,8 @@ const Auth: React.FC = () => {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
@@ -85,7 +88,6 @@ const Auth: React.FC = () => {
         else if (profile?.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
       } else {
-        // Cadastro
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -97,7 +99,6 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // Criar perfil
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -113,7 +114,6 @@ const Auth: React.FC = () => {
           
           setSuccessMsg("Conta criada com sucesso!");
           
-          // Como o e-mail confirm está OFF, ele já está logado. Redirecionamos direto.
           setTimeout(() => {
             if (role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
             else navigate('/cliente/dashboard');
@@ -127,6 +127,23 @@ const Auth: React.FC = () => {
     }
   };
 
+  const FeedbackAlerts = () => (
+    <>
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-start text-xs font-bold animate-pulse">
+          <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+      {successMsg && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-start text-xs font-bold">
+          <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
@@ -139,6 +156,7 @@ const Auth: React.FC = () => {
             </div>
             <h2 className="text-3xl font-black text-blue-900 tracking-tighter">NOVA SENHA</h2>
           </div>
+          <FeedbackAlerts />
           <form onSubmit={handleUpdatePassword} className="space-y-5">
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nova senha (mín. 6 caracteres)" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
             <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50">
@@ -152,6 +170,7 @@ const Auth: React.FC = () => {
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </button>
           <h2 className="text-3xl font-black text-blue-900 tracking-tighter text-center mb-8 uppercase">Recuperar Senha</h2>
+          <FeedbackAlerts />
           <form onSubmit={handleForgotPassword} className="space-y-5">
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Seu e-mail cadastrado" className="w-full p-4 border-2 border-gray-100 rounded-2xl outline-none bg-gray-50 focus:bg-white focus:border-blue-500 transition-all font-medium" />
             <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50">
@@ -171,19 +190,7 @@ const Auth: React.FC = () => {
             <button onClick={() => setIsLogin(false)} className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin ? 'bg-white shadow-lg text-blue-600' : 'text-gray-500'}`}>Cadastro</button>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-start text-xs font-bold animate-pulse">
-              <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl flex items-start text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-              <span>{successMsg}</span>
-            </div>
-          )}
+          <FeedbackAlerts />
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (

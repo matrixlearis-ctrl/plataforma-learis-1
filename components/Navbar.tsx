@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, UserRole } from '../types';
-import { Menu, X, User as UserIcon, LogOut, Coins, Search, Plus } from 'lucide-react';
+import { Menu, X, User as UserIcon, LogOut, Coins, Search } from 'lucide-react';
 
 interface NavbarProps {
   user: User | null;
@@ -101,7 +101,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
             ) : (
               <>
                 <Link to="/auth" onClick={closeMenu} className="block p-3 text-gray-700 font-bold hover:bg-gray-50 rounded-xl text-center border-2 border-gray-100">
-                  Entrar / Cadastro
+                  Entrar
                 </Link>
                 <Link to="/pedir-orcamento" onClick={closeMenu} className="block p-4 bg-blue-600 text-white font-bold rounded-xl text-center shadow-lg">
                   Pedir Orçamento Grátis
