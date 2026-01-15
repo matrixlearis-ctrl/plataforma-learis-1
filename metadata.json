@@ -1,6 +1,6 @@
 {
-  "name": "Copy of Samej - Marketplace de Serviços",
-  "description": "Uma plataforma de intermediação de serviços inspirada no Habitissimo, conectando clientes a profissionais qualificados através de um sistema de leads e créditos.",
+  "name": "Samej - Marketplace de Serviços",
+  "description": "Plataforma de intermediação de serviços conectando clientes a profissionais qualificados através de um sistema de leads e créditos.",
   "requestFramePermissions": [
     "camera",
     "geolocation"
