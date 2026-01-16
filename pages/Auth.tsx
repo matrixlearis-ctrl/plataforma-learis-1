@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
-import { Loader2, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
@@ -25,7 +25,7 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
-        // Passo 1: Autenticação pura
+        // 1. Tenta o Login no Auth
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
         
         if (authError) {
@@ -36,19 +36,49 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // SUCESSO! 
-        // Em vez de tentar ler o perfil aqui e causar "AbortError" (conflito de rede),
-        // vamos apenas sinalizar sucesso e recarregar/redirecionar.
-        setSuccessMsg("Entrando na sua conta...");
-        
-        // Pequeno delay para o Supabase propagar o token nos cookies
+        // 2. Verifica se o Perfil existe
+        const { data: profile, error: profileErr } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        // 3. AUTO-REPARO: Se logou mas não tem perfil no banco, cria um agora
+        if (!profile && !profileErr) {
+          console.log("Perfil não encontrado, criando auto-reparo...");
+          const userRole = authData.user.user_metadata?.role || UserRole.CLIENT;
+          const fullName = authData.user.user_metadata?.full_name || 'Usuário Samej';
+          
+          const { error: insertErr } = await supabase.from('profiles').insert({
+            id: authData.user.id,
+            full_name: fullName,
+            role: userRole,
+            credits: userRole === UserRole.PROFESSIONAL ? 15 : 0,
+            completed_jobs: 0,
+            rating: 5.0
+          });
+
+          if (insertErr) {
+            setError({ message: "Erro ao criar perfil automático. Verifique as políticas de RLS.", type: 'database' });
+            setLoading(false);
+            return;
+          }
+          
+          setSuccessMsg("Perfil recuperado! Entrando...");
+          setTimeout(() => navigate(userRole === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1000);
+          return;
+        }
+
+        // 4. Redirecionamento Normal
+        setSuccessMsg("Login realizado com sucesso!");
         setTimeout(() => {
-          // Forçamos o redirecionamento para a raiz, onde o App.tsx já sabe para onde te mandar
-          window.location.href = '/'; 
+          if (profile?.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
+          else if (profile?.role === UserRole.ADMIN) navigate('/admin');
+          else navigate('/cliente/dashboard');
         }, 800);
 
       } else {
-        // Fluxo de Cadastro
+        // Cadastro
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -58,27 +88,22 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // Criar o perfil manualmente no cadastro
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: signUpData.user.id,
-              full_name: name,
-              role: role,
-              credits: role === UserRole.PROFESSIONAL ? 15 : 0,
-              completed_jobs: 0,
-              rating: 5.0
-            });
+          const { error: profileError } = await supabase.from('profiles').insert({
+            id: signUpData.user.id,
+            full_name: name,
+            role: role,
+            credits: role === UserRole.PROFESSIONAL ? 15 : 0,
+            completed_jobs: 0,
+            rating: 5.0
+          });
           
           if (profileError) {
-             setError({ message: "Conta criada, mas erro ao salvar perfil: " + profileError.message, type: 'database' });
+             setError({ message: "Usuário criado, mas erro na tabela Profiles: " + profileError.message, type: 'database' });
              return;
           }
           
-          setSuccessMsg("Conta Samej criada com sucesso!");
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1500);
+          setSuccessMsg("Bem-vindo à Samej!");
+          setTimeout(() => navigate(role === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1500);
         }
       }
     } catch (err: any) {
@@ -91,18 +116,14 @@ const Auth: React.FC = () => {
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative">
       <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
-      
       <div className="text-center mb-8">
         <h2 className="text-3xl font-black text-blue-900 tracking-tighter uppercase">{isLogin ? 'Entrar' : 'Cadastrar'}</h2>
       </div>
 
       {error && (
-        <div className="p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold bg-red-50 border-red-200 text-red-900 animate-in fade-in slide-in-from-top-2">
+        <div className="p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold bg-red-50 border-red-200 text-red-900">
           <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-black mb-1 text-[10px] uppercase tracking-widest">Ops! Algo deu errado</p>
-            <span>{error.message}</span>
-          </div>
+          <div><p className="font-black mb-1">ERRO</p><span>{error.message}</span></div>
         </div>
       )}
 
