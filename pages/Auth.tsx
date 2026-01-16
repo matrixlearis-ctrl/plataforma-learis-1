@@ -25,6 +25,7 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
+        // 1. Autenticação
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
         
         if (authError) {
@@ -35,38 +36,37 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        const { data: profile, error: profileErr } = await supabase
+        // 2. Tenta buscar o perfil imediatamente
+        const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', authData.user.id)
           .maybeSingle();
 
-        if (!profile && !profileErr) {
+        // 3. Auto-reparo se o perfil sumiu
+        if (!profile) {
           const userRole = authData.user.user_metadata?.role || UserRole.CLIENT;
-          const fullName = authData.user.user_metadata?.full_name || 'Usuário Samej';
-          
           await supabase.from('profiles').insert({
             id: authData.user.id,
-            full_name: fullName,
+            full_name: authData.user.user_metadata?.full_name || 'Usuário',
             role: userRole,
             credits: userRole === UserRole.PROFESSIONAL ? 15 : 0,
             completed_jobs: 0,
             rating: 5.0
           });
-          
-          setSuccessMsg("Perfil ativado! Entrando...");
-          setTimeout(() => navigate(userRole === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1200);
-          return;
         }
 
-        setSuccessMsg("Login autorizado! Carregando seu painel...");
+        setSuccessMsg("Acesso garantido! Entrando...");
+        
+        // Pequeno delay para o Supabase propagar a sessão globalmente
         setTimeout(() => {
-          if (profile?.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
-          else if (profile?.role === UserRole.ADMIN) navigate('/admin');
-          else navigate('/cliente/dashboard');
-        }, 1200);
+          // Em vez de navegar para uma rota específica aqui, 
+          // deixamos o App.tsx detectar o novo 'user' e nos tirar do /auth
+          window.location.hash = '/'; 
+        }, 1500);
 
       } else {
+        // Cadastro
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -85,8 +85,10 @@ const Auth: React.FC = () => {
             rating: 5.0
           });
           
-          setSuccessMsg("Conta Samej criada! Redirecionando...");
-          setTimeout(() => navigate(role === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1800);
+          setSuccessMsg("Conta criada com sucesso!");
+          setTimeout(() => {
+            window.location.hash = '/';
+          }, 2000);
         }
       }
     } catch (err: any) {
@@ -110,7 +112,7 @@ const Auth: React.FC = () => {
       )}
 
       {successMsg && (
-        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-pulse">
+        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-bounce">
           <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <span>{successMsg}</span>
         </div>

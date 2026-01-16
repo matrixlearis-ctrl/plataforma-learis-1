@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -21,7 +22,7 @@ const App: React.FC = () => {
   const [proProfile, setProProfile] = useState<ProfessionalProfile | null>(null);
   const [orders, setOrders] = useState<OrderRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
 
   const fetchOrders = async () => {
@@ -55,7 +56,6 @@ const App: React.FC = () => {
   };
 
   const fetchProfile = async (userId: string) => {
-    setIsProfileLoading(true);
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (data) {
@@ -63,13 +63,12 @@ const App: React.FC = () => {
         if (data.role === UserRole.PROFESSIONAL) {
           setProProfile({ userId: data.id, description: data.description || '', categories: data.categories || [], region: data.region || '', rating: data.rating || 5, credits: data.credits || 0, completedJobs: data.completed_jobs || 0, phone: data.phone || '' });
         }
-      } else {
-        setUser(null);
+        return true;
       }
+      return false;
     } catch (e) { 
       console.error("Falha ao carregar perfil:", e); 
-    } finally {
-      setIsProfileLoading(false);
+      return false;
     }
   };
 
@@ -84,15 +83,20 @@ const App: React.FC = () => {
       } catch (err) { 
         console.error("Erro initApp:", err);
       } finally { 
-        setLoading(false); 
+        setLoading(false);
+        setIsInitializing(false);
       }
     };
     initApp();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        await fetchProfile(session.user.id);
-      } else if (event === 'SIGNED_OUT') {
+      if (session) {
+        const profileFound = await fetchProfile(session.user.id);
+        if (!profileFound && event === 'SIGNED_IN') {
+           // Se logou mas o perfil não carregou, tentamos novamente após um curto delay
+           setTimeout(() => fetchProfile(session.user.id), 1000);
+        }
+      } else {
         setUser(null);
         setProProfile(null);
       }
@@ -107,27 +111,20 @@ const App: React.FC = () => {
     window.location.hash = '/auth';
   };
 
-  if (loading) {
+  if (loading || isInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1e3a8a]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
           <h1 className="text-white text-2xl font-black uppercase tracking-tighter">Samej</h1>
+          <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mt-2 animate-pulse">Sincronizando...</p>
         </div>
       </div>
     );
   }
 
-  // Helper para rotas protegidas que espera o perfil carregar
-  // Fix: Made children optional in the prop type to resolve TS errors where JSX children are not recognized as the children prop
   const ProtectedRoute = ({ children, role }: { children?: React.ReactNode, role?: UserRole }) => {
-    if (isProfileLoading) {
-      return (
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
-      );
-    }
+    // Se o user for nulo, mas ainda estivermos em processo de autenticação, não redirecionamos
     if (!user) return <Navigate to="/auth" />;
     if (role && user.role !== role) return <Navigate to="/" />;
     return <>{children}</>;
@@ -140,7 +137,7 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home user={user} />} />
-            <Route path="/auth" element={user && !isProfileLoading ? <Navigate to="/" /> : <Auth />} />
+            <Route path="/auth" element={user ? <Navigate to="/" /> : <Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
               const { error } = await supabase.from('orders').insert([{ client_id: user?.id || null, client_name: o.clientName, category: o.category, description: o.description, location: o.location, neighborhood: o.neighborhood, deadline: o.deadline, status: o.status, lead_price: o.leadPrice }]);
               if (!error) await fetchOrders();
@@ -148,19 +145,18 @@ const App: React.FC = () => {
             <Route path="/profissionais" element={<ProfessionalDirectory professionals={professionals} />} />
             <Route path="/perfil/:id" element={<PublicProfile professionals={professionals} />} />
             
-            {/* Dashboard Cliente */}
             <Route path="/cliente/dashboard" element={
               <ProtectedRoute role={UserRole.CLIENT}>
                 <CustomerDashboard user={user!} orders={orders} />
               </ProtectedRoute>
             } />
 
-            {/* Dashboards e Rotas Profissional */}
             <Route path="/profissional/dashboard" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <ProfessionalDashboard user={user!} profile={proProfile} />
               </ProtectedRoute>
             } />
+
             <Route path="/profissional/leads" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
@@ -172,6 +168,7 @@ const App: React.FC = () => {
                 }} />
               </ProtectedRoute>
             } />
+
             <Route path="/profissional/recarregar" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <RechargeCredits onAddCredits={async (amt) => {
