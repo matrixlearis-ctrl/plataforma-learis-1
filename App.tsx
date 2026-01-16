@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -54,13 +55,28 @@ const App: React.FC = () => {
     } catch (e) { console.error("Erro professionals:", e); }
   };
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, email?: string) => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (data) {
-        setUser({ id: data.id, name: data.full_name || 'Usuário', email: '', role: data.role as UserRole, avatar: data.avatar_url });
+        setUser({ 
+          id: data.id, 
+          name: data.full_name || 'Usuário', 
+          email: email || '', 
+          role: data.role as UserRole, 
+          avatar: data.avatar_url 
+        });
         if (data.role === UserRole.PROFESSIONAL) {
-          setProProfile({ userId: data.id, description: data.description || '', categories: data.categories || [], region: data.region || '', rating: data.rating || 5, credits: data.credits || 0, completedJobs: data.completed_jobs || 0, phone: data.phone || '' });
+          setProProfile({ 
+            userId: data.id, 
+            description: data.description || '', 
+            categories: data.categories || [], 
+            region: data.region || '', 
+            rating: data.rating || 5, 
+            credits: data.credits || 0, 
+            completedJobs: data.completed_jobs || 0, 
+            phone: data.phone || '' 
+          });
         }
         return true;
       }
@@ -76,7 +92,7 @@ const App: React.FC = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user.id, session.user.email);
         }
         await Promise.all([fetchOrders(), fetchProfessionals()]);
       } catch (err) { 
@@ -98,9 +114,9 @@ const App: React.FC = () => {
       }
 
       if (session) {
-        const profileFound = await fetchProfile(session.user.id);
+        const profileFound = await fetchProfile(session.user.id, session.user.email);
         if (!profileFound && event === 'SIGNED_IN') {
-           setTimeout(() => fetchProfile(session.user.id), 1000);
+           setTimeout(() => fetchProfile(session.user.id, session.user.email), 1000);
         }
       }
     });
@@ -164,7 +180,7 @@ const App: React.FC = () => {
             <Route path="/profissional/leads" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-                  const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completedJobs }).eq('id', p.userId);
+                  const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completed_jobs }).eq('id', p.userId);
                   if (!error) setProProfile(p);
                 }} onUpdateOrder={async (o) => {
                   const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);

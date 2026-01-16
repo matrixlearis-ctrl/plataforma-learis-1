@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
-import { User } from '../types';
-import { Search, CheckCircle, ShieldCheck, Zap } from 'lucide-react';
+import { User, UserRole } from '../types';
+import { Search, CheckCircle, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 
 interface HomeProps {
   user: User | null;
@@ -16,10 +16,8 @@ const Home: React.FC<HomeProps> = ({ user }) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      // Se o usuário digitar algo específico, busca no diretório
       navigate(`/profissionais?search=${encodeURIComponent(searchTerm)}`);
     } else {
-      // Se clicar com campo vazio, vai para o orçamento
       navigate('/pedir-orcamento');
     }
   };
@@ -27,36 +25,57 @@ const Home: React.FC<HomeProps> = ({ user }) => {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="bg-[#1e3a8a] text-white py-24 px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-            Encontre profissionais qualificados perto de você
-          </h1>
-          <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto opacity-90">
-            Receba orçamentos gratuitos dos melhores profissionais da sua região para obras, limpezas, reparos e muito mais.
-          </p>
-          
-          <form 
-            onSubmit={handleSearch}
-            className="bg-white p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row max-w-3xl mx-auto border-4 border-white/10"
-          >
-            <div className="flex-grow flex items-center px-5 py-3 md:py-0 bg-white rounded-xl">
-              <Search className="text-gray-400 mr-3 w-6 h-6" />
-              <input 
-                type="text" 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="O que procura? Ex: Eletricista, Pintor..." 
-                className="w-full py-3 text-gray-900 font-medium focus:outline-none placeholder-gray-400 bg-white"
-              />
+      <section className="bg-[#1e3a8a] text-white py-24 px-4 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full -mr-48 -mt-48 blur-3xl"></div>
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          {user ? (
+            <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+              <span className="bg-blue-500/20 text-blue-200 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-blue-400/30">
+                Bem-vindo de volta, {user.name.split(' ')[0]}!
+              </span>
+              <h1 className="text-4xl md:text-6xl font-extrabold mt-6 mb-8 leading-tight">
+                Pronto para gerenciar seus projetos?
+              </h1>
+              <Link 
+                to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"}
+                className="inline-flex items-center bg-white text-blue-900 px-10 py-5 rounded-2xl font-black text-xl hover:bg-blue-50 transition-all shadow-2xl hover:-translate-y-1 active:translate-y-0"
+              >
+                IR PARA MEU PAINEL
+                <ArrowRight className="ml-3 w-6 h-6" />
+              </Link>
             </div>
-            <button 
-              type="submit"
-              className="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all text-center shadow-lg hover:shadow-blue-500/30 active:scale-95"
-            >
-              Procurar Profissionais
-            </button>
-          </form>
+          ) : (
+            <>
+              <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                Encontre profissionais qualificados perto de você
+              </h1>
+              <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto opacity-90">
+                Receba orçamentos gratuitos dos melhores profissionais da sua região para obras, limpezas, reparos e muito mais.
+              </p>
+              
+              <form 
+                onSubmit={handleSearch}
+                className="bg-white p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row max-w-3xl mx-auto border-4 border-white/10"
+              >
+                <div className="flex-grow flex items-center px-5 py-3 md:py-0 bg-white rounded-xl">
+                  <Search className="text-gray-400 mr-3 w-6 h-6" />
+                  <input 
+                    type="text" 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="O que procura? Ex: Eletricista, Pintor..." 
+                    className="w-full py-3 text-gray-900 font-medium focus:outline-none placeholder-gray-400 bg-white"
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  className="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all text-center shadow-lg hover:shadow-blue-500/30 active:scale-95"
+                >
+                  Procurar Profissionais
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </section>
 
@@ -111,44 +130,46 @@ const Home: React.FC<HomeProps> = ({ user }) => {
       </section>
 
       {/* Professional CTA */}
-      <section className="py-24 px-4">
-        <div className="max-w-6xl mx-auto bg-[#1e3a8a] rounded-[3rem] p-12 md:p-20 text-white flex flex-col md:flex-row items-center shadow-2xl overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32"></div>
-          <div className="md:w-2/3 mb-12 md:mb-0 md:pr-16 relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">É um profissional ou empresa de serviços?</h2>
-            <p className="text-xl text-blue-100 mb-10 leading-relaxed">
-              Encontre novos clientes todos os dias. Na Samej você decide quais pedidos quer atender e paga apenas pelo contato do cliente. Sem mensalidades!
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-              <div className="flex items-center">
-                <Zap className="w-6 h-6 mr-4 text-amber-400" />
-                <span className="text-lg font-medium">Pedidos reais e verificados</span>
+      {!user && (
+        <section className="py-24 px-4">
+          <div className="max-w-6xl mx-auto bg-[#1e3a8a] rounded-[3rem] p-12 md:p-20 text-white flex flex-col md:flex-row items-center shadow-2xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32"></div>
+            <div className="md:w-2/3 mb-12 md:mb-0 md:pr-16 relative z-10">
+              <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">É um profissional ou empresa de serviços?</h2>
+              <p className="text-xl text-blue-100 mb-10 leading-relaxed">
+                Encontre novos clientes todos os dias. Na Samej você decide quais pedidos quer atender e paga apenas pelo contato do cliente. Sem mensalidades!
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                <div className="flex items-center">
+                  <Zap className="w-6 h-6 mr-4 text-amber-400" />
+                  <span className="text-lg font-medium">Pedidos reais e verificados</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="w-6 h-6 mr-4 text-amber-400" />
+                  <span className="text-lg font-medium">Sem taxas de comissão</span>
+                </div>
+                <div className="flex items-center">
+                  <ShieldCheck className="w-6 h-6 mr-4 text-amber-400" />
+                  <span className="text-lg font-medium">Pagamento seguro via Pix</span>
+                </div>
+                <div className="flex items-center">
+                  <ShieldCheck className="w-6 h-6 mr-4 text-amber-400" />
+                  <span className="text-lg font-medium">Gestão total no seu painel</span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-6 h-6 mr-4 text-amber-400" />
-                <span className="text-lg font-medium">Sem taxas de comissão</span>
-              </div>
-              <div className="flex items-center">
-                <ShieldCheck className="w-6 h-6 mr-4 text-amber-400" />
-                <span className="text-lg font-medium">Pagamento seguro via Stripe</span>
-              </div>
-              <div className="flex items-center">
-                <ShieldCheck className="w-6 h-6 mr-4 text-amber-400" />
-                <span className="text-lg font-medium">Gestão total no seu painel</span>
+              <Link to="/auth" className="inline-block bg-white text-blue-900 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-1 active:translate-y-0">
+                Registre sua Empresa Grátis
+              </Link>
+            </div>
+            <div className="md:w-1/3 relative z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500 rounded-2xl rotate-3 scale-105 opacity-20"></div>
+                <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop" alt="Profissional" className="rounded-2xl shadow-2xl relative z-10 grayscale hover:grayscale-0 transition-all duration-700" />
               </div>
             </div>
-            <Link to="/auth" className="inline-block bg-white text-blue-900 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-1 active:translate-y-0">
-              Registre sua Empresa Grátis
-            </Link>
           </div>
-          <div className="md:w-1/3 relative z-10">
-             <div className="relative">
-               <div className="absolute inset-0 bg-blue-500 rounded-2xl rotate-3 scale-105 opacity-20"></div>
-               <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop" alt="Profissional" className="rounded-2xl shadow-2xl relative z-10 grayscale hover:grayscale-0 transition-all duration-700" />
-             </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 };
