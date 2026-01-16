@@ -30,11 +30,22 @@ const App: React.FC = () => {
       const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
       if (!error && data) {
         setOrders(data.map(o => ({
-          id: o.id, clientId: o.client_id, clientName: o.client_name, category: o.category,
-          description: o.description, address: o.address, number: o.number, complement: o.complement,
-          location: o.location, neighborhood: o.neighborhood,
-          deadline: o.deadline, status: o.status as OrderStatus, createdAt: o.created_at,
-          leadPrice: o.lead_price || 5, unlockedBy: o.unlocked_by || []
+          id: o.id, 
+          clientId: o.client_id, 
+          clientName: o.client_name, 
+          category: o.category,
+          description: o.description, 
+          phone: o.phone || '',
+          address: o.address, 
+          number: o.number, 
+          complement: o.complement,
+          location: o.location, 
+          neighborhood: o.neighborhood,
+          deadline: o.deadline, 
+          status: o.status as OrderStatus, 
+          createdAt: o.created_at,
+          leadPrice: o.lead_price || 5, 
+          unlockedBy: o.unlocked_by || []
         })));
       }
     } catch (e) { console.error("Erro orders:", e); }
@@ -165,6 +176,7 @@ const App: React.FC = () => {
                 client_name: o.clientName, 
                 category: o.category, 
                 description: o.description, 
+                phone: o.phone,
                 address: o.address,
                 number: o.number,
                 complement: o.complement,

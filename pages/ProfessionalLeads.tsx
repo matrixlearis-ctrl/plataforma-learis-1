@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProfessionalProfile, OrderRequest, User } from '../types';
 import { CATEGORIES } from '../constants';
-// Added Loader2 to the imports
-import { MapPin, Clock, Lock, Phone, Mail, Coins, User as UserIcon, AlignLeft, PlusCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { MapPin, Clock, Lock, Phone, Mail, Coins, User as UserIcon, AlignLeft, PlusCircle, AlertCircle, Loader2, Info } from 'lucide-react';
 
 interface ProfessionalLeadsProps {
   user: User;
@@ -128,43 +127,67 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                     </div>
                   </div>
 
-                  {unlocked && (
-                    <div className="mb-10 p-6 bg-blue-50 rounded-2xl border-2 border-blue-200">
-                       <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-2">Endereço Completo</p>
-                       <p className="font-black text-blue-900 text-lg">
-                        {order.address}, {order.number}
-                        {order.complement && <span className="text-blue-700 font-bold ml-2">({order.complement})</span>}
-                       </p>
-                       <p className="text-blue-700 font-bold text-sm">{order.neighborhood} - {order.location}</p>
-                    </div>
-                  )}
-
-                  <div className="mb-10 p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 relative">
-                    <div className="flex items-center mb-4 text-gray-400">
-                      <AlignLeft className="w-4 h-4 mr-2" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Detalhes da Necessidade</span>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap font-medium text-lg">
-                      {order.description}
-                    </p>
-                  </div>
-
                   {unlocked ? (
-                    <div className="pt-8 border-t-2 border-gray-50 animate-in fade-in slide-in-from-top-4 duration-500">
-                      <div className="bg-green-50 p-5 rounded-2xl border border-green-100 mb-8 flex items-start">
-                        <AlertCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-green-800 font-bold">Sucesso! Agora você tem acesso direto aos contatos do cliente. Ligue ou envie uma mensagem agora mesmo.</p>
+                    <div className="mb-10 p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-200 animate-in fade-in slide-in-from-top-4 duration-500">
+                      <div className="flex items-center mb-6">
+                        <div className="bg-blue-600 text-white p-2 rounded-lg mr-3 shadow-lg">
+                           <Info className="w-5 h-5" />
+                        </div>
+                        <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">Dados de Contato do Cliente</h4>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <a href={`tel:${profile.phone}`} className="flex items-center justify-center bg-blue-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all active:scale-95">
-                          <Phone className="w-6 h-6 mr-3" /> LIGAR AGORA
-                        </a>
-                        <a href="#" className="flex items-center justify-center bg-white border-4 border-blue-600 text-blue-600 py-5 rounded-2xl font-black text-lg hover:bg-blue-50 transition-all active:scale-95">
-                          <Mail className="w-6 h-6 mr-3" /> ENVIAR WHATSAPP
-                        </a>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                           <div>
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Nome Completo</p>
+                              <p className="font-black text-gray-900 text-lg uppercase">{order.clientName}</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Telefone / WhatsApp</p>
+                              <p className="font-black text-blue-700 text-2xl">{order.phone}</p>
+                           </div>
+                        </div>
+
+                        <div className="space-y-4">
+                           <div>
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Endereço Residencial</p>
+                              <p className="font-black text-gray-900 text-lg uppercase leading-tight">
+                                {order.address}, {order.number}
+                                {order.complement && <span className="block text-sm text-blue-600 font-bold mt-1">Complemento: {order.complement}</span>}
+                              </p>
+                           </div>
+                           <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Bairro</p>
+                                <p className="font-bold text-gray-700 uppercase text-sm">{order.neighborhood}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Cidade/UF</p>
+                                <p className="font-bold text-gray-700 uppercase text-sm">{order.location}</p>
+                              </div>
+                           </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-8 pt-6 border-t border-blue-200">
+                        <p className="text-xs text-blue-600 font-bold italic">
+                          * Copie os dados acima para entrar em contato com o cliente via telefone ou e-mail.
+                        </p>
                       </div>
                     </div>
                   ) : (
+                    <div className="mb-10 p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 relative">
+                      <div className="flex items-center mb-4 text-gray-400">
+                        <AlignLeft className="w-4 h-4 mr-2" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Detalhes da Necessidade</span>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap font-medium text-lg">
+                        {order.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {!unlocked && (
                     <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t-2 border-gray-50">
                       <div className="flex items-center bg-amber-50 px-6 py-4 rounded-2xl border-2 border-amber-100 mb-6 md:mb-0 shadow-sm">
                         <Coins className="w-6 h-6 text-amber-600 mr-3" />

@@ -36,6 +36,7 @@ export interface OrderRequest {
   clientName: string;
   category: string;
   description: string;
+  phone: string;
   address?: string;
   number?: string;
   complement?: string;

@@ -78,6 +78,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
         clientName: formData.name,
         category: formData.category,
         description: formData.description,
+        phone: formData.phone,
         address: formData.address,
         number: formData.number,
         complement: formData.complement,
