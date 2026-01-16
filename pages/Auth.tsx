@@ -1,13 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
-import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, KeyRound, Database, RefreshCw } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   
   const [role, setRole] = useState<UserRole>(UserRole.CLIENT);
@@ -15,7 +14,7 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<{message: string, type: 'auth' | 'database' | 'profile_missing' | 'general'} | null>(null);
+  const [error, setError] = useState<{message: string, type: string} | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,6 +27,7 @@ const Auth: React.FC = () => {
       if (isLogin) {
         // Passo 1: Autenticação
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        
         if (authError) {
           setError({ message: authError.message.includes('Invalid login') ? 'E-mail ou senha incorretos.' : authError.message, type: 'auth' });
           setLoading(false);
@@ -36,25 +36,44 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // Passo 2: Busca de Perfil
-        const { data: profile, error: profileErr } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authData.user.id)
-          .maybeSingle();
+        // Passo 2: Busca de Perfil com Retry (Tratando o AbortError)
+        let profile = null;
+        let profileErr = null;
+        let attempts = 0;
+
+        while (attempts < 2) {
+          const result = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authData.user.id)
+            .maybeSingle();
+          
+          if (!result.error) {
+            profile = result.data;
+            break;
+          }
+          
+          profileErr = result.error;
+          if (profileErr.message.includes('abort') || profileErr.message.includes('signal')) {
+            console.warn("Requisição abortada, tentando novamente...");
+            await new Promise(resolve => setTimeout(resolve, 500)); // Espera meio segundo
+            attempts++;
+          } else {
+            break;
+          }
+        }
         
-        if (profileErr) {
+        if (profileErr && attempts >= 2) {
           setError({ 
-            message: `Erro de Banco (RLS): Verifique as políticas da tabela profiles no Supabase. Detalhe: ${profileErr.message}`, 
+            message: `Erro de Banco: Verifique se a política 'Public read access' foi criada na tabela profiles. Detalhe: ${profileErr.message}`, 
             type: 'database' 
           });
           setLoading(false);
           return;
         }
 
-        // AUTO-REPARO: Se o usuário existe no Auth mas não no Profile (erro comum em setups novos)
+        // AUTO-REPARO: Se o perfil não existe, tenta criar um agora
         if (!profile) {
-          console.log("Perfil não encontrado, tentando auto-reparo...");
           const { error: repairError } = await supabase
             .from('profiles')
             .insert({
@@ -68,19 +87,17 @@ const Auth: React.FC = () => {
           
           if (repairError) {
             setError({ 
-              message: "Seu usuário existe, mas não conseguimos criar seu perfil automático. Crie uma política de INSERT para 'authenticated' na tabela profiles.", 
+              message: "Seu usuário existe, mas não conseguimos criar seu perfil. Verifique a política de INSERT (Allow profile registration).", 
               type: 'profile_missing' 
             });
             setLoading(false);
             return;
           }
-          
-          // Se reparou, recarrega a página para entrar
-          window.location.reload();
+          window.location.reload(); // Recarrega para aplicar o perfil novo
           return;
         }
         
-        // Redirecionamento bem-sucedido
+        // Redirecionamento bem-sucedido baseado no cargo
         if (profile.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
         else if (profile.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
@@ -108,7 +125,7 @@ const Auth: React.FC = () => {
             });
           
           if (profileError) {
-             setError({ message: "Usuário criado no Auth, mas erro ao salvar na tabela Profiles: " + profileError.message, type: 'database' });
+             setError({ message: "Conta criada, mas erro ao salvar perfil: " + profileError.message, type: 'database' });
              return;
           }
           
@@ -140,7 +157,7 @@ const Auth: React.FC = () => {
         }`}>
           {error.type === 'database' || error.type === 'profile_missing' ? <RefreshCw className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />}
           <div>
-            <p className="font-black mb-1">{error.type === 'profile_missing' ? 'REPARO NECESSÁRIO' : 'OPS!'}</p>
+            <p className="font-black mb-1">{error.type === 'profile_missing' ? 'PERFIL NÃO ENCONTRADO' : 'OPS!'}</p>
             <span>{error.message}</span>
           </div>
         </div>
