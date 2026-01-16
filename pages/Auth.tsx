@@ -25,7 +25,7 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
-        // Passo 1: Autenticação
+        // Passo 1: Autenticação pura
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
         
         if (authError) {
@@ -36,63 +36,16 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // Pequena pausa para o Supabase processar a sessão globalmente e evitar AbortError
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Passo 2: Busca de Perfil
-        const { data: profile, error: profileErr } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authData.user.id)
-          .maybeSingle();
+        // SUCESSO! 
+        // Em vez de tentar ler o perfil aqui e causar "AbortError" (conflito de rede),
+        // vamos apenas sinalizar sucesso e recarregar/redirecionar.
+        setSuccessMsg("Entrando na sua conta...");
         
-        // Se der AbortError mas tivermos o usuário, apenas redirecionamos. O App.tsx cuidará do resto.
-        if (profileErr) {
-          const isAbort = profileErr.message.includes('abort') || profileErr.message.includes('signal');
-          if (isAbort) {
-            console.log("Requisição abortada pelo navegador, prosseguindo por estado global...");
-            // No caso de abort, não mostramos erro, apenas navegamos para a home e o App.tsx redireciona
-            navigate('/');
-            return;
-          }
-          
-          setError({ 
-            message: `Erro de Banco (RLS): Certifique-se de clicar em 'Save Policy' no Supabase. Detalhe: ${profileErr.message}`, 
-            type: 'database' 
-          });
-          setLoading(false);
-          return;
-        }
-
-        // AUTO-REPARO: Se o perfil não existe
-        if (!profile) {
-          const { error: repairError } = await supabase
-            .from('profiles')
-            .insert({
-              id: authData.user.id,
-              full_name: authData.user.user_metadata?.full_name || 'Usuário Samej',
-              role: authData.user.user_metadata?.role || UserRole.CLIENT,
-              credits: 0,
-              completed_jobs: 0,
-              rating: 5.0
-            });
-          
-          if (repairError) {
-            setError({ 
-              message: "Perfil não encontrado e erro ao criar automático. Verifique a política 'Allow profile registration' (INSERT).", 
-              type: 'profile_missing' 
-            });
-            setLoading(false);
-            return;
-          }
-          window.location.reload();
-          return;
-        }
-        
-        // Redirecionamento
-        if (profile.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
-        else if (profile.role === UserRole.ADMIN) navigate('/admin');
-        else navigate('/cliente/dashboard');
+        // Pequeno delay para o Supabase propagar o token nos cookies
+        setTimeout(() => {
+          // Forçamos o redirecionamento para a raiz, onde o App.tsx já sabe para onde te mandar
+          window.location.href = '/'; 
+        }, 800);
 
       } else {
         // Fluxo de Cadastro
@@ -105,6 +58,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
+          // Criar o perfil manualmente no cadastro
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -117,21 +71,20 @@ const Auth: React.FC = () => {
             });
           
           if (profileError) {
-             setError({ message: "Conta criada no Auth, mas erro na tabela Profiles: " + profileError.message, type: 'database' });
+             setError({ message: "Conta criada, mas erro ao salvar perfil: " + profileError.message, type: 'database' });
              return;
           }
           
           setSuccessMsg("Conta Samej criada com sucesso!");
           setTimeout(() => {
-            if (role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
-            else navigate('/cliente/dashboard');
+            window.location.href = '/';
           }, 1500);
         }
       }
     } catch (err: any) {
       setError({ message: err.message || 'Erro inesperado.', type: 'general' });
     } finally {
-      setLoading(false);
+      if (!successMsg) setLoading(false);
     }
   };
 
@@ -144,12 +97,10 @@ const Auth: React.FC = () => {
       </div>
 
       {error && (
-        <div className={`p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold ${
-          error.type === 'database' || error.type === 'profile_missing' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-900'
-        }`}>
-          {error.type === 'database' || error.type === 'profile_missing' ? <RefreshCw className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />}
+        <div className="p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold bg-red-50 border-red-200 text-red-900 animate-in fade-in slide-in-from-top-2">
+          <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-black mb-1">{error.type === 'profile_missing' ? 'PERFIL NÃO ENCONTRADO' : 'OPS!'}</p>
+            <p className="font-black mb-1 text-[10px] uppercase tracking-widest">Ops! Algo deu errado</p>
             <span>{error.message}</span>
           </div>
         </div>
@@ -171,8 +122,8 @@ const Auth: React.FC = () => {
         {!isLogin && (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-black text-[10px] ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-400'}`}>CLIENTE</button>
-              <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-black text-[10px] ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-400'}`}>PROFISSIONAL</button>
+              <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-black text-[10px] ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-400'}`}>SOU CLIENTE</button>
+              <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-black text-[10px] ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-400'}`}>SOU PROFISSIONAL</button>
             </div>
             <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Seu Nome" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600" />
           </>
