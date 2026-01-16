@@ -70,10 +70,10 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
           </div>
           <Link 
             to="/profissional/recarregar"
-            className="bg-blue-600 text-white px-6 py-4 rounded-2xl font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 flex items-center transition-all text-sm active:scale-95"
+            className="bg-blue-600 text-white px-6 py-4 rounded-2xl font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 flex items-center transition-all text-sm active:scale-95 uppercase tracking-widest"
           >
             <PlusCircle className="w-4 h-4 mr-2" />
-            RECARREGAR
+            Recarregar
           </Link>
         </div>
       </div>
@@ -89,7 +89,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
             const categoryObj = CATEGORIES.find(c => c.id === order.category);
             
             return (
-              <div key={order.id} className={`bg-white rounded-[2.5rem] border-2 shadow-sm transition-all overflow-hidden ${unlocked ? 'border-green-300 ring-8 ring-green-50' : 'hover:border-blue-300 shadow-xl'}`}>
+              <div key={order.id} className={`bg-white rounded-[2.5rem] border-2 shadow-sm transition-all overflow-hidden ${unlocked ? 'border-green-300 ring-8 ring-green-50/50' : 'hover:border-blue-300 shadow-xl'}`}>
                 <div className="p-8 md:p-10">
                   <div className="flex justify-between items-start mb-8">
                     <div className="flex items-center">
@@ -98,7 +98,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                       </div>
                       <div>
                         <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Solicitação de Serviço</span>
-                        <h3 className="text-xl font-black text-gray-900 uppercase mt-1">{categoryObj?.name || 'Serviço'}</h3>
+                        <h3 className="text-xl font-black text-gray-900 uppercase mt-1 tracking-tight">{categoryObj?.name || 'Serviço'}</h3>
                       </div>
                     </div>
                     {unlocked && (
@@ -108,98 +108,103 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                     )}
                   </div>
 
-                  {/* Cabeçalho de informações básicas */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Cliente</p>
-                      <p className="font-bold text-gray-900 flex items-center uppercase"><UserIcon className="w-4 h-4 mr-2 text-gray-400" />{order.clientName}</p>
+                      <p className="font-bold text-gray-900 flex items-center uppercase text-xs">{order.clientName}</p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Cidade</p>
-                      <p className="font-bold text-gray-900 flex items-center uppercase"><MapPin className="w-4 h-4 mr-2 text-gray-400" />{order.location}</p>
+                      <p className="font-bold text-gray-900 flex items-center uppercase text-xs">{order.location}</p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Bairro</p>
-                      <p className="font-bold text-gray-900 uppercase">{order.neighborhood || 'Não informado'}</p>
+                      <p className="font-bold text-gray-900 uppercase text-xs">{order.neighborhood || 'Não informado'}</p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Prazo</p>
-                      <p className="font-bold text-gray-900 flex items-center uppercase"><Clock className="w-4 h-4 mr-2 text-gray-400" />{getDeadlineLabel(order.deadline)}</p>
+                      <p className="font-bold text-gray-900 flex items-center uppercase text-xs">{getDeadlineLabel(order.deadline)}</p>
                     </div>
                   </div>
 
                   {unlocked ? (
-                    <div className="mb-10 p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-200 animate-in fade-in slide-in-from-top-4 duration-500">
-                      <div className="flex items-center mb-6">
-                        <div className="bg-blue-600 text-white p-2 rounded-lg mr-3 shadow-lg">
+                    <div className="mb-10 p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-200 animate-in fade-in slide-in-from-top-4 duration-500 shadow-inner">
+                      <div className="flex items-center mb-8 pb-4 border-b border-blue-100">
+                        <div className="bg-blue-600 text-white p-3 rounded-xl mr-4 shadow-lg">
                            <Info className="w-5 h-5" />
                         </div>
-                        <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">Dados Completos do Lead</h4>
+                        <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">Dados Completos do Pedido</h4>
                       </div>
 
-                      <div className="space-y-8">
-                        {/* Seção de Contato e Endereço Textual */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-blue-200">
-                          <div className="space-y-4">
-                             <div>
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Nome do Cliente</p>
-                                <p className="font-black text-gray-900 text-xl uppercase leading-none">{order.clientName}</p>
-                             </div>
-                             <div>
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Telefone de Contato</p>
-                                <p className="font-black text-blue-700 text-3xl leading-none">{order.phone || 'Não informado'}</p>
-                             </div>
-                          </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        {/* Seção de Contato e Endereço */}
+                        <div className="space-y-8">
+                           <div>
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-1">Nome do Cliente</p>
+                              <p className="font-black text-gray-900 text-2xl uppercase tracking-tight leading-none">{order.clientName}</p>
+                           </div>
+                           
+                           <div>
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-1">Telefone / WhatsApp</p>
+                              <p className="font-black text-blue-700 text-3xl tracking-tight leading-none">{order.phone || 'NÃO INFORMADO'}</p>
+                           </div>
 
-                          <div className="space-y-4">
-                             <div>
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Endereço de Execução</p>
-                                <p className="font-black text-gray-900 text-lg uppercase leading-tight">
-                                  {order.address || 'Rua não informada'}, Nº {order.number || 'S/N'}
-                                  {order.complement && <span className="block text-sm text-blue-600 font-bold mt-1 uppercase italic">Complemento: {order.complement}</span>}
-                                </p>
-                             </div>
-                             <div className="grid grid-cols-2 gap-4">
+                           <div className="bg-white/50 p-6 rounded-3xl border border-blue-100 shadow-sm space-y-4">
+                              <div>
+                                <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1">Rua / Logradouro</p>
+                                <p className="font-black text-gray-800 uppercase text-lg leading-tight">{order.address || 'RUA NÃO INFORMADA'}</p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Bairro</p>
-                                  <p className="font-black text-gray-800 uppercase text-sm">{order.neighborhood || 'Não informado'}</p>
+                                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1">Número</p>
+                                  <p className="font-black text-gray-800 uppercase text-lg leading-tight">{order.number || 'S/N'}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Cidade/UF</p>
-                                  <p className="font-black text-gray-800 uppercase text-sm">{order.location}</p>
+                                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1">Complemento</p>
+                                  <p className="font-black text-gray-800 uppercase text-lg leading-tight">{order.complement || '-'}</p>
                                 </div>
-                             </div>
-                          </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1">Bairro</p>
+                                  <p className="font-black text-gray-800 uppercase text-sm leading-tight">{order.neighborhood || '-'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1">Cidade/UF</p>
+                                  <p className="font-black text-gray-800 uppercase text-sm leading-tight">{order.location}</p>
+                                </div>
+                              </div>
+                           </div>
                         </div>
 
-                        {/* Descrição Completa do Orçamento */}
-                        <div className="pt-2">
-                           <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-3">O que o cliente precisa (Descrição Completa):</p>
-                           <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-inner">
-                              <p className="text-gray-900 font-bold text-lg leading-relaxed whitespace-pre-wrap uppercase">
+                        {/* Descrição Detalhada que o cliente preencheu */}
+                        <div className="flex flex-col">
+                           <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-3">O Que o Cliente Pediu (Descrição Completa):</p>
+                           <div className="flex-grow bg-white p-8 rounded-[2.5rem] border border-blue-100 shadow-inner overflow-auto max-h-[400px]">
+                              <p className="text-gray-900 font-bold text-xl leading-relaxed whitespace-pre-wrap uppercase">
                                 {order.description}
                               </p>
                            </div>
                         </div>
                       </div>
                       
-                      <div className="mt-8 pt-6 border-t border-blue-200 text-center">
-                        <p className="text-xs text-blue-600 font-black uppercase tracking-widest">
-                          * Copie os dados acima para entrar em contato diretamente com o cliente.
+                      <div className="mt-10 pt-6 border-t border-blue-200 text-center">
+                        <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">
+                          * Copie os dados acima para iniciar o atendimento. Nenhum botão de contato direto está disponível para garantir sua gestão.
                         </p>
                       </div>
                     </div>
                   ) : (
-                    /* Prévia da descrição antes do profissional comprar */
-                    <div className="mb-10 p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 relative">
+                    /* Resumo da descrição antes do profissional liberar */
+                    <div className="mb-10 p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 relative group/desc transition-all hover:bg-white hover:border-blue-100">
                       <div className="flex items-center mb-4 text-gray-400">
                         <AlignLeft className="w-4 h-4 mr-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Resumo do Pedido</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">O que o cliente precisa:</span>
                       </div>
                       <p className="text-gray-600 leading-relaxed line-clamp-3 font-medium text-lg italic uppercase">
                         "{order.description}"
                       </p>
-                      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-50 to-transparent"></div>
+                      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-gray-50 to-transparent group-hover/desc:from-white transition-all"></div>
                     </div>
                   )}
 
@@ -208,20 +213,20 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                       <div className="flex items-center bg-amber-50 px-6 py-4 rounded-2xl border-2 border-amber-100 mb-6 md:mb-0 shadow-sm">
                         <Coins className="w-6 h-6 text-amber-600 mr-3" />
                         <div>
-                          <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest leading-none">Custo para Desbloquear</p>
+                          <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest leading-none">Custo para Liberar</p>
                           <p className="text-2xl font-black text-amber-700 leading-none mt-1">{order.leadPrice} <span className="text-xs">Créditos</span></p>
                         </div>
                       </div>
                       <button 
                         onClick={() => buyLead(order)} 
                         disabled={purchasingId === order.id}
-                        className="w-full md:w-auto bg-gray-900 text-white px-12 py-5 rounded-2xl font-black text-lg hover:bg-black flex items-center justify-center transition-all shadow-2xl active:scale-95 disabled:opacity-50"
+                        className="w-full md:w-auto bg-gray-900 text-white px-12 py-5 rounded-2xl font-black text-lg hover:bg-black flex items-center justify-center transition-all shadow-2xl shadow-gray-900/10 active:scale-95 disabled:opacity-50 uppercase tracking-tight"
                       >
                         {purchasingId === order.id ? (
                           <Loader2 className="w-6 h-6 animate-spin" />
                         ) : (
                           <>
-                            LIBERAR DADOS DO CLIENTE
+                            Liberar Dados do Lead
                             <Lock className="ml-4 w-5 h-5" />
                           </>
                         )}

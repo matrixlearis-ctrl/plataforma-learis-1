@@ -71,13 +71,14 @@ const App: React.FC = () => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (data) {
-        setUser({ 
+        const newUser = { 
           id: data.id, 
           name: data.full_name || 'Usuário', 
           email: email || '', 
           role: data.role as UserRole, 
           avatar: data.avatar_url 
-        });
+        };
+        setUser(newUser);
         if (data.role === UserRole.PROFESSIONAL) {
           setProProfile({ 
             userId: data.id, 
@@ -90,12 +91,12 @@ const App: React.FC = () => {
             phone: data.phone || '' 
           });
         }
-        return true;
+        return newUser;
       }
-      return false;
+      return null;
     } catch (e) { 
       console.error("Falha ao carregar perfil:", e); 
-      return false;
+      return null;
     }
   };
 
@@ -120,16 +121,9 @@ const App: React.FC = () => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setProProfile(null);
-        setLoading(false);
-        setIsInitializing(false);
-        return;
-      }
-
-      if (session) {
-        const profileFound = await fetchProfile(session.user.id, session.user.email);
-        if (!profileFound && event === 'SIGNED_IN') {
-           setTimeout(() => fetchProfile(session.user.id, session.user.email), 1000);
-        }
+      } else if (session) {
+        await fetchProfile(session.user.id, session.user.email);
+        await fetchOrders();
       }
     });
     return () => subscription.unsubscribe();
