@@ -36,43 +36,35 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // Passo 2: Busca de Perfil com Retry (Tratando o AbortError)
-        let profile = null;
-        let profileErr = null;
-        let attempts = 0;
+        // Pequena pausa para o Supabase processar a sessão globalmente e evitar AbortError
+        await new Promise(resolve => setTimeout(resolve, 300));
 
-        while (attempts < 2) {
-          const result = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', authData.user.id)
-            .maybeSingle();
-          
-          if (!result.error) {
-            profile = result.data;
-            break;
-          }
-          
-          profileErr = result.error;
-          if (profileErr.message.includes('abort') || profileErr.message.includes('signal')) {
-            console.warn("Requisição abortada, tentando novamente...");
-            await new Promise(resolve => setTimeout(resolve, 500)); // Espera meio segundo
-            attempts++;
-          } else {
-            break;
-          }
-        }
+        // Passo 2: Busca de Perfil
+        const { data: profile, error: profileErr } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .maybeSingle();
         
-        if (profileErr && attempts >= 2) {
+        // Se der AbortError mas tivermos o usuário, apenas redirecionamos. O App.tsx cuidará do resto.
+        if (profileErr) {
+          const isAbort = profileErr.message.includes('abort') || profileErr.message.includes('signal');
+          if (isAbort) {
+            console.log("Requisição abortada pelo navegador, prosseguindo por estado global...");
+            // No caso de abort, não mostramos erro, apenas navegamos para a home e o App.tsx redireciona
+            navigate('/');
+            return;
+          }
+          
           setError({ 
-            message: `Erro de Banco: Verifique se a política 'Public read access' foi criada na tabela profiles. Detalhe: ${profileErr.message}`, 
+            message: `Erro de Banco (RLS): Certifique-se de clicar em 'Save Policy' no Supabase. Detalhe: ${profileErr.message}`, 
             type: 'database' 
           });
           setLoading(false);
           return;
         }
 
-        // AUTO-REPARO: Se o perfil não existe, tenta criar um agora
+        // AUTO-REPARO: Se o perfil não existe
         if (!profile) {
           const { error: repairError } = await supabase
             .from('profiles')
@@ -87,17 +79,17 @@ const Auth: React.FC = () => {
           
           if (repairError) {
             setError({ 
-              message: "Seu usuário existe, mas não conseguimos criar seu perfil. Verifique a política de INSERT (Allow profile registration).", 
+              message: "Perfil não encontrado e erro ao criar automático. Verifique a política 'Allow profile registration' (INSERT).", 
               type: 'profile_missing' 
             });
             setLoading(false);
             return;
           }
-          window.location.reload(); // Recarrega para aplicar o perfil novo
+          window.location.reload();
           return;
         }
         
-        // Redirecionamento bem-sucedido baseado no cargo
+        // Redirecionamento
         if (profile.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
         else if (profile.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
@@ -125,7 +117,7 @@ const Auth: React.FC = () => {
             });
           
           if (profileError) {
-             setError({ message: "Conta criada, mas erro ao salvar perfil: " + profileError.message, type: 'database' });
+             setError({ message: "Conta criada no Auth, mas erro na tabela Profiles: " + profileError.message, type: 'database' });
              return;
           }
           
