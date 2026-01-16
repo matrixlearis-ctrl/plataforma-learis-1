@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProfessionalProfile, OrderRequest, User } from '../types';
 import { CATEGORIES } from '../constants';
-import { MapPin, Clock, Lock, Phone, Mail, Coins, User as UserIcon, AlignLeft, PlusCircle, AlertCircle, Loader2, Info } from 'lucide-react';
+import { MapPin, Clock, Lock, Info, Coins, User as UserIcon, AlignLeft, PlusCircle, Loader2 } from 'lucide-react';
 
 interface ProfessionalLeadsProps {
   user: User;
@@ -133,57 +133,72 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                         <div className="bg-blue-600 text-white p-2 rounded-lg mr-3 shadow-lg">
                            <Info className="w-5 h-5" />
                         </div>
-                        <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">Dados de Contato do Cliente</h4>
+                        <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">Dados Completos do Pedido</h4>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                           <div>
-                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Nome Completo</p>
-                              <p className="font-black text-gray-900 text-lg uppercase">{order.clientName}</p>
-                           </div>
-                           <div>
-                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Telefone / WhatsApp</p>
-                              <p className="font-black text-blue-700 text-2xl">{order.phone}</p>
-                           </div>
+                      <div className="space-y-8">
+                        {/* Seção de Contato */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-blue-200">
+                          <div className="space-y-4">
+                             <div>
+                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Nome do Cliente</p>
+                                <p className="font-black text-gray-900 text-xl uppercase">{order.clientName}</p>
+                             </div>
+                             <div>
+                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Telefone / WhatsApp</p>
+                                <p className="font-black text-blue-700 text-3xl">{order.phone || 'NÃO INFORMADO'}</p>
+                             </div>
+                          </div>
+
+                          <div className="space-y-4">
+                             <div>
+                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Endereço de Execução</p>
+                                <p className="font-black text-gray-900 text-lg uppercase leading-tight">
+                                  {order.address || 'RUA NÃO INFORMADA'}, {order.number || 'S/N'}
+                                  {order.complement && <span className="block text-sm text-blue-600 font-bold mt-1 italic">COMPLEMENTO: {order.complement}</span>}
+                                </p>
+                             </div>
+                             <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Bairro</p>
+                                  <p className="font-black text-gray-800 uppercase text-sm">{order.neighborhood || 'NÃO INFORMADO'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Cidade/UF</p>
+                                  <p className="font-black text-gray-800 uppercase text-sm">{order.location}</p>
+                                </div>
+                             </div>
+                          </div>
                         </div>
 
-                        <div className="space-y-4">
-                           <div>
-                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Endereço Residencial</p>
-                              <p className="font-black text-gray-900 text-lg uppercase leading-tight">
-                                {order.address}, {order.number}
-                                {order.complement && <span className="block text-sm text-blue-600 font-bold mt-1">Complemento: {order.complement}</span>}
+                        {/* Seção de Descrição (Solicitada) */}
+                        <div className="pt-2">
+                           <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-3">O que o cliente precisa (Descrição):</p>
+                           <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-inner">
+                              <p className="text-gray-900 font-bold text-lg leading-relaxed whitespace-pre-wrap uppercase">
+                                {order.description}
                               </p>
-                           </div>
-                           <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Bairro</p>
-                                <p className="font-bold text-gray-700 uppercase text-sm">{order.neighborhood}</p>
-                              </div>
-                              <div>
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Cidade/UF</p>
-                                <p className="font-bold text-gray-700 uppercase text-sm">{order.location}</p>
-                              </div>
                            </div>
                         </div>
                       </div>
                       
-                      <div className="mt-8 pt-6 border-t border-blue-200">
-                        <p className="text-xs text-blue-600 font-bold italic">
-                          * Copie os dados acima para entrar em contato com o cliente via telefone ou e-mail.
+                      <div className="mt-8 pt-6 border-t border-blue-200 text-center">
+                        <p className="text-xs text-blue-600 font-black uppercase tracking-widest">
+                          * Copie os dados acima para iniciar o atendimento.
                         </p>
                       </div>
                     </div>
                   ) : (
+                    /* Prévia da descrição antes de comprar */
                     <div className="mb-10 p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 relative">
                       <div className="flex items-center mb-4 text-gray-400">
                         <AlignLeft className="w-4 h-4 mr-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Detalhes da Necessidade</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Resumo da Necessidade</span>
                       </div>
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap font-medium text-lg">
-                        {order.description}
+                      <p className="text-gray-600 leading-relaxed line-clamp-3 font-medium text-lg italic">
+                        "{order.description}"
                       </p>
+                      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-50 to-transparent"></div>
                     </div>
                   )}
 
@@ -205,7 +220,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                           <Loader2 className="w-6 h-6 animate-spin" />
                         ) : (
                           <>
-                            LIBERAR CONTATO
+                            LIBERAR TODOS OS DADOS
                             <Lock className="ml-4 w-5 h-5" />
                           </>
                         )}
@@ -219,19 +234,20 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
         )}
       </div>
 
+      {/* Carteira Samej */}
       <div className="mt-20 p-12 bg-blue-900 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between shadow-[0_35px_60px_-15px_rgba(30,58,138,0.3)] overflow-hidden relative border-8 border-white">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
-        <div className="mb-8 md:mb-0 relative z-10 max-w-lg">
-          <h3 className="text-3xl font-black mb-4 tracking-tighter">SUA CARTEIRA SAMEJ</h3>
+        <div className="mb-8 md:mb-0 relative z-10 max-w-lg text-center md:text-left">
+          <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase">Sua Carteira Samej</h3>
           <p className="text-blue-200 text-lg font-medium leading-relaxed">
             Mantenha seu saldo positivo para não perder nenhuma oportunidade de negócio que apareça na sua região.
           </p>
         </div>
         <Link 
           to="/profissional/recarregar" 
-          className="bg-amber-500 text-blue-900 px-10 py-6 rounded-[2rem] font-black text-xl hover:bg-amber-400 transition-all shadow-2xl hover:-translate-y-2 active:translate-y-0 relative z-10 border-4 border-amber-300"
+          className="bg-amber-500 text-blue-900 px-10 py-6 rounded-[2rem] font-black text-xl hover:bg-amber-400 transition-all shadow-2xl hover:-translate-y-2 active:translate-y-0 relative z-10 border-4 border-amber-300 uppercase tracking-tight"
         >
-          RECARREGAR CRÉDITOS
+          Recarregar Agora
         </Link>
       </div>
     </div>

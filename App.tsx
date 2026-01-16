@@ -36,11 +36,11 @@ const App: React.FC = () => {
           category: o.category,
           description: o.description, 
           phone: o.phone || '',
-          address: o.address, 
-          number: o.number, 
-          complement: o.complement,
+          address: o.address || '', 
+          number: o.number || '', 
+          complement: o.complement || '',
           location: o.location, 
-          neighborhood: o.neighborhood,
+          neighborhood: o.neighborhood || '',
           deadline: o.deadline, 
           status: o.status as OrderStatus, 
           createdAt: o.created_at,
@@ -48,7 +48,7 @@ const App: React.FC = () => {
           unlockedBy: o.unlocked_by || []
         })));
       }
-    } catch (e) { console.error("Erro orders:", e); }
+    } catch (e) { console.error("Erro ao buscar pedidos:", e); }
   };
 
   const fetchProfessionals = async () => {
@@ -64,7 +64,7 @@ const App: React.FC = () => {
           completedJobs: p.completed_jobs || 0, phone: p.phone || ''
         })));
       }
-    } catch (e) { console.error("Erro professionals:", e); }
+    } catch (e) { console.error("Erro ao buscar profissionais:", e); }
   };
 
   const fetchProfile = async (userId: string, email?: string) => {
@@ -108,7 +108,7 @@ const App: React.FC = () => {
         }
         await Promise.all([fetchOrders(), fetchProfessionals()]);
       } catch (err) { 
-        console.error("Erro initApp:", err);
+        console.error("Erro no carregamento inicial:", err);
       } finally { 
         setLoading(false);
         setIsInitializing(false);
