@@ -78,6 +78,9 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
         clientName: formData.name,
         category: formData.category,
         description: formData.description,
+        address: formData.address,
+        number: formData.number,
+        complement: formData.complement,
         location: formData.location,
         neighborhood: formData.neighborhood,
         deadline: formData.deadline,
@@ -212,13 +215,51 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               </div>
 
               {formData.location && (
-                <div className="bg-blue-50 p-6 rounded-[2rem] border-2 border-blue-300 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center text-blue-900 font-black mb-2 text-sm uppercase tracking-tight">
-                    <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                    Localização Identificada
+                <div className="space-y-6 animate-in fade-in slide-in-from-top-4">
+                  <div>
+                    <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Endereço (Rua/Avenida)</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.address} 
+                      onChange={(e) => setFormData({...formData, address: e.target.value})} 
+                      placeholder="Nome da rua" 
+                      className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white" 
+                    />
                   </div>
-                  <p className="text-blue-900 font-bold">{formData.address}, {formData.neighborhood}</p>
-                  <p className="text-blue-700 text-xs font-black uppercase tracking-widest mt-1">{formData.location}</p>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Número</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={formData.number} 
+                        onChange={(e) => setFormData({...formData, number: e.target.value})} 
+                        placeholder="Nº" 
+                        className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Complemento</label>
+                      <input 
+                        type="text" 
+                        value={formData.complement} 
+                        onChange={(e) => setFormData({...formData, complement: e.target.value})} 
+                        placeholder="Apt / Bloco" 
+                        className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-6 rounded-[2rem] border-2 border-blue-300">
+                    <div className="flex items-center text-blue-900 font-black mb-2 text-sm uppercase tracking-tight">
+                      <MapPin className="w-5 h-5 mr-2 text-blue-600" />
+                      Localização Confirmada
+                    </div>
+                    <p className="text-blue-900 font-bold">{formData.neighborhood}</p>
+                    <p className="text-blue-700 text-xs font-black uppercase tracking-widest mt-1">{formData.location}</p>
+                  </div>
                 </div>
               )}
 

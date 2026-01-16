@@ -115,7 +115,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                       <p className="font-bold text-gray-900 flex items-center"><UserIcon className="w-4 h-4 mr-2 text-gray-400" />{order.clientName}</p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Local</p>
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Cidade</p>
                       <p className="font-bold text-gray-900 flex items-center"><MapPin className="w-4 h-4 mr-2 text-gray-400" />{order.location}</p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
@@ -127,6 +127,17 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                       <p className="font-bold text-gray-900 flex items-center"><Clock className="w-4 h-4 mr-2 text-gray-400" />{getDeadlineLabel(order.deadline)}</p>
                     </div>
                   </div>
+
+                  {unlocked && (
+                    <div className="mb-10 p-6 bg-blue-50 rounded-2xl border-2 border-blue-200">
+                       <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-2">Endereço Completo</p>
+                       <p className="font-black text-blue-900 text-lg">
+                        {order.address}, {order.number}
+                        {order.complement && <span className="text-blue-700 font-bold ml-2">({order.complement})</span>}
+                       </p>
+                       <p className="text-blue-700 font-bold text-sm">{order.neighborhood} - {order.location}</p>
+                    </div>
+                  )}
 
                   <div className="mb-10 p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 relative">
                     <div className="flex items-center mb-4 text-gray-400">

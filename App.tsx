@@ -31,7 +31,8 @@ const App: React.FC = () => {
       if (!error && data) {
         setOrders(data.map(o => ({
           id: o.id, clientId: o.client_id, clientName: o.client_name, category: o.category,
-          description: o.description, location: o.location, neighborhood: o.neighborhood,
+          description: o.description, address: o.address, number: o.number, complement: o.complement,
+          location: o.location, neighborhood: o.neighborhood,
           deadline: o.deadline, status: o.status as OrderStatus, createdAt: o.created_at,
           leadPrice: o.lead_price || 5, unlockedBy: o.unlocked_by || []
         })));
@@ -159,7 +160,20 @@ const App: React.FC = () => {
             <Route path="/" element={<Home user={user} />} />
             <Route path="/auth" element={user ? <Navigate to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} /> : <Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
-              const { error } = await supabase.from('orders').insert([{ client_id: user?.id || null, client_name: o.clientName, category: o.category, description: o.description, location: o.location, neighborhood: o.neighborhood, deadline: o.deadline, status: o.status, lead_price: o.leadPrice }]);
+              const { error } = await supabase.from('orders').insert([{ 
+                client_id: user?.id || null, 
+                client_name: o.clientName, 
+                category: o.category, 
+                description: o.description, 
+                address: o.address,
+                number: o.number,
+                complement: o.complement,
+                location: o.location, 
+                neighborhood: o.neighborhood, 
+                deadline: o.deadline, 
+                status: o.status, 
+                lead_price: o.leadPrice 
+              }]);
               if (!error) await fetchOrders();
             }} />} />
             <Route path="/profissionais" element={<ProfessionalDirectory professionals={professionals} />} />
