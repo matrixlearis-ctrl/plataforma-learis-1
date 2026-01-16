@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -90,25 +89,31 @@ const App: React.FC = () => {
     initApp();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProProfile(null);
+        setLoading(false);
+        setIsInitializing(false);
+        return;
+      }
+
       if (session) {
         const profileFound = await fetchProfile(session.user.id);
         if (!profileFound && event === 'SIGNED_IN') {
-           // Se logou mas o perfil não carregou, tentamos novamente após um curto delay
            setTimeout(() => fetchProfile(session.user.id), 1000);
         }
-      } else {
-        setUser(null);
-        setProProfile(null);
       }
     });
     return () => subscription.unsubscribe();
   }, []);
 
   const handleLogout = async () => {
+    setLoading(true);
     await supabase.auth.signOut();
     setUser(null);
     setProProfile(null);
-    window.location.hash = '/auth';
+    setLoading(false);
+    window.location.hash = '/';
   };
 
   if (loading || isInitializing) {
@@ -124,7 +129,6 @@ const App: React.FC = () => {
   }
 
   const ProtectedRoute = ({ children, role }: { children?: React.ReactNode, role?: UserRole }) => {
-    // Se o user for nulo, mas ainda estivermos em processo de autenticação, não redirecionamos
     if (!user) return <Navigate to="/auth" />;
     if (role && user.role !== role) return <Navigate to="/" />;
     return <>{children}</>;
@@ -137,7 +141,7 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home user={user} />} />
-            <Route path="/auth" element={user ? <Navigate to="/" /> : <Auth />} />
+            <Route path="/auth" element={user ? <Navigate to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} /> : <Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
               const { error } = await supabase.from('orders').insert([{ client_id: user?.id || null, client_name: o.clientName, category: o.category, description: o.description, location: o.location, neighborhood: o.neighborhood, deadline: o.deadline, status: o.status, lead_price: o.leadPrice }]);
               if (!error) await fetchOrders();

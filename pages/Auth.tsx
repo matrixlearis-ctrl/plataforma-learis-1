@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
@@ -36,16 +35,17 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // 2. Tenta buscar o perfil imediatamente
+        // 2. Tenta buscar o perfil imediatamente para saber o cargo
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', authData.user.id)
           .maybeSingle();
 
+        let userRole = profile?.role || authData.user.user_metadata?.role || UserRole.CLIENT;
+
         // 3. Auto-reparo se o perfil sumiu
         if (!profile) {
-          const userRole = authData.user.user_metadata?.role || UserRole.CLIENT;
           await supabase.from('profiles').insert({
             id: authData.user.id,
             full_name: authData.user.user_metadata?.full_name || 'Usuário',
@@ -56,14 +56,18 @@ const Auth: React.FC = () => {
           });
         }
 
-        setSuccessMsg("Acesso garantido! Entrando...");
+        setSuccessMsg("Acesso garantido! Entrando no seu painel...");
         
-        // Pequeno delay para o Supabase propagar a sessão globalmente
+        // Redirecionamento baseado no cargo
         setTimeout(() => {
-          // Em vez de navegar para uma rota específica aqui, 
-          // deixamos o App.tsx detectar o novo 'user' e nos tirar do /auth
-          window.location.hash = '/'; 
-        }, 1500);
+          if (userRole === UserRole.PROFESSIONAL) {
+            window.location.hash = '/profissional/dashboard';
+          } else if (userRole === UserRole.ADMIN) {
+            window.location.hash = '/admin';
+          } else {
+            window.location.hash = '/cliente/dashboard';
+          }
+        }, 1200);
 
       } else {
         // Cadastro
@@ -85,9 +89,9 @@ const Auth: React.FC = () => {
             rating: 5.0
           });
           
-          setSuccessMsg("Conta criada com sucesso!");
+          setSuccessMsg("Conta criada com sucesso! Redirecionando...");
           setTimeout(() => {
-            window.location.hash = '/';
+            window.location.hash = role === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard';
           }, 2000);
         }
       }
@@ -112,7 +116,7 @@ const Auth: React.FC = () => {
       )}
 
       {successMsg && (
-        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-bounce">
+        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-pulse">
           <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <span>{successMsg}</span>
         </div>
