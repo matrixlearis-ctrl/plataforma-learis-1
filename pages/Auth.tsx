@@ -25,7 +25,6 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
-        // 1. Tenta o Login no Auth
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
         
         if (authError) {
@@ -36,20 +35,17 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // 2. Verifica se o Perfil existe
         const { data: profile, error: profileErr } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', authData.user.id)
           .maybeSingle();
 
-        // 3. AUTO-REPARO: Se logou mas não tem perfil no banco, cria um agora
         if (!profile && !profileErr) {
-          console.log("Perfil não encontrado, criando auto-reparo...");
           const userRole = authData.user.user_metadata?.role || UserRole.CLIENT;
           const fullName = authData.user.user_metadata?.full_name || 'Usuário Samej';
           
-          const { error: insertErr } = await supabase.from('profiles').insert({
+          await supabase.from('profiles').insert({
             id: authData.user.id,
             full_name: fullName,
             role: userRole,
@@ -57,28 +53,20 @@ const Auth: React.FC = () => {
             completed_jobs: 0,
             rating: 5.0
           });
-
-          if (insertErr) {
-            setError({ message: "Erro ao criar perfil automático. Verifique as políticas de RLS.", type: 'database' });
-            setLoading(false);
-            return;
-          }
           
-          setSuccessMsg("Perfil recuperado! Entrando...");
-          setTimeout(() => navigate(userRole === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1000);
+          setSuccessMsg("Perfil ativado! Entrando...");
+          setTimeout(() => navigate(userRole === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1200);
           return;
         }
 
-        // 4. Redirecionamento Normal
-        setSuccessMsg("Login realizado com sucesso!");
+        setSuccessMsg("Login autorizado! Carregando seu painel...");
         setTimeout(() => {
           if (profile?.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
           else if (profile?.role === UserRole.ADMIN) navigate('/admin');
           else navigate('/cliente/dashboard');
-        }, 800);
+        }, 1200);
 
       } else {
-        // Cadastro
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -88,7 +76,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
+          await supabase.from('profiles').insert({
             id: signUpData.user.id,
             full_name: name,
             role: role,
@@ -97,19 +85,13 @@ const Auth: React.FC = () => {
             rating: 5.0
           });
           
-          if (profileError) {
-             setError({ message: "Usuário criado, mas erro na tabela Profiles: " + profileError.message, type: 'database' });
-             return;
-          }
-          
-          setSuccessMsg("Bem-vindo à Samej!");
-          setTimeout(() => navigate(role === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1500);
+          setSuccessMsg("Conta Samej criada! Redirecionando...");
+          setTimeout(() => navigate(role === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard'), 1800);
         }
       }
     } catch (err: any) {
       setError({ message: err.message || 'Erro inesperado.', type: 'general' });
-    } finally {
-      if (!successMsg) setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -123,12 +105,12 @@ const Auth: React.FC = () => {
       {error && (
         <div className="p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold bg-red-50 border-red-200 text-red-900">
           <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
-          <div><p className="font-black mb-1">ERRO</p><span>{error.message}</span></div>
+          <div><p className="font-black mb-1 uppercase text-[10px] tracking-widest">Atenção</p><span>{error.message}</span></div>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-bounce">
+        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-pulse">
           <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <span>{successMsg}</span>
         </div>

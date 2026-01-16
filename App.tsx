@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -15,12 +14,14 @@ import ProfessionalDirectory from './pages/ProfessionalDirectory';
 import PublicProfile from './pages/PublicProfile';
 import { User, UserRole, ProfessionalProfile, OrderRequest, OrderStatus } from './types';
 import { supabase } from './lib/supabase';
+import { Loader2 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [proProfile, setProProfile] = useState<ProfessionalProfile | null>(null);
   const [orders, setOrders] = useState<OrderRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
 
   const fetchOrders = async () => {
@@ -54,36 +55,44 @@ const App: React.FC = () => {
   };
 
   const fetchProfile = async (userId: string) => {
+    setIsProfileLoading(true);
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-      if (error) {
-        console.error("Erro ao buscar perfil:", error.message);
-        return;
-      }
       if (data) {
         setUser({ id: data.id, name: data.full_name || 'Usuário', email: '', role: data.role as UserRole, avatar: data.avatar_url });
         if (data.role === UserRole.PROFESSIONAL) {
           setProProfile({ userId: data.id, description: data.description || '', categories: data.categories || [], region: data.region || '', rating: data.rating || 5, credits: data.credits || 0, completedJobs: data.completed_jobs || 0, phone: data.phone || '' });
         }
+      } else {
+        setUser(null);
       }
-    } catch (e) { console.error("Falha ao carregar perfil:", e); }
+    } catch (e) { 
+      console.error("Falha ao carregar perfil:", e); 
+    } finally {
+      setIsProfileLoading(false);
+    }
   };
 
   useEffect(() => {
     const initApp = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session) await fetchProfile(session.user.id);
+        if (session) {
+          await fetchProfile(session.user.id);
+        }
         await Promise.all([fetchOrders(), fetchProfessionals()]);
-      } catch (err) { console.error("Erro initApp:", err);
-      } finally { setLoading(false); }
+      } catch (err) { 
+        console.error("Erro initApp:", err);
+      } finally { 
+        setLoading(false); 
+      }
     };
     initApp();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
+      if (event === 'SIGNED_IN' && session) {
         await fetchProfile(session.user.id);
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setProProfile(null);
       }
@@ -109,6 +118,21 @@ const App: React.FC = () => {
     );
   }
 
+  // Helper para rotas protegidas que espera o perfil carregar
+  // Fix: Made children optional in the prop type to resolve TS errors where JSX children are not recognized as the children prop
+  const ProtectedRoute = ({ children, role }: { children?: React.ReactNode, role?: UserRole }) => {
+    if (isProfileLoading) {
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      );
+    }
+    if (!user) return <Navigate to="/auth" />;
+    if (role && user.role !== role) return <Navigate to="/" />;
+    return <>{children}</>;
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -116,29 +140,60 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home user={user} />} />
-            <Route path="/auth" element={user ? <Navigate to="/" /> : <Auth />} />
+            <Route path="/auth" element={user && !isProfileLoading ? <Navigate to="/" /> : <Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
               const { error } = await supabase.from('orders').insert([{ client_id: user?.id || null, client_name: o.clientName, category: o.category, description: o.description, location: o.location, neighborhood: o.neighborhood, deadline: o.deadline, status: o.status, lead_price: o.leadPrice }]);
               if (!error) await fetchOrders();
             }} />} />
             <Route path="/profissionais" element={<ProfessionalDirectory professionals={professionals} />} />
             <Route path="/perfil/:id" element={<PublicProfile professionals={professionals} />} />
-            <Route path="/cliente/dashboard" element={user?.role === UserRole.CLIENT ? <CustomerDashboard user={user} orders={orders} /> : <Navigate to="/auth" />} />
-            <Route path="/profissional/dashboard" element={user?.role === UserRole.PROFESSIONAL ? <ProfessionalDashboard user={user} profile={proProfile} /> : <Navigate to="/auth" />} />
-            <Route path="/profissional/leads" element={user?.role === UserRole.PROFESSIONAL ? <ProfessionalLeads user={user} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-              const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completedJobs }).eq('id', p.userId);
-              if (!error) setProProfile(p);
-            }} onUpdateOrder={async (o) => {
-              const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);
-              if (!error) await fetchOrders();
-            }} /> : <Navigate to="/auth" />} />
-            <Route path="/profissional/recarregar" element={user?.role === UserRole.PROFESSIONAL ? <RechargeCredits onAddCredits={async (amt) => {
-               const newCredits = (proProfile?.credits || 0) + amt;
-               await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
-               setProProfile(prev => prev ? {...prev, credits: newCredits} : null);
-            }} /> : <Navigate to="/auth" />} />
-            <Route path="/configuracoes" element={user ? <ProfileSettings user={user} profile={proProfile} /> : <Navigate to="/auth" />} />
-            <Route path="/admin" element={user?.role === UserRole.ADMIN ? <AdminDashboard /> : <Navigate to="/" />} />
+            
+            {/* Dashboard Cliente */}
+            <Route path="/cliente/dashboard" element={
+              <ProtectedRoute role={UserRole.CLIENT}>
+                <CustomerDashboard user={user!} orders={orders} />
+              </ProtectedRoute>
+            } />
+
+            {/* Dashboards e Rotas Profissional */}
+            <Route path="/profissional/dashboard" element={
+              <ProtectedRoute role={UserRole.PROFESSIONAL}>
+                <ProfessionalDashboard user={user!} profile={proProfile} />
+              </ProtectedRoute>
+            } />
+            <Route path="/profissional/leads" element={
+              <ProtectedRoute role={UserRole.PROFESSIONAL}>
+                <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
+                  const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completedJobs }).eq('id', p.userId);
+                  if (!error) setProProfile(p);
+                }} onUpdateOrder={async (o) => {
+                  const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);
+                  if (!error) await fetchOrders();
+                }} />
+              </ProtectedRoute>
+            } />
+            <Route path="/profissional/recarregar" element={
+              <ProtectedRoute role={UserRole.PROFESSIONAL}>
+                <RechargeCredits onAddCredits={async (amt) => {
+                   const newCredits = (proProfile?.credits || 0) + amt;
+                   await supabase.from('profiles').update({ credits: newCredits }).eq('id', user!.id);
+                   setProProfile(prev => prev ? {...prev, credits: newCredits} : null);
+                }} />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/configuracoes" element={
+              <ProtectedRoute>
+                <ProfileSettings user={user!} profile={proProfile} />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin" element={
+              <ProtectedRoute role={UserRole.ADMIN}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
