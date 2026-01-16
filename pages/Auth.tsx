@@ -2,15 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UserRole } from '../types';
-import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, KeyRound, Database } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, KeyRound, Database, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
   
   const [role, setRole] = useState<UserRole>(UserRole.CLIENT);
   const [email, setEmail] = useState('');
@@ -36,9 +34,9 @@ const Auth: React.FC = () => {
           return;
         }
         
-        if (!authData.user) throw new Error("Usuário não retornado pelo sistema.");
+        if (!authData.user) throw new Error("Falha na autenticação.");
 
-        // Passo 2: Busca de Perfil (Aqui costuma dar erro de RLS)
+        // Passo 2: Busca de Perfil
         const { data: profile, error: profileErr } = await supabase
           .from('profiles')
           .select('*')
@@ -47,23 +45,42 @@ const Auth: React.FC = () => {
         
         if (profileErr) {
           setError({ 
-            message: `Erro de Banco (RLS): O Supabase bloqueou a leitura do seu perfil. Verifique as 'Policies' da tabela 'profiles'. Detalhe: ${profileErr.message}`, 
+            message: `Erro de Banco (RLS): Verifique as políticas da tabela profiles no Supabase. Detalhe: ${profileErr.message}`, 
             type: 'database' 
           });
           setLoading(false);
           return;
         }
 
+        // AUTO-REPARO: Se o usuário existe no Auth mas não no Profile (erro comum em setups novos)
         if (!profile) {
-          setError({ 
-            message: "Login OK, mas não achamos seu nome na tabela 'profiles'. Verifique se a linha com ID " + authData.user.id + " existe no Editor de Tabelas.", 
-            type: 'profile_missing' 
-          });
-          setLoading(false);
+          console.log("Perfil não encontrado, tentando auto-reparo...");
+          const { error: repairError } = await supabase
+            .from('profiles')
+            .insert({
+              id: authData.user.id,
+              full_name: authData.user.user_metadata?.full_name || 'Usuário Samej',
+              role: authData.user.user_metadata?.role || UserRole.CLIENT,
+              credits: 0,
+              completed_jobs: 0,
+              rating: 5.0
+            });
+          
+          if (repairError) {
+            setError({ 
+              message: "Seu usuário existe, mas não conseguimos criar seu perfil automático. Crie uma política de INSERT para 'authenticated' na tabela profiles.", 
+              type: 'profile_missing' 
+            });
+            setLoading(false);
+            return;
+          }
+          
+          // Se reparou, recarrega a página para entrar
+          window.location.reload();
           return;
         }
         
-        // Redirecionamento
+        // Redirecionamento bem-sucedido
         if (profile.role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
         else if (profile.role === UserRole.ADMIN) navigate('/admin');
         else navigate('/cliente/dashboard');
@@ -91,11 +108,11 @@ const Auth: React.FC = () => {
             });
           
           if (profileError) {
-             setError({ message: "Usuário criado, mas erro ao inserir na tabela profiles: " + profileError.message, type: 'database' });
+             setError({ message: "Usuário criado no Auth, mas erro ao salvar na tabela Profiles: " + profileError.message, type: 'database' });
              return;
           }
           
-          setSuccessMsg("Conta Samej criada! Redirecionando...");
+          setSuccessMsg("Conta Samej criada com sucesso!");
           setTimeout(() => {
             if (role === UserRole.PROFESSIONAL) navigate('/profissional/dashboard');
             else navigate('/cliente/dashboard');
@@ -119,15 +136,18 @@ const Auth: React.FC = () => {
 
       {error && (
         <div className={`p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold ${
-          error.type === 'database' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-900'
+          error.type === 'database' || error.type === 'profile_missing' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-900'
         }`}>
-          {error.type === 'database' ? <Database className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />}
-          <span>{error.message}</span>
+          {error.type === 'database' || error.type === 'profile_missing' ? <RefreshCw className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />}
+          <div>
+            <p className="font-black mb-1">{error.type === 'profile_missing' ? 'REPARO NECESSÁRIO' : 'OPS!'}</p>
+            <span>{error.message}</span>
+          </div>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold">
+        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-bounce">
           <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
           <span>{successMsg}</span>
         </div>
@@ -145,7 +165,7 @@ const Auth: React.FC = () => {
               <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-black text-[10px] ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-400'}`}>CLIENTE</button>
               <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-black text-[10px] ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-400'}`}>PROFISSIONAL</button>
             </div>
-            <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Nome" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600" />
+            <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Seu Nome" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600" />
           </>
         )}
         <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="E-mail" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600" />
