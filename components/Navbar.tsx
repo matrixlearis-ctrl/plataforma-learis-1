@@ -18,25 +18,26 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
-        <Link to="/" onClick={closeMenu} className="flex items-center space-x-3">
-          {/* Logo Image Placeholder - Points to images/logo.png */}
-          <div className="flex items-center">
+        <Link to="/" onClick={closeMenu} className="flex items-center space-x-3 h-full">
+          {/* Logo Principal do Usuário */}
+          <div className="flex items-center py-2 h-full">
             <img 
               src="/images/logo.png" 
               alt="Samej Logo" 
-              className="h-12 w-auto object-contain"
+              className="h-full w-auto max-h-[60px] object-contain"
               onError={(e) => {
-                // Fallback caso a imagem ainda não exista
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                // Fallback elegante caso a imagem não seja encontrada
+                e.currentTarget.parentElement?.classList.add('hidden');
+                e.currentTarget.parentElement?.nextElementSibling?.classList.remove('hidden');
               }}
             />
-            <div className="hidden flex items-center space-x-3">
-              <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-black text-2xl">S</span>
-              </div>
-              <span className="text-2xl font-black text-black tracking-tight">Samej</span>
+          </div>
+          {/* Logo Alternativa (Caso a imagem falhe) */}
+          <div className="hidden flex items-center space-x-3">
+            <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-white font-black text-2xl">S</span>
             </div>
+            <span className="text-2xl font-black text-black tracking-tight">Samej</span>
           </div>
         </Link>
 

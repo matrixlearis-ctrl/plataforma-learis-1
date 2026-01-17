@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
               <img 
                 src="/images/logo.png" 
                 alt="Samej Logo" 
-                className="h-10 w-auto object-contain brightness-0 invert" 
+                className="h-14 w-auto object-contain brightness-0 invert" 
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');

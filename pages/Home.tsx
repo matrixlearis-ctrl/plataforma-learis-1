@@ -21,6 +21,27 @@ const Home: React.FC<HomeProps> = ({ user }) => {
     }
   };
 
+  const testimonials = [
+    { 
+      name: "Clayton Amaral", 
+      role: "Cliente - São Paulo, SP", 
+      text: "Consegui 3 orçamentos para pintar minha casa em 2 horas. Atendimento excelente!", 
+      img: "/images/clayton.jpg" 
+    },
+    { 
+      name: "José Reis", 
+      role: "Pedreiro - Rio de Janeiro, RJ", 
+      text: "A Samej transformou meu negócio. Hoje recebo pedidos todos os dias e consigo organizar minha agenda com facilidade.", 
+      img: "/images/jose.jpg" 
+    },
+    { 
+      name: "Clara Almeida", 
+      role: "Cliente - Belo Horizonte, MG", 
+      text: "Fácil de usar e os profissionais são muito atenciosos. Recomendo a todos que buscam segurança e qualidade.", 
+      img: "/images/clara.jpg" 
+    }
+  ];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -33,10 +54,10 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight max-w-4xl mx-auto">
-            Conectamos você com os <span className="text-brand-orange">melhores</span> profissionais
+            Resolva seus projetos com os <span className="text-brand-orange">melhores</span> profissionais
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/80 mb-12 max-w-2xl mx-auto font-medium">
-            construção, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
+            Obras, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
           </p>
           
           <form 
@@ -69,7 +90,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* Categories Grid - Elevated Style */}
+      {/* Categories Grid */}
       <section className="max-w-7xl mx-auto -mt-16 py-20 px-4 w-full relative z-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {CATEGORIES.slice(0, 8).map((cat) => (
@@ -79,7 +100,6 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:border-brand-blue/20 hover:-translate-y-2 transition-all flex flex-col items-center text-center group"
             >
               <div className="w-20 h-20 bg-brand-bg text-brand-blue rounded-3xl flex items-center justify-center mb-6 group-hover:bg-brand-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                {/* Fix: TypeScript error by casting to ReactElement<any> */}
                 {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-8 h-8" })}
               </div>
               <span className="font-extrabold text-gray-800 text-lg group-hover:text-brand-blue transition-colors leading-tight">{cat.name}</span>
@@ -89,13 +109,12 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* "Como Funciona?" Section - Baseada no Print */}
+      {/* Como Funciona */}
       <section className="bg-white py-24 px-4 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl font-black text-brand-darkBlue mb-20 tracking-tight">Como Funciona?</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
-            {/* Passo 1 */}
             <div className="flex flex-col items-center group">
               <div className="relative mb-10">
                 <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">1</div>
@@ -104,12 +123,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-brand-darkBlue mb-4">Descreva seu projeto</h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
-                Conte-nos o que você precisa. Quanto mais detalhes, melhor será o orçamento que você receberá.
-              </p>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">Conte-nos o que você precisa. Quanto mais detalhes, melhor.</p>
             </div>
 
-            {/* Passo 2 */}
             <div className="flex flex-col items-center group">
               <div className="relative mb-10">
                 <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">2</div>
@@ -118,12 +134,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-brand-darkBlue mb-4">Encontramos profissionais</h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
-                Nossa plataforma conecta você automaticamente com profissionais qualificados da sua região.
-              </p>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">Conectamos você automaticamente com especialistas da sua região.</p>
             </div>
 
-            {/* Passo 3 */}
             <div className="flex flex-col items-center group">
               <div className="relative mb-10">
                 <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">3</div>
@@ -132,12 +145,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-brand-darkBlue mb-4">Receba orçamentos</h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
-                Receba até 4 orçamentos gratuitos por email e WhatsApp em até 24 horas.
-              </p>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">Receba até 4 orçamentos gratuitos via e-mail e WhatsApp.</p>
             </div>
 
-            {/* Passo 4 */}
             <div className="flex flex-col items-center group">
               <div className="relative mb-10">
                 <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">4</div>
@@ -146,110 +156,67 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-brand-darkBlue mb-4">Escolha e contrate</h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
-                Compare preços, avalie perfis e escolha o profissional ideal. Negocie diretamente com ele!
-              </p>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">Compare perfis, avalie e negocie diretamente com o ideal.</p>
             </div>
           </div>
 
-          {/* Yellow Banner Section - Baseada no Print */}
           <div className="bg-[#fff161] rounded-[2rem] md:rounded-[3rem] p-10 md:p-16 text-left relative overflow-hidden">
             <div className="max-w-4xl">
               <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-6">Seja um Profissional Samej</h2>
-              <p className="text-lg md:text-xl text-brand-darkBlue/80 font-bold mb-10 leading-relaxed">
-                Cadastre-se gratuitamente e conecte-se com milhares de clientes em busca dos seus serviços. Aumente sua renda e faça seu negócio crescer!
-              </p>
-              
+              <p className="text-lg md:text-xl text-brand-darkBlue/80 font-bold mb-10 leading-relaxed">Cadastre-se gratuitamente e conecte-se com milhares de clientes. Aumente sua renda!</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-                <div className="flex items-center">
-                  <Users className="w-5 h-5 text-blue-600 mr-4" />
-                  <span className="font-bold text-brand-darkBlue">Acesso a milhares de clientes</span>
-                </div>
-                <div className="flex items-center">
-                  <Coins className="w-5 h-5 text-blue-600 mr-4" />
-                  <span className="font-bold text-brand-darkBlue">Sistema de moedas flexível</span>
-                </div>
-                <div className="flex items-center">
-                  <Star className="w-5 h-5 text-blue-600 mr-4" />
-                  <span className="font-bold text-brand-darkBlue">Sistema de avaliações</span>
-                </div>
-                <div className="flex items-center">
-                  <Smartphone className="w-5 h-5 text-blue-600 mr-4" />
-                  <span className="font-bold text-brand-darkBlue">Acesse de qualquer lugar</span>
-                </div>
+                <div className="flex items-center"><Users className="w-5 h-5 text-blue-600 mr-4" /><span className="font-bold">Milhares de clientes</span></div>
+                <div className="flex items-center"><Coins className="w-5 h-5 text-blue-600 mr-4" /><span className="font-bold">Sistema de moedas flexível</span></div>
+                <div className="flex items-center"><Star className="w-5 h-5 text-blue-600 mr-4" /><span className="font-bold">Avaliações reais</span></div>
+                <div className="flex items-center"><Smartphone className="w-5 h-5 text-blue-600 mr-4" /><span className="font-bold">App para profissionais</span></div>
               </div>
-
-              <Link to="/auth" className="inline-flex items-center bg-transparent border-none text-brand-darkBlue font-black text-lg hover:underline transition-all">
-                <UserPlus className="mr-3 w-6 h-6" />
-                Cadastrar-se Grátis
-              </Link>
+              <Link to="/auth" className="inline-flex items-center bg-transparent border-none text-brand-darkBlue font-black text-lg hover:underline"><UserPlus className="mr-3 w-6 h-6" />Cadastrar-se Grátis</Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust Section */}
+      {/* Testimonials - REPLICANDO FIELMENTE O PRINT */}
       <section className="bg-brand-bg py-24 px-4 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
-           <h2 className="text-3xl font-black text-brand-darkBlue mb-16 uppercase tracking-tight">O que dizem sobre nós</h2>
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                { name: "Carlos Silva", role: "Cliente", text: "Consegui 3 orçamentos para pintar minha casa em 2 horas. Atendimento excelente!", stars: 5 },
-                { name: "Maria Oliveira", role: "Cliente", text: "Fácil de usar e os profissionais são muito atenciosos. Recomendo a todos.", stars: 5 },
-                { name: "Ricardo Santos", role: "Profissional", text: "A Samej transformou meu negócio. Hoje recebo pedidos todos os dias.", stars: 5 }
-              ].map((item, idx) => (
-                <div key={idx} className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-white">
-                   <div className="flex justify-center mb-6 text-brand-orange">
-                      {[...Array(item.stars)].map((_, i) => <Star key={i} className="w-5 h-5 fill-current" />)}
-                   </div>
-                   <p className="text-gray-600 font-medium italic mb-8 text-lg leading-relaxed">"{item.text}"</p>
-                   <div className="flex items-center justify-center gap-3">
-                      <div className="w-10 h-10 bg-brand-blue rounded-full"></div>
-                      <div className="text-left">
-                         <p className="font-black text-gray-900 text-sm leading-none">{item.name}</p>
-                         <p className="text-brand-blue text-[10px] font-black uppercase mt-1 tracking-widest">{item.role}</p>
-                      </div>
-                   </div>
+          <h2 className="text-3xl font-black text-brand-darkBlue mb-16 uppercase tracking-tight">O que dizem sobre nós</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((item, idx) => (
+              <div key={idx} className="bg-white p-8 rounded-[1.5rem] shadow-sm border border-gray-100 flex flex-col items-start text-left">
+                <div className="flex items-center mb-6 w-full">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0 mr-4">
+                    <img src={item.img} alt={item.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/150'; }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <h4 className="font-extrabold text-gray-900 text-lg leading-tight">{item.name}</h4>
+                    <p className="text-gray-400 font-semibold text-sm">{item.role}</p>
+                    <div className="flex mt-1 text-amber-400">
+                      {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                    </div>
+                  </div>
                 </div>
-              ))}
-           </div>
+                <p className="text-gray-600 font-medium italic text-base leading-relaxed">"{item.text}"</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Professional CTA - Bold habitissimo blue/orange */}
+      {/* Final CTA */}
       {!user && (
         <section className="py-24 px-4">
-          <div className="max-w-7xl mx-auto bg-brand-darkBlue rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center shadow-3xl overflow-hidden relative border-8 border-white/5">
+          <div className="max-w-7xl mx-auto bg-brand-darkBlue rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center shadow-3xl relative border-8 border-white/5 overflow-hidden">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/10 rounded-full -mr-32 -mt-32 blur-[100px]"></div>
             <div className="md:w-3/5 mb-16 md:mb-0 md:pr-16 relative z-10">
-              <h2 className="text-5xl md:text-6xl font-black mb-10 leading-[1.1]">Você é um <span className="text-brand-orange">profissional</span>?</h2>
-              <p className="text-xl text-blue-100/90 mb-12 leading-relaxed font-medium">
-                Encontre novos clientes diariamente na sua região. Sem mensalidades, você paga apenas pelos contatos que desejar atender.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
-                <div className="flex items-center group">
-                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mr-5 group-hover:bg-brand-orange transition-colors">
-                    <Zap className="w-6 h-6 text-brand-orange group-hover:text-white" />
-                  </div>
-                  <span className="text-lg font-bold">Leads em Tempo Real</span>
-                </div>
-                <div className="flex items-center group">
-                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mr-5 group-hover:bg-brand-orange transition-colors">
-                    <CheckCircle className="w-6 h-6 text-brand-orange group-hover:text-white" />
-                  </div>
-                  <span className="text-lg font-bold">Sem Taxas de Serviço</span>
-                </div>
-              </div>
-              <Link to="/auth" className="inline-flex items-center bg-brand-orange text-white px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange transition-all shadow-2xl hover:-translate-y-1 active:translate-y-0">
+              <h2 className="text-5xl md:text-6xl font-black mb-10">Você é um <span className="text-brand-orange">profissional</span>?</h2>
+              <p className="text-xl text-blue-100/90 mb-12">Encontre novos clientes diariamente. Pague apenas pelos contatos que desejar atender.</p>
+              <Link to="/auth" className="inline-flex items-center bg-brand-orange text-white px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange transition-all shadow-2xl">
                 CADASTRAR MINHA EMPRESA
                 <ArrowRight className="ml-3 w-6 h-6" />
               </Link>
             </div>
             <div className="md:w-2/5 relative z-10">
-              <div className="relative">
-                <div className="absolute -inset-4 bg-brand-orange/20 rounded-[3rem] rotate-3 blur-2xl"></div>
-                <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop" alt="Profissional Ativo" className="rounded-[3rem] shadow-2xl relative z-10 border-4 border-white/10" />
-              </div>
+              <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop" alt="Profissional Ativo" className="rounded-[3rem] shadow-2xl border-4 border-white/10" />
             </div>
           </div>
         </section>
