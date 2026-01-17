@@ -93,7 +93,7 @@ const Footer: React.FC = () => {
 
         <div className="pt-10 border-t border-white/10 text-center">
           <p className="text-gray-500 text-sm font-bold tracking-tight">
-            © 2025 Samej - Todos os direitos reservados
+            © 2026 Samej - Todos os direitos reservados
           </p>
         </div>
       </div>

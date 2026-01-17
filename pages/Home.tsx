@@ -45,7 +45,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="bg-brand-darkBlue text-white pt-24 pb-32 px-4 overflow-hidden relative">
+      <section className="bg-brand-darkBlue text-white pt-24 pb-20 px-4 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-orange/10 rounded-full -mr-64 -mt-64 blur-[120px]"></div>
         <div className="max-w-6xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
@@ -90,27 +90,44 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* Categories Grid */}
-      <section className="max-w-7xl mx-auto -mt-16 py-20 px-4 w-full relative z-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {CATEGORIES.slice(0, 8).map((cat) => (
-            <Link 
-              key={cat.id} 
-              to={`/pedir-orcamento?category=${cat.id}`}
-              className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:border-brand-blue/20 hover:-translate-y-2 transition-all flex flex-col items-center text-center group"
-            >
-              <div className="w-20 h-20 bg-brand-bg text-brand-blue rounded-3xl flex items-center justify-center mb-6 group-hover:bg-brand-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-8 h-8" })}
-              </div>
-              <span className="font-extrabold text-gray-800 text-lg group-hover:text-brand-blue transition-colors leading-tight">{cat.name}</span>
-              <span className="text-brand-orange text-xs font-black uppercase mt-4 opacity-0 group-hover:opacity-100 transition-all tracking-widest">Pedir Agora</span>
-            </Link>
-          ))}
+      {/* Categories Grid - AJUSTADO PARA DESCER MAIS E SEGUIR O PRINT */}
+      <section className="bg-white pt-24 pb-20 px-4 w-full relative z-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl md:text-5xl font-black text-brand-darkBlue tracking-tighter">
+              Encontre o Profissional Que Você Precisa.
+            </h2>
+            <p className="text-2xl md:text-4xl font-black text-brand-orange uppercase tracking-tight animate-pulse">
+              Peça seu orçamento grátis agora!
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {CATEGORIES.slice(0, 8).map((cat) => (
+              <Link 
+                key={cat.id} 
+                to={`/pedir-orcamento?category=${cat.id}`}
+                className="bg-white p-8 md:p-14 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-blue-900/5 hover:shadow-2xl transition-all flex flex-col items-center text-center group relative overflow-hidden active:scale-95 border-b-8 border-b-transparent hover:border-b-brand-blue/10"
+              >
+                <div className="w-24 h-24 bg-brand-bg text-brand-blue rounded-[2rem] flex items-center justify-center mb-8 group-hover:bg-brand-blue group-hover:text-white transition-all duration-300 shadow-inner">
+                  {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-10 h-10" })}
+                </div>
+                <span className="font-extrabold text-gray-800 text-xl group-hover:text-brand-blue transition-colors leading-tight mb-4 min-h-[3.5rem] flex items-center">
+                  {cat.name}
+                </span>
+                <div className="h-6">
+                  <span className="text-brand-orange text-xs font-black uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    Pedir Agora
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Como Funciona */}
-      <section className="bg-white py-24 px-4 overflow-hidden">
+      <section className="bg-white py-24 px-4 overflow-hidden border-t border-gray-50">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl font-black text-brand-darkBlue mb-20 tracking-tight">Como Funciona?</h2>
           
@@ -176,15 +193,15 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* Testimonials - REPLICANDO FIELMENTE O PRINT */}
+      {/* Testimonials */}
       <section className="bg-brand-bg py-24 px-4 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-black text-brand-darkBlue mb-16 uppercase tracking-tight">O que dizem sobre nós</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((item, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-[1.5rem] shadow-sm border border-gray-100 flex flex-col items-start text-left">
+              <div key={idx} className="bg-white p-8 rounded-[1.5rem] shadow-sm border border-gray-100 flex flex-col items-start text-left transition-all hover:shadow-lg">
                 <div className="flex items-center mb-6 w-full">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0 mr-4">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0 mr-4 shadow-sm">
                     <img src={item.img} alt={item.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/150'; }} />
                   </div>
                   <div className="flex flex-col">
@@ -208,9 +225,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           <div className="max-w-7xl mx-auto bg-brand-darkBlue rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center shadow-3xl relative border-8 border-white/5 overflow-hidden">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/10 rounded-full -mr-32 -mt-32 blur-[100px]"></div>
             <div className="md:w-3/5 mb-16 md:mb-0 md:pr-16 relative z-10">
-              <h2 className="text-5xl md:text-6xl font-black mb-10">Você é um <span className="text-brand-orange">profissional</span>?</h2>
+              <h2 className="text-5xl md:text-6xl font-black mb-10 leading-tight">Você é um <span className="text-brand-orange">profissional</span>?</h2>
               <p className="text-xl text-blue-100/90 mb-12">Encontre novos clientes diariamente. Pague apenas pelos contatos que desejar atender.</p>
-              <Link to="/auth" className="inline-flex items-center bg-brand-orange text-white px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange transition-all shadow-2xl">
+              <Link to="/auth" className="inline-flex items-center bg-brand-orange text-white px-12 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange transition-all shadow-2xl active:scale-95">
                 CADASTRAR MINHA EMPRESA
                 <ArrowRight className="ml-3 w-6 h-6" />
               </Link>
