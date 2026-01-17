@@ -57,7 +57,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
             Resolva seus projetos com os <span className="text-brand-orange">melhores</span> profissionais
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/80 mb-12 max-w-2xl mx-auto font-medium">
-            Obras, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
+            Construção, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
           </p>
           
           <form 
