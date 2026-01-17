@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProfessionalProfile, OrderRequest, User } from '../types';
@@ -48,10 +47,10 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
 
   const getDeadlineLabel = (deadline: string) => {
     switch (deadline) {
-      case 'imediato': return 'Urgente / O quanto antes';
-      case '15_dias': return 'Próximas 2 semanas';
-      case 'um_mes': return 'Próximo mês';
-      case 'mais_3_meses': return 'Apenas planejando';
+      case 'imediato': return 'O quanto antes';
+      case 'um_mes': return 'No próximo mês';
+      case 'mais_3_meses': return 'Mais de 3 meses';
+      case 'orcamento': return 'Apenas orçamento';
       default: return deadline || 'Não especificado';
     }
   };

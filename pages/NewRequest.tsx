@@ -123,7 +123,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
           <CheckCircle2 className="w-14 h-14" />
         </div>
         <h2 className="text-4xl font-black text-brand-darkBlue mb-6 tracking-tight">PEDIDO ENVIADO COM SUCESSO!</h2>
-        <p className="text-gray-500 mb-12 text-xl font-medium leading-relaxed max-w-md mx-auto">
+        <p className="text-gray-600 mb-12 text-xl font-medium leading-relaxed max-w-md mx-auto">
           Excelente! Sua solicitação agora será enviada para profissionais verificados. Você receberá até 4 contatos.
         </p>
         <button 
@@ -141,10 +141,10 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
   return (
     <div className="max-w-4xl mx-auto my-12 px-4">
       <div className="mb-8 flex items-center justify-between">
-        <button onClick={handleBack} className="flex items-center text-gray-400 hover:text-brand-blue font-bold transition-colors">
+        <button onClick={handleBack} className="flex items-center text-gray-700 hover:text-brand-blue font-bold transition-colors">
           <ArrowLeft className="w-5 h-5 mr-2" /> Voltar
         </button>
-        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Passo {step} de {totalSteps}</span>
+        <span className="text-xs font-black text-gray-600 uppercase tracking-widest">Passo {step} de {totalSteps}</span>
       </div>
 
       <div className="h-2 w-full bg-gray-100 rounded-full mb-12 overflow-hidden shadow-inner">
@@ -183,10 +183,10 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                       : 'border-transparent bg-brand-bg hover:bg-white hover:border-brand-blue/30'
                     }`}
                   >
-                    <div className={`mr-6 p-4 rounded-2xl transition-all ${formData.category === cat.id ? 'bg-brand-blue text-white shadow-lg' : 'bg-white text-gray-400 group-hover:text-brand-blue'}`}>
+                    <div className={`mr-6 p-4 rounded-2xl transition-all ${formData.category === cat.id ? 'bg-brand-blue text-white shadow-lg' : 'bg-white text-gray-600 group-hover:text-brand-blue'}`}>
                       {React.cloneElement(cat.icon as React.ReactElement, { className: "w-6 h-6" })}
                     </div>
-                    <span className={`text-xl font-black transition-colors ${formData.category === cat.id ? 'text-brand-darkBlue' : 'text-gray-600'}`}>
+                    <span className={`text-xl font-black transition-colors ${formData.category === cat.id ? 'text-brand-darkBlue' : 'text-gray-800'}`}>
                       {cat.name}
                     </span>
                   </button>
@@ -203,7 +203,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <div className="space-y-8">
                 {/* CEP Input */}
                 <div className="max-w-md">
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4 ml-2">Qual seu CEP?</label>
+                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-4 ml-2">Qual seu CEP?</label>
                   <div className="relative group">
                     <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 text-brand-orange transition-transform group-focus-within:scale-110" />
                     <input 
@@ -214,7 +214,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                       value={formData.cep} 
                       onChange={(e) => setFormData({...formData, cep: e.target.value})} 
                       placeholder="00000-000" 
-                      className="w-full pl-20 pr-8 py-8 border-4 border-gray-50 bg-brand-bg rounded-[2.5rem] outline-none text-2xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
+                      className="w-full pl-20 pr-8 py-8 border-4 border-gray-100 bg-brand-bg rounded-[2.5rem] outline-none text-2xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
                     />
                     {loadingCep && <div className="absolute right-8 top-1/2 -translate-y-1/2"><Loader2 className="w-8 h-8 text-brand-blue animate-spin" /></div>}
                   </div>
@@ -236,36 +236,36 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
                     <div className="space-y-8">
                       <div className="space-y-4">
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Rua / Logradouro</label>
+                        <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Rua / Logradouro</label>
                         <input 
                           type="text" 
                           required 
                           value={formData.address} 
                           onChange={(e) => setFormData({...formData, address: e.target.value})} 
                           placeholder="Ex: Rua das Flores" 
-                          className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white" 
+                          className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white" 
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-4">
-                          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Número</label>
+                          <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Número</label>
                           <input 
                             type="text" 
                             required 
                             value={formData.number} 
                             onChange={(e) => setFormData({...formData, number: e.target.value})} 
                             placeholder="Ex: 123" 
-                            className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white" 
+                            className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white" 
                           />
                         </div>
                         <div className="space-y-4">
-                          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Complemento</label>
+                          <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Complemento</label>
                           <input 
                             type="text" 
                             value={formData.complement} 
                             onChange={(e) => setFormData({...formData, complement: e.target.value})} 
                             placeholder="Ex: Bloco B, Ap 12" 
-                            className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white" 
+                            className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white" 
                           />
                         </div>
                       </div>
@@ -281,19 +281,19 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
               <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Conte-nos os detalhes do seu projeto</h2>
               <div className="space-y-6">
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4 ml-2">O que exatamente você precisa?</label>
+                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-4 ml-2">O que exatamente você precisa?</label>
                 <textarea 
                   required
                   rows={6}
                   autoFocus
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full p-8 border-4 border-gray-50 bg-brand-bg rounded-[3rem] outline-none text-xl font-bold text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white resize-none shadow-sm"
+                  className="w-full p-8 border-4 border-gray-100 bg-brand-bg rounded-[3rem] outline-none text-xl font-bold text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white resize-none shadow-sm"
                   placeholder="Ex: Preciso pintar uma sala de 20m² e dois quartos com tinta lavável branca..."
                 />
                 <div className="flex items-start gap-4 p-6 bg-blue-50 rounded-3xl border border-blue-100">
                    <Info className="w-6 h-6 text-brand-blue mt-1 flex-shrink-0" />
-                   <p className="text-sm text-brand-blue/80 font-medium leading-relaxed">Quanto mais detalhes você der, mais precisos serão os orçamentos que você vai receber.</p>
+                   <p className="text-sm text-brand-blue font-semibold leading-relaxed">Quanto mais detalhes você der, mais precisos serão os orçamentos que você vai receber.</p>
                 </div>
               </div>
             </div>
@@ -306,9 +306,9 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   { id: 'imediato', label: 'O quanto antes', sub: 'Estou com pressa' },
-                  { id: '15_dias', label: 'Próximas 2 semanas', sub: 'Tenho flexibilidade' },
                   { id: 'um_mes', label: 'No próximo mês', sub: 'Estou planejando' },
-                  { id: 'mais_3_meses', label: 'Apenas orçamento', sub: 'Mais de 3 meses' }
+                  { id: 'mais_3_meses', label: 'Mais de 3 meses', sub: 'Longo prazo' },
+                  { id: 'orcamento', label: 'Apenas orçamento', sub: 'Pesquisa de preços' }
                 ].map(item => (
                   <button
                     key={item.id}
@@ -323,9 +323,9 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                       : 'border-transparent bg-brand-bg hover:bg-white hover:border-brand-orange/30 shadow-sm'
                     }`}
                   >
-                    <Calendar className={`w-8 h-8 mb-4 ${formData.deadline === item.id ? 'text-brand-orange' : 'text-gray-400'}`} />
-                    <span className={`text-xl font-black ${formData.deadline === item.id ? 'text-brand-darkBlue' : 'text-gray-700'}`}>{item.label}</span>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">{item.sub}</span>
+                    <Calendar className={`w-8 h-8 mb-4 ${formData.deadline === item.id ? 'text-brand-orange' : 'text-gray-600'}`} />
+                    <span className={`text-xl font-black ${formData.deadline === item.id ? 'text-brand-darkBlue' : 'text-gray-900'}`}>{item.label}</span>
+                    <span className={`text-xs font-bold uppercase tracking-widest mt-2 ${formData.deadline === item.id ? 'text-brand-orange/80' : 'text-gray-600'}`}>{item.sub}</span>
                   </button>
                 ))}
               </div>
@@ -338,7 +338,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Como podemos te contatar?</h2>
               <div className="space-y-8 max-w-lg">
                 <div className="space-y-4">
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Qual seu nome?</label>
+                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Qual seu nome?</label>
                   <input 
                     type="text" 
                     required 
@@ -346,11 +346,11 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                     value={formData.name} 
                     onChange={(e) => setFormData({...formData, name: e.target.value})} 
                     placeholder="Seu nome completo" 
-                    className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
+                    className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
                   />
                 </div>
                 <div className="space-y-4">
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">WhatsApp / Telefone</label>
+                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">WhatsApp / Telefone</label>
                   <div className="relative">
                     <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-brand-blue" />
                     <input 
@@ -359,7 +359,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                       value={formData.phone} 
                       onChange={(e) => setFormData({...formData, phone: e.target.value})} 
                       placeholder="(00) 00000-0000" 
-                      className="w-full pl-16 pr-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
+                      className="w-full pl-16 pr-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
                     />
                   </div>
                 </div>
@@ -367,7 +367,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             </div>
           )}
 
-          <div className="pt-12 border-t-4 border-gray-50 flex flex-col md:flex-row items-center gap-6">
+          <div className="pt-12 border-t-4 border-gray-100 flex flex-col md:flex-row items-center gap-6">
             <button 
               type="submit" 
               disabled={isSubmitting}
@@ -382,7 +382,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                 </>
               )}
             </button>
-            <p className="text-gray-400 font-bold text-sm text-center md:text-right">
+            <p className="text-gray-600 font-bold text-sm text-center md:text-right">
               {step === totalSteps ? 'Quase lá! Só mais um clique.' : 'Você pode voltar e alterar a qualquer momento.'}
             </p>
           </div>
