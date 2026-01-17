@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -142,11 +143,11 @@ const App: React.FC = () => {
 
   if (loading || isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1e3a8a]">
+      <div className="min-h-screen flex items-center justify-center bg-brand-darkBlue">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <h1 className="text-white text-2xl font-black uppercase tracking-tighter">Samej</h1>
-          <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mt-2 animate-pulse">Iniciando Sistema...</p>
+          <div className="w-16 h-16 border-8 border-white/10 border-t-brand-orange rounded-full animate-spin mx-auto mb-6 shadow-2xl"></div>
+          <h1 className="text-white text-3xl font-black uppercase tracking-tighter">Samej</h1>
+          <p className="text-brand-orange text-xs font-black uppercase tracking-[0.5em] mt-2 animate-pulse">Carregando Ecossistema</p>
         </div>
       </div>
     );
@@ -204,8 +205,10 @@ const App: React.FC = () => {
             <Route path="/profissional/leads" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-                  // Fix: Property 'completed_jobs' does not exist on type 'ProfessionalProfile'. Using completedJobs.
-                  const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completedJobs }).eq('id', p.userId);
+                  const { error } = await supabase.from('profiles').update({ 
+                    credits: p.credits, 
+                    completed_jobs: p.completedJobs 
+                  }).eq('id', p.userId);
                   if (!error) setProProfile(p);
                 }} onUpdateOrder={async (o) => {
                   const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);
