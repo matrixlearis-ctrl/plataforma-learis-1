@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, OrderStatus, OrderRequest } from '../types';
-import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle, ArrowLeft, MessageSquare, Calendar, Phone, Info, Home } from 'lucide-react';
 
 interface NewRequestProps {
   user: User | null;
@@ -14,6 +13,8 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const totalSteps = 5;
+  
   const [loadingCep, setLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,16 +61,31 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     fetchAddress();
   }, [formData.cep]);
 
+  const handleNext = () => {
+    if (step === 1 && !formData.category) return;
+    if (step === 2 && (!formData.location || !formData.address || !formData.number)) return;
+    if (step === 3 && !formData.description) return;
+    if (step === 4 && !formData.deadline) return;
+    if (step === 5 && (!formData.name || !formData.phone)) return;
+    
+    if (step < totalSteps) {
+      setStep(step + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) setStep(step - 1);
+    else navigate(-1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (step < 2) {
-      if (!formData.category) return;
-      setStep(step + 1);
+    if (step < totalSteps) {
+      handleNext();
       return;
     }
-    
+
+    setError(null);
     setIsSubmitting(true);
     try {
       const newOrder: OrderRequest = {
@@ -94,7 +110,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
       await onAddOrder(newOrder);
       setSubmitted(true);
     } catch (err: any) {
-      setError("Não foi possível enviar seu pedido. Verifique as permissões do banco de dados.");
+      setError("Não foi possível enviar seu pedido. Verifique os dados.");
     } finally {
       setIsSubmitting(false);
     }
@@ -102,17 +118,17 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto my-20 p-12 bg-white rounded-[2.5rem] text-center border shadow-2xl animate-in zoom-in-95">
-        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-          <CheckCircle2 className="w-12 h-12" />
+      <div className="max-w-2xl mx-auto my-20 p-16 bg-white rounded-[4rem] text-center border-4 border-white shadow-3xl animate-in zoom-in-95">
+        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
+          <CheckCircle2 className="w-14 h-14" />
         </div>
-        <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">PEDIDO ENVIADO!</h2>
-        <p className="text-gray-700 mb-8 text-lg font-medium leading-relaxed">
-          Sua solicitação já está disponível para os profissionais qualificados da Samej.
+        <h2 className="text-4xl font-black text-brand-darkBlue mb-6 tracking-tight">PEDIDO ENVIADO COM SUCESSO!</h2>
+        <p className="text-gray-500 mb-12 text-xl font-medium leading-relaxed max-w-md mx-auto">
+          Excelente! Sua solicitação agora será enviada para profissionais verificados. Você receberá até 4 contatos.
         </p>
         <button 
           onClick={() => navigate(user ? '/cliente/dashboard' : '/')} 
-          className="w-full bg-blue-600 text-white px-8 py-5 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-xl active:scale-95"
+          className="w-full bg-brand-orange text-white px-10 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange transition-all shadow-xl active:scale-95"
         >
           {user ? 'VER MEUS PEDIDOS' : 'VOLTAR AO INÍCIO'}
         </button>
@@ -120,53 +136,57 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     );
   }
 
+  const progress = (step / totalSteps) * 100;
+
   return (
-    <div className="max-w-3xl mx-auto my-12 px-4">
-      <div className="bg-white rounded-[2.5rem] border shadow-2xl overflow-hidden">
-        <div className="bg-[#1e3a8a] p-10 text-white relative">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-          <h2 className="text-3xl font-black mb-2 tracking-tight">ORÇAMENTO GRÁTIS</h2>
-          <p className="text-blue-100 font-bold">Receba até 4 propostas em poucos minutos.</p>
-          
-          <div className="flex mt-10 items-center space-x-6 relative z-10">
-            <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all ${step >= 1 ? 'bg-blue-500 text-white shadow-lg scale-110' : 'bg-blue-900 text-blue-300'}`}>1</div>
-              <span className="ml-3 font-bold text-xs uppercase tracking-widest opacity-100">Categoria</span>
-            </div>
-            <div className="h-0.5 w-12 bg-blue-800"></div>
-            <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all ${step >= 2 ? 'bg-blue-500 text-white shadow-lg scale-110' : 'bg-blue-800 text-blue-300'}`}>2</div>
-              <span className="ml-3 font-bold text-xs uppercase tracking-widest opacity-100">Detalhes</span>
-            </div>
-          </div>
+    <div className="max-w-4xl mx-auto my-12 px-4">
+      <div className="mb-8 flex items-center justify-between">
+        <button onClick={handleBack} className="flex items-center text-gray-400 hover:text-brand-blue font-bold transition-colors">
+          <ArrowLeft className="w-5 h-5 mr-2" /> Voltar
+        </button>
+        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Passo {step} de {totalSteps}</span>
+      </div>
+
+      <div className="h-2 w-full bg-gray-100 rounded-full mb-12 overflow-hidden shadow-inner">
+        <div className="h-full bg-brand-orange transition-all duration-500 rounded-full shadow-lg shadow-orange-200" style={{ width: `${progress}%` }}></div>
+      </div>
+
+      <div className="bg-white rounded-[4rem] border border-gray-100 shadow-3xl overflow-hidden p-8 md:p-20 relative">
+        <div className="absolute top-0 right-0 p-10 pointer-events-none opacity-5">
+           <MessageSquare className="w-40 h-40 text-brand-blue" />
         </div>
 
-        <form onSubmit={handleSubmit} className="p-10 space-y-8 bg-white">
+        <form onSubmit={handleSubmit} className="relative z-10 space-y-12">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center text-sm font-bold animate-pulse">
-              <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+            <div className="p-6 bg-red-50 border-2 border-red-100 text-red-700 rounded-3xl flex items-center text-sm font-bold animate-pulse">
+              <AlertCircle className="w-6 h-6 mr-4 flex-shrink-0" />
               {error}
             </div>
           )}
 
+          {/* STEP 1: CATEGORY */}
           {step === 1 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-500">
+              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Olá! O que você precisa fazer hoje?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setFormData({...formData, category: cat.id})}
-                    className={`flex items-center px-6 py-5 border-2 rounded-2xl text-left transition-all group ${
+                    onClick={() => {
+                      setFormData({...formData, category: cat.id});
+                      setTimeout(() => setStep(2), 300);
+                    }}
+                    className={`flex items-center px-8 py-6 border-4 rounded-[2.5rem] text-left transition-all group ${
                       formData.category === cat.id 
-                      ? 'border-blue-600 bg-blue-50 ring-4 ring-blue-50' 
-                      : 'border-gray-300 bg-white hover:border-blue-500 hover:bg-blue-50'
+                      ? 'border-brand-blue bg-blue-50/50 shadow-xl' 
+                      : 'border-transparent bg-brand-bg hover:bg-white hover:border-brand-blue/30'
                     }`}
                   >
-                    <div className={`mr-4 transition-colors ${formData.category === cat.id ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'}`}>
-                      {cat.icon}
+                    <div className={`mr-6 p-4 rounded-2xl transition-all ${formData.category === cat.id ? 'bg-brand-blue text-white shadow-lg' : 'bg-white text-gray-400 group-hover:text-brand-blue'}`}>
+                      {React.cloneElement(cat.icon as React.ReactElement, { className: "w-6 h-6" })}
                     </div>
-                    <span className={`text-base font-black transition-colors ${formData.category === cat.id ? 'text-blue-900' : 'text-gray-700'}`}>
+                    <span className={`text-xl font-black transition-colors ${formData.category === cat.id ? 'text-brand-darkBlue' : 'text-gray-600'}`}>
                       {cat.name}
                     </span>
                   </button>
@@ -175,131 +195,196 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             </div>
           )}
 
+          {/* STEP 2: LOCATION & FULL ADDRESS */}
           {step === 2 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div>
-                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Seu Nome</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={formData.name} 
-                  onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                  placeholder="Seu nome completo" 
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white placeholder-gray-500" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">O que você precisa?</label>
-                <textarea 
-                  required
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white resize-none placeholder-gray-500"
-                  placeholder="Ex: Preciso pintar 3 quartos e uma sala com tinta acrílica..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">WhatsApp</label>
-                  <input type="tel" required value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="(00) 00000-0000" className="w-full p-4 border-2 border-gray-300 rounded-2xl outline-none text-gray-900 bg-white font-bold placeholder-gray-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">CEP</label>
-                  <div className="relative">
-                    <input type="text" required maxLength={9} value={formData.cep} onChange={(e) => setFormData({...formData, cep: e.target.value})} placeholder="00000-000" className="w-full p-4 border-2 border-gray-300 rounded-2xl outline-none text-gray-900 bg-white font-bold placeholder-gray-500" />
-                    {loadingCep && <div className="absolute right-4 top-1/2 -translate-y-1/2"><Loader2 className="w-5 h-5 text-blue-600 animate-spin" /></div>}
-                  </div>
-                </div>
-              </div>
-
-              {formData.location && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-top-4">
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Endereço (Rua/Avenida)</label>
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
+              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Onde o serviço será realizado?</h2>
+              
+              <div className="space-y-8">
+                {/* CEP Input */}
+                <div className="max-w-md">
+                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4 ml-2">Qual seu CEP?</label>
+                  <div className="relative group">
+                    <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 text-brand-orange transition-transform group-focus-within:scale-110" />
                     <input 
                       type="text" 
                       required 
-                      value={formData.address} 
-                      onChange={(e) => setFormData({...formData, address: e.target.value})} 
-                      placeholder="Nome da rua" 
-                      className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white" 
+                      maxLength={9} 
+                      autoFocus
+                      value={formData.cep} 
+                      onChange={(e) => setFormData({...formData, cep: e.target.value})} 
+                      placeholder="00000-000" 
+                      className="w-full pl-20 pr-8 py-8 border-4 border-gray-50 bg-brand-bg rounded-[2.5rem] outline-none text-2xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Número</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={formData.number} 
-                        onChange={(e) => setFormData({...formData, number: e.target.value})} 
-                        placeholder="Nº" 
-                        className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Complemento</label>
-                      <input 
-                        type="text" 
-                        value={formData.complement} 
-                        onChange={(e) => setFormData({...formData, complement: e.target.value})} 
-                        placeholder="Apt / Bloco" 
-                        className="w-full p-4 border-2 border-gray-300 rounded-2xl focus:border-blue-600 outline-none text-gray-900 font-bold transition-all bg-white" 
-                      />
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 p-6 rounded-[2rem] border-2 border-blue-300">
-                    <div className="flex items-center text-blue-900 font-black mb-2 text-sm uppercase tracking-tight">
-                      <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                      Localização Confirmada
-                    </div>
-                    <p className="text-blue-900 font-bold">{formData.neighborhood}</p>
-                    <p className="text-blue-700 text-xs font-black uppercase tracking-widest mt-1">{formData.location}</p>
+                    {loadingCep && <div className="absolute right-8 top-1/2 -translate-y-1/2"><Loader2 className="w-8 h-8 text-brand-blue animate-spin" /></div>}
                   </div>
                 </div>
-              )}
 
-              <div>
-                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-3 ml-1">Urgência do Serviço</label>
-                <div className="relative">
-                  <select value={formData.deadline} required onChange={(e) => setFormData({...formData, deadline: e.target.value})} className="w-full p-4 border-2 border-gray-300 rounded-2xl text-gray-900 bg-white font-bold cursor-pointer hover:border-blue-600 transition-all appearance-none">
-                    <option value="">Selecione...</option>
-                    <option value="imediato">O mais rápido possível</option>
-                    <option value="15_dias">Nos próximos 15 dias</option>
-                    <option value="um_mes">No próximo mês</option>
-                    <option value="mais_3_meses">Apenas planejando (3+ meses)</option>
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ChevronRight className="w-5 h-5 text-gray-400 rotate-90" />
+                {/* Conditional Address Detail Fields */}
+                {formData.location && (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="p-8 bg-brand-blue/5 rounded-[2.5rem] border-2 border-brand-blue/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-black text-brand-blue uppercase tracking-widest mb-1">Localização encontrada:</p>
+                        <p className="text-2xl font-black text-brand-darkBlue leading-none">{formData.neighborhood}</p>
+                        <p className="text-lg font-bold text-brand-blue/70 mt-1">{formData.location}</p>
+                      </div>
+                      <div className="flex-shrink-0 w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                        <Home className="text-brand-orange w-6 h-6" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <div className="space-y-4">
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Rua / Logradouro</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={formData.address} 
+                          onChange={(e) => setFormData({...formData, address: e.target.value})} 
+                          placeholder="Ex: Rua das Flores" 
+                          className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white" 
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Número</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={formData.number} 
+                            onChange={(e) => setFormData({...formData, number: e.target.value})} 
+                            placeholder="Ex: 123" 
+                            className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white" 
+                          />
+                        </div>
+                        <div className="space-y-4">
+                          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Complemento</label>
+                          <input 
+                            type="text" 
+                            value={formData.complement} 
+                            onChange={(e) => setFormData({...formData, complement: e.target.value})} 
+                            placeholder="Ex: Bloco B, Ap 12" 
+                            className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: DESCRIPTION */}
+          {step === 3 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
+              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Conte-nos os detalhes do seu projeto</h2>
+              <div className="space-y-6">
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4 ml-2">O que exatamente você precisa?</label>
+                <textarea 
+                  required
+                  rows={6}
+                  autoFocus
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="w-full p-8 border-4 border-gray-50 bg-brand-bg rounded-[3rem] outline-none text-xl font-bold text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white resize-none shadow-sm"
+                  placeholder="Ex: Preciso pintar uma sala de 20m² e dois quartos com tinta lavável branca..."
+                />
+                <div className="flex items-start gap-4 p-6 bg-blue-50 rounded-3xl border border-blue-100">
+                   <Info className="w-6 h-6 text-brand-blue mt-1 flex-shrink-0" />
+                   <p className="text-sm text-brand-blue/80 font-medium leading-relaxed">Quanto mais detalhes você der, mais precisos serão os orçamentos que você vai receber.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: DEADLINE */}
+          {step === 4 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
+              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Para quando você precisa do serviço?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { id: 'imediato', label: 'O quanto antes', sub: 'Estou com pressa' },
+                  { id: '15_dias', label: 'Próximas 2 semanas', sub: 'Tenho flexibilidade' },
+                  { id: 'um_mes', label: 'No próximo mês', sub: 'Estou planejando' },
+                  { id: 'mais_3_meses', label: 'Apenas orçamento', sub: 'Mais de 3 meses' }
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setFormData({...formData, deadline: item.id});
+                      setTimeout(() => setStep(5), 300);
+                    }}
+                    className={`flex flex-col items-center justify-center p-10 border-4 rounded-[2.5rem] text-center transition-all ${
+                      formData.deadline === item.id 
+                      ? 'border-brand-orange bg-orange-50 shadow-xl' 
+                      : 'border-transparent bg-brand-bg hover:bg-white hover:border-brand-orange/30 shadow-sm'
+                    }`}
+                  >
+                    <Calendar className={`w-8 h-8 mb-4 ${formData.deadline === item.id ? 'text-brand-orange' : 'text-gray-400'}`} />
+                    <span className={`text-xl font-black ${formData.deadline === item.id ? 'text-brand-darkBlue' : 'text-gray-700'}`}>{item.label}</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">{item.sub}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: CONTACT */}
+          {step === 5 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
+              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Como podemos te contatar?</h2>
+              <div className="space-y-8 max-w-lg">
+                <div className="space-y-4">
+                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Qual seu nome?</label>
+                  <input 
+                    type="text" 
+                    required 
+                    autoFocus
+                    value={formData.name} 
+                    onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                    placeholder="Seu nome completo" 
+                    className="w-full px-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
+                  />
+                </div>
+                <div className="space-y-4">
+                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-2">WhatsApp / Telefone</label>
+                  <div className="relative">
+                    <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-brand-blue" />
+                    <input 
+                      type="tel" 
+                      required 
+                      value={formData.phone} 
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                      placeholder="(00) 00000-0000" 
+                      className="w-full pl-16 pr-8 py-6 border-4 border-gray-50 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-300 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
+                    />
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="pt-8 flex justify-between items-center border-t-2 border-gray-100">
-            {step > 1 ? (
-              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 font-black text-gray-500 hover:text-blue-600 transition-colors uppercase text-sm tracking-widest">
-                Voltar
-              </button>
-            ) : <div />}
-            
+          <div className="pt-12 border-t-4 border-gray-50 flex flex-col md:flex-row items-center gap-6">
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-blue-600 text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-700 shadow-xl shadow-blue-500/30 transition-all active:scale-95 flex items-center disabled:opacity-50"
+              className="w-full md:w-auto flex-grow bg-brand-orange text-white px-12 py-6 rounded-[2.5rem] font-black text-xl hover:bg-brand-lightOrange shadow-2xl shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center disabled:opacity-50"
             >
               {isSubmitting ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
+                <Loader2 className="w-8 h-8 animate-spin" />
               ) : (
-                step === 2 ? 'ENVIAR PEDIDO' : 'PRÓXIMO PASSO'
+                <>
+                  {step === totalSteps ? 'FINALIZAR E ENVIAR PEDIDO' : 'PRÓXIMO PASSO'}
+                  <ChevronRight className="ml-3 w-6 h-6" />
+                </>
               )}
             </button>
+            <p className="text-gray-400 font-bold text-sm text-center md:text-right">
+              {step === totalSteps ? 'Quase lá! Só mais um clique.' : 'Você pode voltar e alterar a qualquer momento.'}
+            </p>
           </div>
         </form>
       </div>

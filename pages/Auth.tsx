@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
-import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, Lock, Mail, User as UserIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Auth: React.FC = () => {
@@ -35,24 +34,26 @@ const Auth: React.FC = () => {
         
         if (!authData.user) throw new Error("Falha na autenticação.");
 
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('role')
           .eq('id', authData.user.id)
           .maybeSingle();
 
-        const userRole = profile?.role || UserRole.CLIENT;
+        if (profileError) throw profileError;
 
-        setSuccessMsg("ACESSO GARANTIDO! REDIRECIONANDO...");
+        const userRole = profile?.role || UserRole.CLIENT;
+        setSuccessMsg("ACESSO CONFIRMADO! REDIRECIONANDO...");
         
-        // Navegação direta com base no role
-        if (userRole === UserRole.PROFESSIONAL) {
-          navigate('/profissional/dashboard');
-        } else if (userRole === UserRole.ADMIN) {
-          navigate('/admin');
-        } else {
-          navigate('/cliente/dashboard');
-        }
+        setTimeout(() => {
+          if (userRole === UserRole.PROFESSIONAL) {
+            navigate('/profissional/dashboard');
+          } else if (userRole === UserRole.ADMIN) {
+            navigate('/admin');
+          } else {
+            navigate('/cliente/dashboard');
+          }
+        }, 500);
 
       } else {
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
@@ -64,7 +65,7 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          await supabase.from('profiles').insert({
+          const { error: insertError } = await supabase.from('profiles').insert({
             id: signUpData.user.id,
             full_name: name,
             role: role,
@@ -73,6 +74,8 @@ const Auth: React.FC = () => {
             rating: 5.0
           });
           
+          if (insertError) throw insertError;
+
           setSuccessMsg("CONTA CRIADA COM SUCESSO!");
           setTimeout(() => {
             navigate(role === UserRole.PROFESSIONAL ? '/profissional/dashboard' : '/cliente/dashboard');
@@ -80,54 +83,73 @@ const Auth: React.FC = () => {
         }
       }
     } catch (err: any) {
-      setError({ message: err.message || 'Erro inesperado.', type: 'general' });
+      console.error("Erro no Auth:", err);
+      setError({ message: err.message || 'Erro inesperado ao processar acesso.', type: 'general' });
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-[2.5rem] border shadow-2xl relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-2 bg-blue-600 shadow-md"></div>
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-black text-blue-900 tracking-tighter uppercase">{isLogin ? 'Entrar' : 'Cadastrar'}</h2>
-      </div>
+    <div className="max-w-md mx-auto my-16 px-4">
+      <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-3xl overflow-hidden relative">
+        <div className="h-4 bg-brand-orange shadow-md"></div>
+        <div className="p-10 pt-12">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight uppercase">{isLogin ? 'Entrar' : 'Cadastrar'}</h2>
+            <p className="text-gray-400 font-bold mt-2">{isLogin ? 'Bem-vindo de volta à Samej' : 'Comece hoje mesmo'}</p>
+          </div>
 
-      {error && (
-        <div className="p-5 mb-6 rounded-2xl border-2 flex items-start text-sm font-bold bg-red-50 border-red-200 text-red-900 animate-in fade-in slide-in-from-top-4">
-          <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
-          <div><p className="font-black mb-1 uppercase text-[10px] tracking-widest">Erro no Acesso</p><span>{error.message}</span></div>
-        </div>
-      )}
-
-      {successMsg && (
-        <div className="p-5 mb-6 bg-green-50 border-2 border-green-200 text-green-900 rounded-2xl flex items-start text-sm font-bold animate-in zoom-in-95">
-          <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
-          <span className="font-black uppercase tracking-tight">{successMsg}</span>
-        </div>
-      )}
-
-      <div className="flex bg-gray-100 p-1 rounded-2xl mb-8">
-        <button onClick={() => setIsLogin(true)} className={`flex-1 py-3 rounded-xl font-black transition-all text-xs uppercase tracking-widest ${isLogin ? 'bg-white shadow-md text-blue-600' : 'text-gray-400'}`}>Login</button>
-        <button onClick={() => setIsLogin(false)} className={`flex-1 py-3 rounded-xl font-black transition-all text-xs uppercase tracking-widest ${!isLogin ? 'bg-white shadow-md text-blue-600' : 'text-gray-400'}`}>Cadastro</button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {!isLogin && (
-          <>
-            <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-3 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${role === UserRole.CLIENT ? 'border-blue-600 bg-blue-50 text-blue-600 shadow-sm' : 'border-gray-200 text-gray-400'}`}>SOU CLIENTE</button>
-              <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-3 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${role === UserRole.PROFESSIONAL ? 'border-blue-600 bg-blue-50 text-blue-600 shadow-sm' : 'border-gray-200 text-gray-400'}`}>SOU PROFISSIONAL</button>
+          {error && (
+            <div className="p-5 mb-8 rounded-[1.5rem] border-2 flex items-start text-sm font-bold bg-red-50 border-red-100 text-red-900 animate-in fade-in slide-in-from-top-4">
+              <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+              <div><p className="font-black mb-1 uppercase text-[10px] tracking-widest">Erro de Acesso</p><span>{error.message}</span></div>
             </div>
-            <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="SEU NOME COMPLETO" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600 uppercase placeholder:text-gray-300" />
-          </>
-        )}
-        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="SEU E-MAIL" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600 uppercase placeholder:text-gray-300" />
-        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="SUA SENHA" className="w-full p-4 border-2 border-gray-300 rounded-2xl bg-white font-bold text-gray-900 outline-none focus:border-blue-600 uppercase placeholder:text-gray-300" />
-        
-        <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-500/20 active:scale-95 disabled:opacity-50 transition-all uppercase tracking-tight">
-          {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR AGORA' : 'CRIAR MINHA CONTA')}
-        </button>
-      </form>
+          )}
+
+          {successMsg && (
+            <div className="p-5 mb-8 bg-green-50 border-2 border-green-100 text-green-900 rounded-[1.5rem] flex items-start text-sm font-bold animate-in zoom-in-95">
+              <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+              <span className="font-black uppercase tracking-tight">{successMsg}</span>
+            </div>
+          )}
+
+          <div className="flex bg-brand-bg p-1.5 rounded-[2rem] mb-10 border border-gray-100">
+            <button onClick={() => setIsLogin(true)} className={`flex-1 py-4 rounded-[1.5rem] font-black transition-all text-xs uppercase tracking-widest ${isLogin ? 'bg-white shadow-xl text-brand-blue' : 'text-gray-400 hover:text-gray-600'}`}>Login</button>
+            <button onClick={() => setIsLogin(false)} className={`flex-1 py-4 rounded-[1.5rem] font-black transition-all text-xs uppercase tracking-widest ${!isLogin ? 'bg-white shadow-xl text-brand-blue' : 'text-gray-400 hover:text-gray-600'}`}>Cadastro</button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {!isLogin && (
+              <>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-4 rounded-2xl border-4 font-black text-[10px] uppercase tracking-widest transition-all ${role === UserRole.CLIENT ? 'border-brand-blue bg-blue-50 text-brand-blue shadow-lg shadow-blue-100' : 'border-gray-50 bg-gray-50 text-gray-400'}`}>SOU CLIENTE</button>
+                  <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-4 rounded-2xl border-4 font-black text-[10px] uppercase tracking-widest transition-all ${role === UserRole.PROFESSIONAL ? 'border-brand-orange bg-orange-50 text-brand-orange shadow-lg shadow-orange-100' : 'border-gray-50 bg-gray-50 text-gray-400'}`}>SOU PROFISSIONAL</button>
+                </div>
+                <div className="relative">
+                  <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="NOME COMPLETO" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-300" />
+                </div>
+              </>
+            )}
+            <div className="relative">
+              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="SEU E-MAIL" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-300" />
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="SUA SENHA" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-300" />
+            </div>
+            
+            <button type="submit" disabled={loading} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-900/20 active:scale-95 disabled:opacity-50 transition-all uppercase tracking-tight mt-6 hover:bg-black">
+              {loading ? <Loader2 className="w-8 h-8 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR AGORA' : 'CRIAR MINHA CONTA')}
+            </button>
+          </form>
+
+          <p className="text-center mt-10 text-xs font-bold text-gray-400">
+            {isLogin ? 'Esqueceu sua senha?' : 'Ao se cadastrar, você aceita nossos Termos de Uso.'}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

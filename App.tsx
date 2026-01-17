@@ -71,7 +71,7 @@ const App: React.FC = () => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (data) {
-        const newUser = { 
+        const newUser: User = { 
           id: data.id, 
           name: data.full_name || 'Usuário', 
           email: email || '', 
@@ -122,8 +122,10 @@ const App: React.FC = () => {
         setUser(null);
         setProProfile(null);
       } else if (session) {
-        await fetchProfile(session.user.id, session.user.email);
-        await fetchOrders();
+        const updatedUser = await fetchProfile(session.user.id, session.user.email);
+        if (updatedUser) {
+          await fetchOrders();
+        }
       }
     });
     return () => subscription.unsubscribe();
@@ -144,7 +146,7 @@ const App: React.FC = () => {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
           <h1 className="text-white text-2xl font-black uppercase tracking-tighter">Samej</h1>
-          <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mt-2 animate-pulse">Sincronizando...</p>
+          <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mt-2 animate-pulse">Iniciando Sistema...</p>
         </div>
       </div>
     );
@@ -163,7 +165,9 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home user={user} />} />
-            <Route path="/auth" element={user ? <Navigate to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} /> : <Auth />} />
+            <Route path="/auth" element={user ? (
+              <Navigate to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} replace />
+            ) : <Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
               const { error } = await supabase.from('orders').insert([{ 
                 client_id: user?.id || null, 
