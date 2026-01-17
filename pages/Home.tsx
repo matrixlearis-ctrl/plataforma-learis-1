@@ -14,7 +14,10 @@ import {
   UserPlus,
   ShieldCheck,
   Zap,
-  Award
+  Award,
+  Edit3,
+  Mail,
+  Handshake
 } from 'lucide-react';
 
 interface HomeProps {
@@ -114,7 +117,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               Explore por <span className="text-brand-blue">Categorias</span>
             </h2>
             <p className="text-lg text-gray-500 font-bold max-w-xl mx-auto uppercase tracking-tight">
-              Selecione o serviço desejado e conecte-se com especialistas.
+              Selecione o serviço desejado e conect-se com especialistas.
             </p>
           </div>
 
@@ -138,6 +141,81 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
+      {/* Como Funciona Section - REPLICANDO O MODELO DO PRINT COM HOVER DINÂMICO */}
+      <section className="bg-white py-24 px-4 border-t border-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue text-center mb-20 tracking-tight">
+            Como Funciona?
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+            {/* Passo 1 */}
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">
+                  1
+                </div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <Edit3 className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Descreva seu projeto</h3>
+              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">
+                Conte-nos o que você precisa. Quanto mais detalhes, melhor será o orçamento que você receberá.
+              </p>
+            </div>
+
+            {/* Passo 2 */}
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">
+                  2
+                </div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <Search className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Encontramos profissionais</h3>
+              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">
+                Nossa plataforma conecta você automaticamente com profissionais qualificados da sua região.
+              </p>
+            </div>
+
+            {/* Passo 3 */}
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">
+                  3
+                </div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <Mail className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Receba orçamentos</h3>
+              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">
+                Receba até 4 orçamentos gratuitos por email e WhatsApp em até 24 horas.
+              </p>
+            </div>
+
+            {/* Passo 4 */}
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">
+                  4
+                </div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <Handshake className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Escolha e contrate</h3>
+              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">
+                Compare preços, avalie perfis e escolha o profissional ideal. Negocie diretamente com ele!
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section - Para Profissionais */}
       <section className="py-24 px-4 bg-brand-darkBlue overflow-hidden relative">
          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-brand-orange/10 rounded-full blur-[100px]"></div>
@@ -150,7 +228,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                   <Users className="w-6 h-6" /> <span className="font-black uppercase text-xs">Acesso a Clientes</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white/10 px-6 py-4 rounded-2xl backdrop-blur-sm">
-                  <Coins className="w-6 h-6" /> <span className="font-black uppercase text-xs">Pague por Lead</span>
+                  <Users className="w-6 h-6" /> <span className="font-black uppercase text-xs">Pague por Lead</span>
                 </div>
               </div>
               <Link to="/auth" className="inline-flex items-center bg-brand-darkBlue text-white px-12 py-6 rounded-[2.5rem] font-black text-xl hover:scale-105 transition-all shadow-2xl active:scale-95 uppercase">

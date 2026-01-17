@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, OrderStatus, OrderRequest } from '../types';
-import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle, ArrowLeft, MessageSquare, Calendar, Phone, Info, Home } from 'lucide-react';
+import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle, ArrowLeft, MessageSquare, Calendar, Phone, Home } from 'lucide-react';
 
 interface NewRequestProps {
   user: User | null;
@@ -66,7 +67,6 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     if (step === 2 && (!formData.location || !formData.address || !formData.number)) return;
     if (step === 3 && !formData.description) return;
     if (step === 4 && !formData.deadline) return;
-    if (step === 5 && (!formData.name || !formData.phone)) return;
     
     if (step < totalSteps) {
       setStep(step + 1);
@@ -152,10 +152,6 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
       </div>
 
       <div className="bg-white rounded-[4rem] border border-gray-100 shadow-3xl overflow-hidden p-8 md:p-20 relative">
-        <div className="absolute top-0 right-0 p-10 pointer-events-none opacity-5">
-           <MessageSquare className="w-40 h-40 text-brand-blue" />
-        </div>
-
         <form onSubmit={handleSubmit} className="relative z-10 space-y-12">
           {error && (
             <div className="p-6 bg-red-50 border-2 border-red-100 text-red-700 rounded-3xl flex items-center text-sm font-bold animate-pulse">
@@ -164,229 +160,180 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             </div>
           )}
 
-          {/* STEP 1: CATEGORY */}
           {step === 1 && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-500">
-              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Olá! O que você precisa fazer hoje?</h2>
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
+              <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Qual serviço você precisa?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => {
-                      setFormData({...formData, category: cat.id});
-                      setTimeout(() => setStep(2), 300);
+                      setFormData({ ...formData, category: cat.id });
+                      setStep(2);
                     }}
-                    className={`flex items-center px-8 py-6 border-4 rounded-[2.5rem] text-left transition-all group ${
+                    className={`flex items-center p-6 rounded-3xl border-4 transition-all text-left group ${
                       formData.category === cat.id 
-                      ? 'border-brand-blue bg-blue-50/50 shadow-xl' 
-                      : 'border-transparent bg-brand-bg hover:bg-white hover:border-brand-blue/30'
+                      ? 'border-brand-blue bg-blue-50 text-brand-blue shadow-lg' 
+                      : 'border-gray-50 hover:border-brand-blue/20 text-gray-700'
                     }`}
                   >
-                    <div className={`mr-6 p-4 rounded-2xl transition-all ${formData.category === cat.id ? 'bg-brand-blue text-white shadow-lg' : 'bg-white text-gray-600 group-hover:text-brand-blue'}`}>
-                      {/* Fix: TypeScript error by casting to ReactElement<any> */}
-                      {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-5 transition-colors ${
+                      formData.category === cat.id ? 'bg-brand-blue text-white' : 'bg-brand-bg text-brand-blue group-hover:bg-brand-blue group-hover:text-white'
+                    }`}>
+                      {cat.icon}
                     </div>
-                    <span className={`text-xl font-black transition-colors ${formData.category === cat.id ? 'text-brand-darkBlue' : 'text-gray-800'}`}>
-                      {cat.name}
-                    </span>
+                    <span className="font-black uppercase text-sm tracking-tight">{cat.name}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP 2: LOCATION & FULL ADDRESS */}
           {step === 2 && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
-              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Onde o serviço será realizado?</h2>
-              
-              <div className="space-y-8">
-                {/* CEP Input */}
-                <div className="max-w-md">
-                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-4 ml-2">Qual seu CEP?</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 text-brand-orange transition-transform group-focus-within:scale-110" />
-                    <input 
-                      type="text" 
-                      required 
-                      maxLength={9} 
-                      autoFocus
-                      value={formData.cep} 
-                      onChange={(e) => setFormData({...formData, cep: e.target.value})} 
-                      placeholder="00000-000" 
-                      className="w-full pl-20 pr-8 py-8 border-4 border-gray-100 bg-brand-bg rounded-[2.5rem] outline-none text-2xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
-                    />
-                    {loadingCep && <div className="absolute right-8 top-1/2 -translate-y-1/2"><Loader2 className="w-8 h-8 text-brand-blue animate-spin" /></div>}
-                  </div>
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Onde será o serviço?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative">
+                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="CEP"
+                    value={formData.cep}
+                    onChange={e => setFormData({ ...formData, cep: e.target.value })}
+                    className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                  />
+                  {loadingCep && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-brand-blue" />}
                 </div>
-
-                {/* Conditional Address Detail Fields */}
-                {formData.location && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="p-8 bg-brand-blue/5 rounded-[2.5rem] border-2 border-brand-blue/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black text-brand-blue uppercase tracking-widest mb-1">Localização encontrada:</p>
-                        <p className="text-2xl font-black text-brand-darkBlue leading-none">{formData.neighborhood}</p>
-                        <p className="text-lg font-bold text-brand-blue/70 mt-1">{formData.location}</p>
-                      </div>
-                      <div className="flex-shrink-0 w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                        <Home className="text-brand-orange w-6 h-6" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-8">
-                      <div className="space-y-4">
-                        <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Rua / Logradouro</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={formData.address} 
-                          onChange={(e) => setFormData({...formData, address: e.target.value})} 
-                          placeholder="Ex: Rua das Flores" 
-                          className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white" 
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Número</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={formData.number} 
-                            onChange={(e) => setFormData({...formData, number: e.target.value})} 
-                            placeholder="Ex: 123" 
-                            className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white" 
-                          />
-                        </div>
-                        <div className="space-y-4">
-                          <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Complemento</label>
-                          <input 
-                            type="text" 
-                            value={formData.complement} 
-                            onChange={(e) => setFormData({...formData, complement: e.target.value})} 
-                            placeholder="Ex: Bloco B, Ap 12" 
-                            className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white" 
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: DESCRIPTION */}
-          {step === 3 && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
-              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Conte-nos os detalhes do seu projeto</h2>
-              <div className="space-y-6">
-                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-4 ml-2">O que exatamente você precisa?</label>
-                <textarea 
-                  required
-                  rows={6}
-                  autoFocus
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full p-8 border-4 border-gray-100 bg-brand-bg rounded-[3rem] outline-none text-xl font-bold text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white resize-none shadow-sm"
-                  placeholder="Ex: Preciso pintar uma sala de 20m² e dois quartos com tinta lavável branca..."
+                <input
+                  type="text"
+                  placeholder="CIDADE / UF"
+                  readOnly
+                  value={formData.location}
+                  className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-500 uppercase cursor-not-allowed"
                 />
-                <div className="flex items-start gap-4 p-6 bg-blue-50 rounded-3xl border border-blue-100">
-                   <Info className="w-6 h-6 text-brand-blue mt-1 flex-shrink-0" />
-                   <p className="text-sm text-brand-blue font-semibold leading-relaxed">Quanto mais detalhes você der, mais precisos serão os orçamentos que você vai receber.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: DEADLINE */}
-          {step === 4 && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
-              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Para quando você precisa do serviço?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { id: 'imediato', label: 'O quanto antes', sub: 'Estou com pressa' },
-                  { id: 'um_mes', label: 'No próximo mês', sub: 'Estou planejando' },
-                  { id: 'mais_3_meses', label: 'Mais de 3 meses', sub: 'Longo prazo' },
-                  { id: 'orcamento', label: 'Apenas orçamento', sub: 'Pesquisa de preços' }
-                ].map(item => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      setFormData({...formData, deadline: item.id});
-                      setTimeout(() => setStep(5), 300);
-                    }}
-                    className={`flex flex-col items-center justify-center p-10 border-4 rounded-[2.5rem] text-center transition-all ${
-                      formData.deadline === item.id 
-                      ? 'border-brand-orange bg-orange-50 shadow-xl' 
-                      : 'border-transparent bg-brand-bg hover:bg-white hover:border-brand-orange/30 shadow-sm'
-                    }`}
-                  >
-                    <Calendar className={`w-8 h-8 mb-4 ${formData.deadline === item.id ? 'text-brand-orange' : 'text-gray-600'}`} />
-                    <span className={`text-xl font-black ${formData.deadline === item.id ? 'text-brand-darkBlue' : 'text-gray-900'}`}>{item.label}</span>
-                    <span className={`text-xs font-bold uppercase tracking-widest mt-2 ${formData.deadline === item.id ? 'text-brand-orange/80' : 'text-gray-600'}`}>{item.sub}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 5: CONTACT */}
-          {step === 5 && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-right-6 duration-500">
-              <h2 className="text-4xl font-black text-brand-darkBlue leading-tight">Como podemos te contatar?</h2>
-              <div className="space-y-8 max-w-lg">
-                <div className="space-y-4">
-                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Qual seu nome?</label>
-                  <input 
-                    type="text" 
-                    required 
-                    autoFocus
-                    value={formData.name} 
-                    onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                    placeholder="Seu nome completo" 
-                    className="w-full px-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
+                <div className="md:col-span-2">
+                  <input
+                    type="text"
+                    placeholder="ENDEREÇO"
+                    value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
                   />
                 </div>
-                <div className="space-y-4">
-                  <label className="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">WhatsApp / Telefone</label>
-                  <div className="relative">
-                    <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-brand-blue" />
-                    <input 
-                      type="tel" 
-                      required 
-                      value={formData.phone} 
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})} 
-                      placeholder="(00) 00000-0000" 
-                      className="w-full pl-16 pr-8 py-6 border-4 border-gray-100 bg-brand-bg rounded-[2rem] outline-none text-xl font-black text-brand-darkBlue placeholder-gray-500 focus:border-brand-blue/30 transition-all focus:bg-white shadow-sm" 
-                    />
-                  </div>
-                </div>
+                <input
+                  type="text"
+                  placeholder="NÚMERO"
+                  value={formData.number}
+                  onChange={e => setFormData({ ...formData, number: e.target.value })}
+                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                />
+                <input
+                  type="text"
+                  placeholder="COMPLEMENTO (OPCIONAL)"
+                  value={formData.complement}
+                  onChange={e => setFormData({ ...formData, complement: e.target.value })}
+                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                />
+              </div>
+              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-3xl font-black text-xl shadow-2xl active:scale-95 transition-all uppercase">
+                Próximo Passo
+              </button>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">O que precisa ser feito?</h2>
+              <div className="relative">
+                <textarea
+                  rows={6}
+                  placeholder="Descreva os detalhes do serviço. Quanto mais detalhes, melhores os orçamentos!"
+                  value={formData.description}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none"
+                />
+              </div>
+              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-3xl font-black text-xl shadow-2xl active:scale-95 transition-all uppercase">
+                Próximo Passo
+              </button>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Qual o prazo de execução?</h2>
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { id: 'imediato', label: 'O QUANTO ANTES', icon: <Calendar className="w-5 h-5" /> },
+                  { id: 'um_mes', label: 'NOS PRÓXIMOS 30 DIAS', icon: <Calendar className="w-5 h-5" /> },
+                  { id: 'mais_3_meses', label: 'MAIS DE 3 MESES', icon: <Calendar className="w-5 h-5" /> },
+                  { id: 'orcamento', label: 'APENAS ORÇAMENTO', icon: <Calendar className="w-5 h-5" /> }
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, deadline: opt.id });
+                      setStep(5);
+                    }}
+                    className={`flex items-center p-6 rounded-3xl border-4 transition-all text-left ${
+                      formData.deadline === opt.id 
+                      ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                      : 'border-gray-50 hover:border-brand-blue/20 text-gray-700'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-5 ${
+                      formData.deadline === opt.id ? 'bg-brand-blue text-white' : 'bg-brand-bg text-brand-blue'
+                    }`}>
+                      {opt.icon}
+                    </div>
+                    <span className="font-black text-sm uppercase">{opt.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          <div className="pt-12 border-t-4 border-gray-100 flex flex-col md:flex-row items-center gap-6">
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="w-full md:w-auto flex-grow bg-brand-orange text-white px-12 py-6 rounded-[2.5rem] font-black text-xl hover:bg-brand-lightOrange shadow-2xl shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-8 h-8 animate-spin" />
-              ) : (
-                <>
-                  {step === totalSteps ? 'FINALIZAR E ENVIAR PEDIDO' : 'PRÓXIMO PASSO'}
-                  <ChevronRight className="ml-3 w-6 h-6" />
-                </>
-              )}
-            </button>
-            <p className="text-gray-600 font-bold text-sm text-center md:text-right">
-              {step === totalSteps ? 'Quase lá! Só mais um clique.' : 'Você pode voltar e alterar a qualquer momento.'}
-            </p>
-          </div>
+          {step === 5 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Dados de Contato</h2>
+              <div className="space-y-6">
+                <div className="relative">
+                  <Home className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="SEU NOME COMPLETO"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                  />
+                </div>
+                <div className="relative">
+                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="tel"
+                    placeholder="WHATSAPP / CELULAR"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                  />
+                </div>
+              </div>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-brand-orange text-white py-6 rounded-3xl font-black text-2xl shadow-3xl active:scale-95 disabled:opacity-50 transition-all uppercase flex items-center justify-center"
+              >
+                {isSubmitting ? <Loader2 className="w-8 h-8 animate-spin" /> : (
+                  <>
+                    Publicar Pedido
+                    <ChevronRight className="ml-3 w-6 h-6" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
