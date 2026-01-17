@@ -54,7 +54,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight max-w-4xl mx-auto">
-            Resolva seus projetos com os <span className="text-brand-orange">melhores</span> profissionais
+            Conectamos você com os <span className="text-brand-orange">melhores</span> profissionais
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/80 mb-12 max-w-2xl mx-auto font-medium">
             Construção, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
