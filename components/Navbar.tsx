@@ -19,10 +19,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
         <Link to="/" onClick={closeMenu} className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-brand-blue rounded-xl flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-md">
             <span className="text-white font-black text-2xl">S</span>
           </div>
-          <span className="text-2xl font-extrabold text-brand-darkBlue tracking-tight">Samej</span>
+          <span className="text-2xl font-black text-black tracking-tight">Samej</span>
         </Link>
 
         {/* Desktop Menu */}

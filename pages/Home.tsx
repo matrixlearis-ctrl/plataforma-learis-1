@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, UserRole } from '../types';
-import { Search, CheckCircle, ShieldCheck, Zap, ArrowRight, Star } from 'lucide-react';
+import { Search, CheckCircle, ShieldCheck, Zap, ArrowRight, Star, Edit, Search as SearchIcon, Mail, Handshake, Users, Coins, Smartphone, UserPlus } from 'lucide-react';
 
 interface HomeProps {
   user: User | null;
@@ -88,39 +88,100 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* How it works - Conversational Flow */}
-      <section className="bg-white py-32 px-4 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-20">
-            <div className="md:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-8 leading-tight">Como a Samej te ajuda a economizar tempo e dinheiro?</h2>
-              <div className="space-y-10">
-                <div className="flex gap-6">
-                  <div className="flex-shrink-0 w-12 h-12 bg-brand-blue text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-blue-200">1</div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-gray-900 mb-2">Descreva seu projeto</h3>
-                    <p className="text-gray-500 text-lg font-medium leading-relaxed">Conte-nos o que você precisa. Nosso formulário inteligente guia você para dar os detalhes certos.</p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div className="flex-shrink-0 w-12 h-12 bg-brand-orange text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-orange-200">2</div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-gray-900 mb-2">Compare orçamentos</h3>
-                    <p className="text-gray-500 text-lg font-medium leading-relaxed">Até 4 profissionais qualificados entrarão em contato. Você analisa perfis, fotos e avaliações.</p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div className="flex-shrink-0 w-12 h-12 bg-brand-darkBlue text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-slate-300">3</div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-gray-900 mb-2">Contrate o melhor</h3>
-                    <p className="text-gray-500 text-lg font-medium leading-relaxed">Sem taxas de intermediação. O pagamento e os detalhes são combinados diretamente com o profissional.</p>
-                  </div>
+      {/* "Como Funciona?" Section - Baseada no Print */}
+      <section className="bg-white py-24 px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-4xl font-black text-brand-darkBlue mb-20 tracking-tight">Como Funciona?</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
+            {/* Passo 1 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative mb-10">
+                <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">1</div>
+                <div className="w-24 h-24 bg-gray-50 text-blue-600 rounded-full flex items-center justify-center border-2 border-gray-100 group-hover:border-blue-600 group-hover:bg-white transition-all duration-300">
+                  <Edit className="w-10 h-10" />
                 </div>
               </div>
+              <h3 className="text-xl font-black text-brand-darkBlue mb-4">Descreva seu projeto</h3>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
+                Conte-nos o que você precisa. Quanto mais detalhes, melhor será o orçamento que você receberá.
+              </p>
             </div>
-            <div className="md:w-1/2 relative">
-               <div className="absolute -inset-4 bg-brand-blue/5 rounded-[3rem] -rotate-2"></div>
-               <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=2070&auto=format&fit=crop" alt="Trabalho Manual" className="rounded-[3rem] shadow-2xl relative z-10 border-8 border-white" />
+
+            {/* Passo 2 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative mb-10">
+                <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">2</div>
+                <div className="w-24 h-24 bg-gray-50 text-blue-600 rounded-full flex items-center justify-center border-2 border-gray-100 group-hover:border-blue-600 group-hover:bg-white transition-all duration-300">
+                  <SearchIcon className="w-10 h-10" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-brand-darkBlue mb-4">Encontramos profissionais</h3>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
+                Nossa plataforma conecta você automaticamente com profissionais qualificados da sua região.
+              </p>
+            </div>
+
+            {/* Passo 3 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative mb-10">
+                <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">3</div>
+                <div className="w-24 h-24 bg-gray-50 text-blue-600 rounded-full flex items-center justify-center border-2 border-gray-100 group-hover:border-blue-600 group-hover:bg-white transition-all duration-300">
+                  <Mail className="w-10 h-10" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-brand-darkBlue mb-4">Receba orçamentos</h3>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
+                Receba até 4 orçamentos gratuitos por email e WhatsApp em até 24 horas.
+              </p>
+            </div>
+
+            {/* Passo 4 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative mb-10">
+                <div className="absolute -top-4 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-sm z-10 shadow-lg">4</div>
+                <div className="w-24 h-24 bg-gray-50 text-blue-600 rounded-full flex items-center justify-center border-2 border-gray-100 group-hover:border-blue-600 group-hover:bg-white transition-all duration-300">
+                  <Handshake className="w-10 h-10" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-brand-darkBlue mb-4">Escolha e contrate</h3>
+              <p className="text-gray-500 font-medium text-sm leading-relaxed px-4">
+                Compare preços, avalie perfis e escolha o profissional ideal. Negocie diretamente com ele!
+              </p>
+            </div>
+          </div>
+
+          {/* Yellow Banner Section - Baseada no Print */}
+          <div className="bg-[#fff161] rounded-[2rem] md:rounded-[3rem] p-10 md:p-16 text-left relative overflow-hidden">
+            <div className="max-w-4xl">
+              <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-6">Seja um Profissional Samej</h2>
+              <p className="text-lg md:text-xl text-brand-darkBlue/80 font-bold mb-10 leading-relaxed">
+                Cadastre-se gratuitamente e conecte-se com milhares de clientes em busca dos seus serviços. Aumente sua renda e faça seu negócio crescer!
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                <div className="flex items-center">
+                  <Users className="w-5 h-5 text-blue-600 mr-4" />
+                  <span className="font-bold text-brand-darkBlue">Acesso a milhares de clientes</span>
+                </div>
+                <div className="flex items-center">
+                  <Coins className="w-5 h-5 text-blue-600 mr-4" />
+                  <span className="font-bold text-brand-darkBlue">Sistema de moedas flexível</span>
+                </div>
+                <div className="flex items-center">
+                  <Star className="w-5 h-5 text-blue-600 mr-4" />
+                  <span className="font-bold text-brand-darkBlue">Sistema de avaliações</span>
+                </div>
+                <div className="flex items-center">
+                  <Smartphone className="w-5 h-5 text-blue-600 mr-4" />
+                  <span className="font-bold text-brand-darkBlue">Acesse de qualquer lugar</span>
+                </div>
+              </div>
+
+              <Link to="/auth" className="inline-flex items-center bg-transparent border-none text-brand-darkBlue font-black text-lg hover:underline transition-all">
+                <UserPlus className="mr-3 w-6 h-6" />
+                Cadastrar-se Grátis
+              </Link>
             </div>
           </div>
         </div>
