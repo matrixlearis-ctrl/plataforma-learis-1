@@ -184,7 +184,8 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                     }`}
                   >
                     <div className={`mr-6 p-4 rounded-2xl transition-all ${formData.category === cat.id ? 'bg-brand-blue text-white shadow-lg' : 'bg-white text-gray-600 group-hover:text-brand-blue'}`}>
-                      {React.cloneElement(cat.icon as React.ReactElement, { className: "w-6 h-6" })}
+                      {/* Fix: TypeScript error by casting to ReactElement<any> */}
+                      {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
                     </div>
                     <span className={`text-xl font-black transition-colors ${formData.category === cat.id ? 'text-brand-darkBlue' : 'text-gray-800'}`}>
                       {cat.name}

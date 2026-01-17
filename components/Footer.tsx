@@ -9,13 +9,24 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Logo and Tagline */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-black text-2xl">S</span>
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/images/logo.png" 
+                alt="Samej Logo" 
+                className="h-10 w-auto object-contain brightness-0 invert" 
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden flex items-center space-x-3">
+                <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-black text-2xl">S</span>
+                </div>
+                <span className="text-2xl font-black text-white tracking-tight">Samej</span>
               </div>
-              <span className="text-2xl font-black text-white tracking-tight">Samej</span>
-            </div>
-            <p className="text-gray-400 font-medium text-sm leading-relaxed max-w-xs">
+            </Link>
+            <p className="text-gray-400 font-bold text-sm leading-relaxed max-w-xs">
               O seu melhor portal de Serviços. Conectando quem precisa com quem sabe fazer.
             </p>
             <div className="flex space-x-4">

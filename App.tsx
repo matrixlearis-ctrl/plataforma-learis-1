@@ -204,7 +204,8 @@ const App: React.FC = () => {
             <Route path="/profissional/leads" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-                  const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completed_jobs }).eq('id', p.userId);
+                  // Fix: Property 'completed_jobs' does not exist on type 'ProfessionalProfile'. Using completedJobs.
+                  const { error } = await supabase.from('profiles').update({ credits: p.credits, completed_jobs: p.completedJobs }).eq('id', p.userId);
                   if (!error) setProProfile(p);
                 }} onUpdateOrder={async (o) => {
                   const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);

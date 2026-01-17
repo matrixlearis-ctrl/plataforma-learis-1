@@ -19,22 +19,37 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
         <Link to="/" onClick={closeMenu} className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-md">
-            <span className="text-white font-black text-2xl">S</span>
+          {/* Logo Image Placeholder - Points to images/logo.png */}
+          <div className="flex items-center">
+            <img 
+              src="/images/logo.png" 
+              alt="Samej Logo" 
+              className="h-12 w-auto object-contain"
+              onError={(e) => {
+                // Fallback caso a imagem ainda não exista
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <div className="hidden flex items-center space-x-3">
+              <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-white font-black text-2xl">S</span>
+              </div>
+              <span className="text-2xl font-black text-black tracking-tight">Samej</span>
+            </div>
           </div>
-          <span className="text-2xl font-black text-black tracking-tight">Samej</span>
         </Link>
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center space-x-8">
-          <Link to="/profissionais" className="text-gray-500 hover:text-brand-blue font-semibold text-sm transition-colors flex items-center">
-            <Search className="w-4 h-4 mr-2" /> Profissionais
+          <Link to="/profissionais" className="text-gray-700 hover:text-brand-blue font-bold text-sm transition-colors flex items-center">
+            <Search className="w-4 h-4 mr-2" /> Encontrar Profissionais
           </Link>
           
           {!user && (
             <>
-              <Link to="/auth" className="text-gray-500 hover:text-brand-blue font-semibold text-sm transition-colors">Entrar</Link>
-              <Link to="/pedir-orcamento" className="bg-brand-orange text-white px-7 py-3 rounded-full hover:bg-brand-lightOrange font-bold text-sm transition-all shadow-lg hover:shadow-orange-200 active:scale-95">
+              <Link to="/auth" className="text-gray-700 hover:text-brand-blue font-bold text-sm transition-colors">Entrar</Link>
+              <Link to="/pedir-orcamento" className="bg-brand-orange text-white px-7 py-3 rounded-full hover:bg-brand-lightOrange font-black text-sm transition-all shadow-lg hover:shadow-orange-200 active:scale-95 uppercase">
                 Pedir Orçamento Grátis
               </Link>
             </>
@@ -54,7 +69,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
                   {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 text-gray-400" />}
                 </div>
-                <span className="text-sm font-bold text-gray-700 group-hover:text-brand-blue transition-colors">{user.name.split(' ')[0]}</span>
+                <span className="text-sm font-bold text-gray-800 group-hover:text-brand-blue transition-colors">{user.name.split(' ')[0]}</span>
               </Link>
               
               <button onClick={onLogout} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
@@ -74,19 +89,19 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
       {isMenuOpen && (
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b shadow-2xl z-50 animate-in slide-in-from-top duration-300">
           <div className="p-6 space-y-5">
-            <Link to="/profissionais" onClick={closeMenu} className="flex items-center p-4 text-gray-700 font-bold hover:bg-brand-blue/5 rounded-2xl">
+            <Link to="/profissionais" onClick={closeMenu} className="flex items-center p-4 text-gray-800 font-black hover:bg-brand-blue/5 rounded-2xl">
               <Search className="w-5 h-5 mr-4 text-brand-blue" /> Encontrar Profissionais
             </Link>
             
             {user ? (
               <div className="space-y-4">
                 <div className="p-5 bg-brand-bg rounded-[2rem] border border-gray-100">
-                  <p className="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest">MINHA CONTA</p>
-                  <Link to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} onClick={closeMenu} className="flex items-center font-bold text-gray-800 py-3">
+                  <p className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">MINHA CONTA</p>
+                  <Link to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} onClick={closeMenu} className="flex items-center font-black text-gray-800 py-3">
                     <UserIcon className="w-5 h-5 mr-4 text-brand-blue" /> Painel Principal
                   </Link>
                   {user.role === UserRole.PROFESSIONAL && (
-                    <Link to="/profissional/recarregar" onClick={closeMenu} className="flex items-center font-bold text-brand-orange py-3">
+                    <Link to="/profissional/recarregar" onClick={closeMenu} className="flex items-center font-black text-brand-orange py-3">
                       <Coins className="w-5 h-5 mr-4" /> Saldo: {credits} créditos
                     </Link>
                   )}
@@ -97,10 +112,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 pt-4 border-t border-gray-100">
-                <Link to="/auth" onClick={closeMenu} className="block p-4 text-gray-700 font-bold hover:bg-gray-50 rounded-2xl text-center border-2 border-gray-100">
-                  Entrar
+                <Link to="/auth" onClick={closeMenu} className="block p-4 text-gray-800 font-black hover:bg-gray-50 rounded-2xl text-center border-2 border-gray-100">
+                  ENTRAR
                 </Link>
-                <Link to="/pedir-orcamento" onClick={closeMenu} className="block p-5 bg-brand-orange text-white font-black rounded-2xl text-center shadow-lg active:scale-95">
+                <Link to="/pedir-orcamento" onClick={closeMenu} className="block p-5 bg-brand-orange text-white font-black rounded-2xl text-center shadow-lg active:scale-95 uppercase">
                   PEDIR ORÇAMENTO GRÁTIS
                 </Link>
               </div>

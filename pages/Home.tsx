@@ -33,10 +33,10 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight max-w-4xl mx-auto">
-            Resolva seus projetos com os <span className="text-brand-orange">melhores</span> profissionais
+            Conectamos você com os <span className="text-brand-orange">melhores</span> profissionais
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/80 mb-12 max-w-2xl mx-auto font-medium">
-            Obras, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
+            construção, reformas, limpeza e manutenções. Receba até 4 orçamentos gratuitos em poucos minutos.
           </p>
           
           <form 
@@ -79,7 +79,8 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:border-brand-blue/20 hover:-translate-y-2 transition-all flex flex-col items-center text-center group"
             >
               <div className="w-20 h-20 bg-brand-bg text-brand-blue rounded-3xl flex items-center justify-center mb-6 group-hover:bg-brand-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                {React.cloneElement(cat.icon as React.ReactElement, { className: "w-8 h-8" })}
+                {/* Fix: TypeScript error by casting to ReactElement<any> */}
+                {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-8 h-8" })}
               </div>
               <span className="font-extrabold text-gray-800 text-lg group-hover:text-brand-blue transition-colors leading-tight">{cat.name}</span>
               <span className="text-brand-orange text-xs font-black uppercase mt-4 opacity-0 group-hover:opacity-100 transition-all tracking-widest">Pedir Agora</span>
