@@ -41,17 +41,20 @@ const Home: React.FC<HomeProps> = ({ user }) => {
     {
       name: "Clayton Amaral",
       role: "Cliente - São Paulo, SP",
-      avatar: "/images/clayton.jpg"
+      avatar: "/images/clayton.jpg",
+      content: "Excelente plataforma! Encontrei um profissional em menos de 1 hora e o serviço ficou impecável. Recomendo a todos que buscam qualidade e agilidade."
     },
     {
       name: "José Reis",
       role: "Pedreiro - Rio de Janeiro, RJ",
-      avatar: "/images/jose.jpg"
+      avatar: "/images/jose.jpg",
+      content: "Como profissional, a Samej mudou minha rotina. Recebo clientes todos os dias direto no meu celular e meu faturamento cresceu muito."
     },
     {
       name: "Clara Almeida",
       role: "Cliente - Belo Horizonte, MG",
-      avatar: "/images/clara.jpg"
+      avatar: "/images/clara.jpg",
+      content: "O processo de pedir orçamento é muito simples. Os profissionais que me contataram foram super atenciosos e os preços bem competitivos."
     }
   ];
 
@@ -105,28 +108,6 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* Trust Stats */}
-      <section className="bg-white py-12 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="text-center">
-            <p className="text-3xl md:text-4xl font-black text-brand-darkBlue">+50k</p>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Serviços Realizados</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl md:text-4xl font-black text-brand-darkBlue">4.9/5</p>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Avaliação Média</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl md:text-4xl font-black text-brand-darkBlue">15min</p>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Tempo Médio de Resposta</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl md:text-4xl font-black text-brand-darkBlue">100%</p>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Segurança Garantida</p>
-          </div>
-        </div>
-      </section>
-
       {/* Categories Grid */}
       <section className="bg-brand-bg py-32 px-4">
         <div className="max-w-7xl mx-auto">
@@ -135,7 +116,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               Explore por <span className="text-brand-blue">Categorias</span>
             </h2>
             <p className="text-lg text-gray-500 font-bold max-w-xl mx-auto uppercase tracking-tight">
-              Selecione o serviço desejado e conect-se com especialistas.
+              Selecione o serviço desejado e conecte-se com especialistas.
             </p>
           </div>
 
@@ -243,27 +224,34 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-16 text-center tracking-tight">O que nossos usuários dizem</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((item, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex items-center">
-                <div className="flex-shrink-0 mr-6">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-50 shadow-sm">
-                    <img 
-                      src={item.avatar} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = `https://picsum.photos/seed/${item.name}/200`;
-                      }}
-                    />
+              <div key={idx} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex flex-col">
+                <div className="flex items-center mb-6">
+                  <div className="flex-shrink-0 mr-6">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-50 shadow-sm">
+                      <img 
+                        src={item.avatar} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://picsum.photos/seed/${item.name}/200`;
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-gray-900 leading-tight mb-1">{item.name}</h3>
+                    <p className="text-sm font-bold text-gray-400 mb-2">{item.role}</p>
+                    <div className="flex text-amber-400">
+                      {[...Array(5)].map((_, j) => (
+                        <Star key={j} className="w-4 h-4 fill-current" />
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-black text-gray-900 leading-tight mb-1">{item.name}</h3>
-                  <p className="text-sm font-bold text-gray-400 mb-2">{item.role}</p>
-                  <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
+                <div className="pt-4 border-t border-gray-50">
+                   <p className="text-gray-600 italic font-medium leading-relaxed">
+                     "{item.content}"
+                   </p>
                 </div>
               </div>
             ))}

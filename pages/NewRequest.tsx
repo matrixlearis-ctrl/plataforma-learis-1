@@ -1,9 +1,28 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, OrderStatus, OrderRequest } from '../types';
-import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle, ArrowLeft, MessageSquare, Calendar, Phone, Home, User as UserIcon } from 'lucide-react';
+import { 
+  Send, 
+  CheckCircle2, 
+  ChevronRight, 
+  Loader2, 
+  MapPin, 
+  AlertCircle, 
+  ArrowLeft, 
+  MessageSquare, 
+  Calendar, 
+  Phone, 
+  Home, 
+  User as UserIcon,
+  Star,
+  Clock,
+  Hammer,
+  Paintbrush,
+  Lightbulb,
+  Shovel,
+  Droplets
+} from 'lucide-react';
 
 interface NewRequestProps {
   user: User | null;
@@ -36,13 +55,34 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
   const [submitted, setSubmitted] = useState(false);
 
-  // Função para aplicar máscara de telefone (XX) XXXXX-XXXX
+  // Dados dos profissionais para o carrossel do Passo 3
+  const proPreviews = [
+    { name: 'João Silva', role: 'Pedreiro', rating: 4.9, reviews: 127, exp: 15, loc: 'São Paulo, SP', tags: ['Alvenaria', 'Acabamentos', 'Reformas'], img: '/images/joao.jpg', icon: <Hammer className="w-4 h-4" /> },
+    { name: 'Tiago Menezes', role: 'Pintor', rating: 4.8, reviews: 89, exp: 12, loc: 'Rio de Janeiro, RJ', tags: ['Pintura Residencial', 'Textura', 'Verniz'], img: '/images/tiago.jpg', icon: <Paintbrush className="w-4 h-4" /> },
+    { name: 'Ricardo Santos', role: 'Eletricista', rating: 5.0, reviews: 156, exp: 20, loc: 'Belo Horizonte, MG', tags: ['Instalações', 'Manutenção', 'Emergência'], img: '/images/ricardo.jpg', icon: <Lightbulb className="w-4 h-4" /> },
+    { name: 'Francisco Lessa', role: 'Jardineiro', rating: 4.7, reviews: 64, exp: 10, loc: 'Curitiba, PR', tags: ['Paisagismo', 'Poda', 'Adubação'], img: '/images/francisco.jpg', icon: <Shovel className="w-4 h-4" /> },
+    { name: 'Pedro Lima', role: 'Encanador', rating: 4.9, reviews: 112, exp: 8, loc: 'Porto Alegre, RS', tags: ['Hidráulica', 'Reparos', 'Desentupimento'], img: '/images/pedro.jpg', icon: <Droplets className="w-4 h-4" /> },
+    { name: 'Mara da Silva', role: 'Arquiteta', rating: 5.0, reviews: 42, exp: 5, loc: 'Florianópolis, SC', tags: ['Projetos 3D', 'Interiores', 'Reformas'], img: '/images/mara.jpg', icon: <Home className="w-4 h-4" /> },
+  ];
+
+  // Estado para o carrossel infinito
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  useEffect(() => {
+    if (step === 3) {
+      const interval = setInterval(() => {
+        setCarouselIndex((prev) => (prev + 1) % proPreviews.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [step, proPreviews.length]);
+
   const maskPhone = (value: string) => {
     if (!value) return "";
-    value = value.replace(/\D/g, ""); // Remove tudo que não é número
-    value = value.replace(/^(\d{2})(\d)/g, "($1) $2"); // Coloca parênteses no DDD
-    value = value.replace(/(\d)(\d{4})$/, "$1-$2"); // Coloca o hífen
-    return value.substring(0, 15); // Limita ao tamanho da máscara
+    value = value.replace(/\D/g, "");
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+    return value.substring(0, 15);
   };
 
   useEffect(() => {
@@ -65,7 +105,6 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             setError("CEP não encontrado.");
           }
         } catch (error) {
-          console.error("Erro ao buscar CEP:", error);
           setError("Erro ao consultar o CEP.");
         } finally {
           setLoadingCep(false);
@@ -92,15 +131,9 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
   const handleNext = () => {
     if (validateStep(step)) {
       setError(null);
-      if (step < totalSteps) {
-        setStep(step + 1);
-      }
+      if (step < totalSteps) setStep(step + 1);
     } else {
-      if (step === 5) {
-        setError("Por favor, preencha o telefone completo com DDD e os 9 dígitos.");
-      } else {
-        setError("Por favor, preencha todos os campos obrigatórios corretamente.");
-      }
+      setError(step === 5 ? "Preencha o telefone com DDD e os 9 dígitos." : "Por favor, preencha todos os campos obrigatórios.");
     }
   };
 
@@ -115,12 +148,6 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
       handleNext();
       return;
     }
-
-    if (!validateStep(5)) {
-      setError("Por favor, preencha o telefone completo com DDD e os 9 dígitos.");
-      return;
-    }
-
     setError(null);
     setIsSubmitting(true);
     try {
@@ -142,11 +169,10 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
         leadPrice: 5,
         unlockedBy: []
       };
-
       await onAddOrder(newOrder);
       setSubmitted(true);
     } catch (err: any) {
-      setError("Não foi possível enviar seu pedido. Verifique sua conexão.");
+      setError("Não foi possível enviar seu pedido.");
     } finally {
       setIsSubmitting(false);
     }
@@ -158,14 +184,11 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
         <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
           <CheckCircle2 className="w-14 h-14" />
         </div>
-        <h2 className="text-4xl font-black text-brand-darkBlue mb-6 tracking-tight">PEDIDO ENVIADO COM SUCESSO!</h2>
+        <h2 className="text-4xl font-black text-brand-darkBlue mb-6 tracking-tight">PEDIDO ENVIADO!</h2>
         <p className="text-gray-600 mb-12 text-xl font-medium leading-relaxed max-w-md mx-auto">
-          Excelente! Sua solicitação agora será enviada para profissionais verificados. Você receberá até 4 contatos.
+          Excelente! Sua solicitação será enviada para profissionais verificados.
         </p>
-        <button 
-          onClick={() => navigate(user ? '/cliente/dashboard' : '/')} 
-          className="w-full bg-brand-orange text-white px-10 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange transition-all shadow-xl active:scale-95"
-        >
+        <button onClick={() => navigate(user ? '/cliente/dashboard' : '/')} className="w-full bg-brand-orange text-white px-10 py-6 rounded-[2rem] font-black text-xl hover:bg-brand-lightOrange shadow-xl">
           {user ? 'VER MEUS PEDIDOS' : 'VOLTAR AO INÍCIO'}
         </button>
       </div>
@@ -175,19 +198,20 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
   const progress = (step / totalSteps) * 100;
 
   return (
-    <div className="max-w-4xl mx-auto my-12 px-4">
-      <div className="mb-8 flex items-center justify-between">
-        <button onClick={handleBack} className="flex items-center text-gray-700 hover:text-brand-blue font-bold transition-colors">
-          <ArrowLeft className="w-5 h-5 mr-2" /> Voltar
-        </button>
-        <span className="text-xs font-black text-gray-600 uppercase tracking-widest">Passo {step} de {totalSteps}</span>
+    <div className="max-w-7xl mx-auto my-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8 flex items-center justify-between">
+          <button onClick={handleBack} className="flex items-center text-gray-700 hover:text-brand-blue font-bold transition-colors">
+            <ArrowLeft className="w-5 h-5 mr-2" /> Voltar
+          </button>
+          <span className="text-xs font-black text-gray-600 uppercase tracking-widest">Passo {step} de {totalSteps}</span>
+        </div>
+        <div className="h-2 w-full bg-gray-100 rounded-full mb-12 overflow-hidden shadow-inner">
+          <div className="h-full bg-brand-orange transition-all duration-500 rounded-full shadow-lg shadow-orange-200" style={{ width: `${progress}%` }}></div>
+        </div>
       </div>
 
-      <div className="h-2 w-full bg-gray-100 rounded-full mb-12 overflow-hidden shadow-inner">
-        <div className="h-full bg-brand-orange transition-all duration-500 rounded-full shadow-lg shadow-orange-200" style={{ width: `${progress}%` }}></div>
-      </div>
-
-      <div className="bg-white rounded-[4rem] border border-gray-100 shadow-3xl overflow-hidden p-8 md:p-20 relative">
+      <div className={`bg-white rounded-[4rem] border border-gray-100 shadow-3xl overflow-hidden p-8 md:p-20 relative mx-auto ${step === 3 ? 'max-w-7xl' : 'max-w-4xl'}`}>
         <form onSubmit={handleSubmit} className="relative z-10 space-y-12">
           {error && (
             <div className="p-6 bg-red-50 border-2 border-red-100 text-red-700 rounded-3xl flex items-center text-sm font-bold animate-in fade-in slide-in-from-top-4">
@@ -201,24 +225,8 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Qual serviço você precisa?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {CATEGORIES.map(cat => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => {
-                      setFormData({ ...formData, category: cat.id });
-                      setStep(2);
-                    }}
-                    className={`flex items-center p-6 rounded-3xl border-4 transition-all text-left group ${
-                      formData.category === cat.id 
-                      ? 'border-brand-blue bg-blue-50 text-brand-blue shadow-lg' 
-                      : 'border-gray-50 hover:border-brand-blue/20 text-gray-700'
-                    }`}
-                  >
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-5 transition-colors ${
-                      formData.category === cat.id ? 'bg-brand-blue text-white' : 'bg-brand-bg text-brand-blue group-hover:bg-brand-blue group-hover:text-white'
-                    }`}>
-                      {cat.icon}
-                    </div>
+                  <button key={cat.id} type="button" onClick={() => { setFormData({ ...formData, category: cat.id }); setStep(2); }} className={`flex items-center p-6 rounded-3xl border-4 transition-all text-left group ${formData.category === cat.id ? 'border-brand-blue bg-blue-50 text-brand-blue shadow-lg' : 'border-gray-50 hover:border-brand-blue/20 text-gray-700'}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-5 transition-colors ${formData.category === cat.id ? 'bg-brand-blue text-white' : 'bg-brand-bg text-brand-blue group-hover:bg-brand-blue group-hover:text-white'}`}>{cat.icon}</div>
                     <span className="font-black uppercase text-sm tracking-tight">{cat.name}</span>
                   </button>
                 ))}
@@ -233,70 +241,19 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="relative">
                     <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="CEP"
-                      required
-                      maxLength={9}
-                      value={formData.cep}
-                      onChange={e => setFormData({ ...formData, cep: e.target.value })}
-                      className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                    />
+                    <input type="text" placeholder="CEP" required maxLength={9} value={formData.cep} onChange={e => setFormData({ ...formData, cep: e.target.value })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
                     {loadingCep && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-brand-blue" />}
                   </div>
-                  <input
-                    type="text"
-                    placeholder="CIDADE / UF"
-                    readOnly
-                    required
-                    value={formData.location}
-                    className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-500 uppercase cursor-not-allowed"
-                  />
+                  <input type="text" placeholder="CIDADE / UF" readOnly required value={formData.location} className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-500 uppercase cursor-not-allowed" />
                 </div>
-
-                <input
-                  type="text"
-                  placeholder="RUA / LOGRADOURO"
-                  required
-                  value={formData.address}
-                  onChange={e => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                />
-
-                <input
-                  type="text"
-                  placeholder="BAIRRO"
-                  required
-                  value={formData.neighborhood}
-                  onChange={e => setFormData({ ...formData, neighborhood: e.target.value })}
-                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                />
-
+                <input type="text" placeholder="RUA / LOGRADOURO" required value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                <input type="text" placeholder="BAIRRO" required value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input
-                    type="text"
-                    placeholder="NÚMERO"
-                    required
-                    value={formData.number}
-                    onChange={e => setFormData({ ...formData, number: e.target.value })}
-                    className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                  />
-                  <input
-                    type="text"
-                    placeholder="COMPLEMENTO (OPCIONAL)"
-                    value={formData.complement}
-                    onChange={e => setFormData({ ...formData, complement: e.target.value })}
-                    className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                  />
+                  <input type="text" placeholder="NÚMERO" required value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                  <input type="text" placeholder="COMPLEMENTO (OPCIONAL)" value={formData.complement} onChange={e => setFormData({ ...formData, complement: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
                 </div>
               </div>
-              <button 
-                type="button" 
-                onClick={handleNext} 
-                className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition-all uppercase tracking-tight"
-              >
-                Próximo Passo
-              </button>
+              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all uppercase tracking-tight">Próximo Passo</button>
             </div>
           )}
 
@@ -304,18 +261,59 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
               <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">O que precisa ser feito?</h2>
               <div className="relative">
-                <textarea
-                  rows={6}
-                  required
-                  placeholder="Descreva os detalhes do serviço. Quanto mais detalhes, melhores os orçamentos!"
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none"
-                />
+                <textarea rows={6} required placeholder="Descreva os detalhes do serviço..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none" />
               </div>
-              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition-all uppercase">
+              
+              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all uppercase">
                 Próximo Passo
               </button>
+
+              {/* Seção de Profissionais Disponíveis (Solicitado pelo usuário) */}
+              <div className="pt-20 border-t border-gray-100 text-center">
+                <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4 tracking-tight">Profissionais disponíveis na sua região</h2>
+                <p className="text-gray-500 font-bold mb-12">Conheça alguns dos profissionais que podem atender você</p>
+                
+                <div className="relative overflow-hidden w-full pb-10">
+                  <div 
+                    className="flex transition-transform duration-700 ease-in-out gap-6 px-4"
+                    style={{ transform: `translateX(-${carouselIndex * (100 / 3)}%)` }}
+                  >
+                    {[...proPreviews, ...proPreviews].map((pro, idx) => (
+                      <div key={idx} className="min-w-[calc(33.333%-1rem)] bg-white rounded-[2rem] border border-gray-100 shadow-lg p-8 flex flex-col items-center group hover:shadow-2xl transition-all">
+                        <div className="relative mb-6">
+                           <img 
+                            src={pro.img} 
+                            alt={pro.name} 
+                            className="w-24 h-24 rounded-full object-cover border-4 border-brand-blue shadow-md" 
+                            onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${pro.name}/200`; }}
+                           />
+                        </div>
+                        <h3 className="text-xl font-black text-brand-darkBlue mb-1">{pro.name}</h3>
+                        <div className="flex items-center text-brand-blue font-bold text-xs uppercase mb-3">
+                           {pro.icon}
+                           <span className="ml-2">{pro.role}</span>
+                        </div>
+                        <div className="flex text-amber-400 mb-1">
+                          {[...Array(5)].map((_, i) => <Star key={i} className={`w-4 h-4 fill-current ${i >= Math.floor(pro.rating) ? 'text-gray-200' : ''}`} />)}
+                        </div>
+                        <p className="text-[10px] text-gray-400 font-bold mb-4">{pro.rating} ({pro.reviews} avaliações)</p>
+                        <div className="space-y-2 mb-6 text-xs text-gray-500 font-bold w-full">
+                           <div className="flex items-center justify-center"><Clock className="w-3 h-3 mr-2 text-brand-blue" /> {pro.exp} anos de experiência</div>
+                           <div className="flex items-center justify-center"><MapPin className="w-3 h-3 mr-2 text-brand-blue" /> {pro.loc}</div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 justify-center mb-8">
+                           {pro.tags.map(tag => (
+                             <span key={tag} className="bg-blue-50 text-brand-blue text-[9px] font-black uppercase px-3 py-1.5 rounded-full tracking-wider">{tag}</span>
+                           ))}
+                        </div>
+                        <button className="w-full flex items-center justify-center py-3 px-4 border-2 border-brand-blue text-brand-blue rounded-2xl font-black text-xs uppercase hover:bg-brand-blue hover:text-white transition-all group-hover:shadow-lg">
+                           <Send className="w-3 h-3 mr-2" /> Solicitar Orçamento
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -329,24 +327,8 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                   { id: 'mais_3_meses', label: 'MAIS DE 3 MESES', icon: <Calendar className="w-5 h-5" /> },
                   { id: 'orcamento', label: 'APENAS ORÇAMENTO', icon: <Calendar className="w-5 h-5" /> }
                 ].map(opt => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => {
-                      setFormData({ ...formData, deadline: opt.id });
-                      setStep(5);
-                    }}
-                    className={`flex items-center p-6 rounded-3xl border-4 transition-all text-left ${
-                      formData.deadline === opt.id 
-                      ? 'border-brand-blue bg-blue-50 text-brand-blue' 
-                      : 'border-gray-50 hover:border-brand-blue/20 text-gray-700'
-                    }`}
-                  >
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-5 ${
-                      formData.deadline === opt.id ? 'bg-brand-blue text-white' : 'bg-brand-bg text-brand-blue'
-                    }`}>
-                      {opt.icon}
-                    </div>
+                  <button key={opt.id} type="button" onClick={() => { setFormData({ ...formData, deadline: opt.id }); setStep(5); }} className={`flex items-center p-6 rounded-3xl border-4 transition-all text-left ${formData.deadline === opt.id ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-gray-50 hover:border-brand-blue/20 text-gray-700'}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-5 ${formData.deadline === opt.id ? 'bg-brand-blue text-white' : 'bg-brand-bg text-brand-blue'}`}>{opt.icon}</div>
                     <span className="font-black text-sm uppercase">{opt.label}</span>
                   </button>
                 ))}
@@ -360,32 +342,14 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <div className="space-y-6">
                 <div className="relative">
                   <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="SEU NOME COMPLETO"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                  />
+                  <input type="text" required placeholder="SEU NOME COMPLETO" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
                 </div>
                 <div className="relative">
                   <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="tel"
-                    required
-                    placeholder="WHATSAPP / CELULAR"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: maskPhone(e.target.value) })}
-                    className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                  />
+                  <input type="tel" required placeholder="WHATSAPP / CELULAR" value={formData.phone} onChange={e => setFormData({ ...formData, phone: maskPhone(e.target.value) })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
                 </div>
               </div>
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-brand-darkBlue text-white py-6 rounded-[2.5rem] font-black text-2xl shadow-3xl active:scale-95 disabled:opacity-50 transition-all uppercase flex items-center justify-center"
-              >
+              <button type="submit" disabled={isSubmitting} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2.5rem] font-black text-2xl shadow-3xl active:scale-95 disabled:opacity-50 transition-all uppercase flex items-center justify-center">
                 {isSubmitting ? <Loader2 className="w-8 h-8 animate-spin" /> : (
                   <>
                     ENVIAR PEDIDO
