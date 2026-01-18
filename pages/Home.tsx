@@ -37,6 +37,24 @@ const Home: React.FC<HomeProps> = ({ user }) => {
     }
   };
 
+  const testimonials = [
+    {
+      name: "Clayton Amaral",
+      role: "Cliente - São Paulo, SP",
+      avatar: "/images/clayton.jpg"
+    },
+    {
+      name: "José Reis",
+      role: "Pedreiro - Rio de Janeiro, RJ",
+      avatar: "/images/jose.jpg"
+    },
+    {
+      name: "Clara Almeida",
+      role: "Cliente - Belo Horizonte, MG",
+      avatar: "/images/clara.jpg"
+    }
+  ];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section - Estilo Habitissimo Premium */}
@@ -55,7 +73,6 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/70 mb-14 max-w-2xl mx-auto font-medium">
             Conte com a gente para conectar você aos melhores profissionais e receba até 4 orçamentos gratuitos.
-
           </p>
           
           <form 
@@ -110,7 +127,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* Categories Grid - Super Visual */}
+      {/* Categories Grid */}
       <section className="bg-brand-bg py-32 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24 space-y-4">
@@ -178,7 +195,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Receba orçamentos</h3>
-              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">Receba até 4 orçamentos gratuitos por email e WhatsApp em até 24 horas.</p>
+              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">Receba até 4 orçamentos gratuitos por email e WhatsApp.</p>
             </div>
             <div className="flex flex-col items-center text-center group">
               <div className="relative mb-8">
@@ -194,7 +211,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
-      {/* CTA Section - Para Profissionais (ATUALIZADO CONFORME SOLICITADO) */}
+      {/* CTA Section - Para Profissionais */}
       <section className="py-24 px-4 bg-brand-darkBlue overflow-hidden relative">
          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-brand-orange/10 rounded-full blur-[100px]"></div>
          <div className="max-w-7xl mx-auto bg-brand-orange rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center gap-16 relative z-10 shadow-3xl">
@@ -220,26 +237,32 @@ const Home: React.FC<HomeProps> = ({ user }) => {
          </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-white py-32 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-black text-brand-darkBlue mb-20 uppercase tracking-widest">O que dizem os nossos clientes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-brand-bg p-12 rounded-[3rem] text-left relative transition-transform hover:-translate-y-2">
-                <div className="flex text-amber-400 mb-6">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="w-5 h-5 fill-current" />)}
-                </div>
-                <p className="text-gray-700 font-bold text-lg mb-8 leading-relaxed italic">
-                  "{i === 1 ? 'Melhor plataforma para encontrar pedreiros qualificados. Recebi 3 orçamentos em 2 horas!' : i === 2 ? 'Sou eletricista e uso a Samej há 6 meses. Meu faturamento dobrou!' : 'Super simples de usar, atendimento ao cliente nota 10.'}"
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gray-200 rounded-full border-4 border-white shadow-sm overflow-hidden">
-                    <img src={`https://picsum.photos/seed/user${i}/100`} className="w-full h-full object-cover" />
+      {/* Testimonials - O que nossos usuários dizem */}
+      <section className="bg-brand-bg py-32 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-16 text-center tracking-tight">O que nossos usuários dizem</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {testimonials.map((item, idx) => (
+              <div key={idx} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex items-center">
+                <div className="flex-shrink-0 mr-6">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-50 shadow-sm">
+                    <img 
+                      src={item.avatar} 
+                      alt={item.name} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = `https://picsum.photos/seed/${item.name}/200`;
+                      }}
+                    />
                   </div>
-                  <div>
-                    <p className="font-black text-brand-darkBlue uppercase text-xs tracking-widest">{i === 1 ? 'Carlos Silva' : i === 2 ? 'Ricardo Nunes' : 'Amanda Costa'}</p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{i === 1 ? 'Cliente Satisfeito' : i === 2 ? 'Profissional Parceiro' : 'Cliente Satisfeito'}</p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 leading-tight mb-1">{item.name}</h3>
+                  <p className="text-sm font-bold text-gray-400 mb-2">{item.role}</p>
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-current" />
+                    ))}
                   </div>
                 </div>
               </div>
