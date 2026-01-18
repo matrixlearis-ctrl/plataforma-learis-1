@@ -54,7 +54,8 @@ const Home: React.FC<HomeProps> = ({ user }) => {
             Sua casa, <span className="text-brand-orange italic">perfeita</span>. <br/>Sem complicações.
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/70 mb-14 max-w-2xl mx-auto font-medium">
-            Receba até 4 orçamentos gratuitos de profissionais verificados na sua região em menos de 24h.
+            Conte com a gente para conectar você aos melhores profissionais e receba até 4 orçamentos gratuitos.
+
           </p>
           
           <form 
