@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, OrderStatus, OrderRequest } from '../types';
-import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle, ArrowLeft, MessageSquare, Calendar, Phone, Home } from 'lucide-react';
+import { Send, CheckCircle2, ChevronRight, Loader2, MapPin, AlertCircle, ArrowLeft, MessageSquare, Calendar, Phone, Home, User as UserIcon } from 'lucide-react';
 
 interface NewRequestProps {
   user: User | null;
@@ -36,6 +36,15 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
   const [submitted, setSubmitted] = useState(false);
 
+  // Função para aplicar máscara de telefone (XX) XXXXX-XXXX
+  const maskPhone = (value: string) => {
+    if (!value) return "";
+    value = value.replace(/\D/g, ""); // Remove tudo que não é número
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2"); // Coloca parênteses no DDD
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2"); // Coloca o hífen
+    return value.substring(0, 15); // Limita ao tamanho da máscara
+  };
+
   useEffect(() => {
     const fetchAddress = async () => {
       const cleanCep = formData.cep.replace(/\D/g, '');
@@ -51,9 +60,13 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               neighborhood: data.bairro || '',
               address: data.logradouro || ''
             }));
+            setError(null);
+          } else {
+            setError("CEP não encontrado.");
           }
         } catch (error) {
           console.error("Erro ao buscar CEP:", error);
+          setError("Erro ao consultar o CEP.");
         } finally {
           setLoadingCep(false);
         }
@@ -62,14 +75,32 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     fetchAddress();
   }, [formData.cep]);
 
+  const validateStep = (currentStep: number) => {
+    switch (currentStep) {
+      case 1: return !!formData.category;
+      case 2: return !!formData.cep && !!formData.location && !!formData.address && !!formData.neighborhood && !!formData.number;
+      case 3: return !!formData.description && formData.description.length > 10;
+      case 4: return !!formData.deadline;
+      case 5: {
+        const cleanPhone = formData.phone.replace(/\D/g, '');
+        return !!formData.name && cleanPhone.length === 11;
+      }
+      default: return true;
+    }
+  };
+
   const handleNext = () => {
-    if (step === 1 && !formData.category) return;
-    if (step === 2 && (!formData.location || !formData.address || !formData.number)) return;
-    if (step === 3 && !formData.description) return;
-    if (step === 4 && !formData.deadline) return;
-    
-    if (step < totalSteps) {
-      setStep(step + 1);
+    if (validateStep(step)) {
+      setError(null);
+      if (step < totalSteps) {
+        setStep(step + 1);
+      }
+    } else {
+      if (step === 5) {
+        setError("Por favor, preencha o telefone completo com DDD e os 9 dígitos.");
+      } else {
+        setError("Por favor, preencha todos os campos obrigatórios corretamente.");
+      }
     }
   };
 
@@ -82,6 +113,11 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     e.preventDefault();
     if (step < totalSteps) {
       handleNext();
+      return;
+    }
+
+    if (!validateStep(5)) {
+      setError("Por favor, preencha o telefone completo com DDD e os 9 dígitos.");
       return;
     }
 
@@ -110,7 +146,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
       await onAddOrder(newOrder);
       setSubmitted(true);
     } catch (err: any) {
-      setError("Não foi possível enviar seu pedido. Verifique os dados.");
+      setError("Não foi possível enviar seu pedido. Verifique sua conexão.");
     } finally {
       setIsSubmitting(false);
     }
@@ -154,7 +190,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
       <div className="bg-white rounded-[4rem] border border-gray-100 shadow-3xl overflow-hidden p-8 md:p-20 relative">
         <form onSubmit={handleSubmit} className="relative z-10 space-y-12">
           {error && (
-            <div className="p-6 bg-red-50 border-2 border-red-100 text-red-700 rounded-3xl flex items-center text-sm font-bold animate-pulse">
+            <div className="p-6 bg-red-50 border-2 border-red-100 text-red-700 rounded-3xl flex items-center text-sm font-bold animate-in fade-in slide-in-from-top-4">
               <AlertCircle className="w-6 h-6 mr-4 flex-shrink-0" />
               {error}
             </div>
@@ -193,50 +229,72 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
           {step === 2 && (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
               <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Onde será o serviço?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="relative">
-                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="relative">
+                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="CEP"
+                      required
+                      maxLength={9}
+                      value={formData.cep}
+                      onChange={e => setFormData({ ...formData, cep: e.target.value })}
+                      className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                    />
+                    {loadingCep && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-brand-blue" />}
+                  </div>
                   <input
                     type="text"
-                    placeholder="CEP"
-                    value={formData.cep}
-                    onChange={e => setFormData({ ...formData, cep: e.target.value })}
-                    className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                    placeholder="CIDADE / UF"
+                    readOnly
+                    required
+                    value={formData.location}
+                    className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-500 uppercase cursor-not-allowed"
                   />
-                  {loadingCep && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-brand-blue" />}
                 </div>
+
                 <input
                   type="text"
-                  placeholder="CIDADE / UF"
-                  readOnly
-                  value={formData.location}
-                  className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-500 uppercase cursor-not-allowed"
+                  placeholder="RUA / LOGRADOURO"
+                  required
+                  value={formData.address}
+                  onChange={e => setFormData({ ...formData, address: e.target.value })}
+                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
                 />
-                <div className="md:col-span-2">
+
+                <input
+                  type="text"
+                  placeholder="BAIRRO"
+                  required
+                  value={formData.neighborhood}
+                  onChange={e => setFormData({ ...formData, neighborhood: e.target.value })}
+                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input
                     type="text"
-                    placeholder="ENDEREÇO"
-                    value={formData.address}
-                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="NÚMERO"
+                    required
+                    value={formData.number}
+                    onChange={e => setFormData({ ...formData, number: e.target.value })}
+                    className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
+                  />
+                  <input
+                    type="text"
+                    placeholder="COMPLEMENTO (OPCIONAL)"
+                    value={formData.complement}
+                    onChange={e => setFormData({ ...formData, complement: e.target.value })}
                     className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
                   />
                 </div>
-                <input
-                  type="text"
-                  placeholder="NÚMERO"
-                  value={formData.number}
-                  onChange={e => setFormData({ ...formData, number: e.target.value })}
-                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                />
-                <input
-                  type="text"
-                  placeholder="COMPLEMENTO (OPCIONAL)"
-                  value={formData.complement}
-                  onChange={e => setFormData({ ...formData, complement: e.target.value })}
-                  className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
-                />
               </div>
-              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-3xl font-black text-xl shadow-2xl active:scale-95 transition-all uppercase">
+              <button 
+                type="button" 
+                onClick={handleNext} 
+                className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition-all uppercase tracking-tight"
+              >
                 Próximo Passo
               </button>
             </div>
@@ -248,13 +306,14 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <div className="relative">
                 <textarea
                   rows={6}
+                  required
                   placeholder="Descreva os detalhes do serviço. Quanto mais detalhes, melhores os orçamentos!"
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none"
                 />
               </div>
-              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-3xl font-black text-xl shadow-2xl active:scale-95 transition-all uppercase">
+              <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition-all uppercase">
                 Próximo Passo
               </button>
             </div>
@@ -300,9 +359,10 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">Dados de Contato</h2>
               <div className="space-y-6">
                 <div className="relative">
-                  <Home className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
+                    required
                     placeholder="SEU NOME COMPLETO"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -313,9 +373,10 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                   <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="tel"
+                    required
                     placeholder="WHATSAPP / CELULAR"
                     value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={e => setFormData({ ...formData, phone: maskPhone(e.target.value) })}
                     className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase"
                   />
                 </div>
@@ -323,11 +384,11 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full bg-brand-orange text-white py-6 rounded-3xl font-black text-2xl shadow-3xl active:scale-95 disabled:opacity-50 transition-all uppercase flex items-center justify-center"
+                className="w-full bg-brand-darkBlue text-white py-6 rounded-[2.5rem] font-black text-2xl shadow-3xl active:scale-95 disabled:opacity-50 transition-all uppercase flex items-center justify-center"
               >
                 {isSubmitting ? <Loader2 className="w-8 h-8 animate-spin" /> : (
                   <>
-                    Publicar Pedido
+                    ENVIAR PEDIDO
                     <ChevronRight className="ml-3 w-6 h-6" />
                   </>
                 )}

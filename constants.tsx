@@ -8,18 +8,19 @@ import {
   Hammer, 
   Shovel, 
   Trash2, 
-  Home 
+  Home,
+  PlusCircle
 } from 'lucide-react';
 
 export const CATEGORIES = [
   { id: 'obras', name: 'Construções e Reformas', icon: <Hammer className="w-5 h-5" /> },
   { id: 'eletrica', name: 'Eletricista', icon: <Lightbulb className="w-5 h-5" /> },
-  { id: 'encanamento', name: 'Impermeabilizações', icon: <Droplets className="w-5 h-5" /> },
+  { id: 'telhado', name: 'Telhado', icon: <Home className="w-5 h-5" /> },
   { id: 'pintura', name: 'Pintura', icon: <Paintbrush className="w-5 h-5" /> },
   { id: 'limpeza', name: 'Limpeza', icon: <Trash2 className="w-5 h-5" /> },
   { id: 'jardim', name: 'Jardinagem', icon: <Shovel className="w-5 h-5" /> },
   { id: 'tecnico', name: 'Climatização e ar condicionado', icon: <Wrench className="w-5 h-5" /> },
-  { id: 'outros', name: 'Outros Serviços', icon: <Home className="w-5 h-5" /> },
+  { id: 'outros', name: 'Outros Serviços', icon: <PlusCircle className="w-5 h-5" /> },
 ];
 
 export const CREDIT_PACKAGES = [
