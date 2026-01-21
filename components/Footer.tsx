@@ -10,10 +10,10 @@ const Footer: React.FC = () => {
           {/* Logo and Tagline */}
           <div className="space-y-6">
             <Link to="/" className="flex items-center">
-              <img 
-                src="/images/logo.png" 
-                alt="Samej Logo" 
-                className="h-14 w-auto object-contain brightness-0 invert" 
+              <img
+                src="/images/logo.png"
+                alt="Samej Logo"
+                className="h-14 w-auto object-contain bg-white p-2 rounded-lg"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
           {/* For Clients */}
           <div>
             <h4 className="text-lg font-black mb-8 uppercase tracking-widest text-white">Para Clientes</h4>
-            <ul className="space-y-4 text-gray-400 font-bold text-sm">
+            <ul className="space-y-4 text-gray-400 font-bold text-[20px]">
               <li>
                 <Link to="/pedir-orcamento" className="hover:text-brand-orange transition-colors">Solicitar Orçamento</Link>
               </li>
@@ -61,7 +61,7 @@ const Footer: React.FC = () => {
           {/* For Professionals */}
           <div>
             <h4 className="text-lg font-black mb-8 uppercase tracking-widest text-white">Para Profissionais</h4>
-            <ul className="space-y-4 text-gray-400 font-bold text-sm">
+            <ul className="space-y-4 text-gray-400 font-bold text-[20px]">
               <li>
                 <Link to="/auth" className="hover:text-brand-orange transition-colors">Cadastrar-se</Link>
               </li>
@@ -77,7 +77,7 @@ const Footer: React.FC = () => {
           {/* Contact */}
           <div>
             <h4 className="text-lg font-black mb-8 uppercase tracking-widest text-white">Contato</h4>
-            <ul className="space-y-4 text-gray-400 font-bold text-sm">
+            <ul className="space-y-4 text-gray-400 font-bold text-[20px]">
               <li className="flex items-center">
                 <Mail className="w-4 h-4 mr-3 text-brand-orange" />
                 <a href="mailto:samejgrup@gmail.com" className="hover:text-brand-orange transition-colors">samejgrup@gmail.com</a>

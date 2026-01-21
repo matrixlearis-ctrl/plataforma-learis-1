@@ -21,9 +21,9 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
         <Link to="/" onClick={closeMenu} className="flex items-center space-x-3 h-full">
           {/* Logo Principal do Usuário */}
           <div className="flex items-center py-2 h-full">
-            <img 
-              src="/images/logo.png" 
-              alt="Samej Logo" 
+            <img
+              src="/images/logo.png"
+              alt="Samej Logo"
               className="h-full w-auto max-h-[60px] object-contain"
               onError={(e) => {
                 // Fallback elegante caso a imagem não seja encontrada
@@ -43,14 +43,14 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center space-x-8">
-          <Link to="/profissionais" className="text-gray-700 hover:text-brand-blue font-bold text-sm transition-colors flex items-center">
+          <Link to="/profissionais" className="text-gray-700 hover:text-brand-blue font-bold text-[20px] transition-colors flex items-center">
             <Search className="w-4 h-4 mr-2" /> Encontrar Profissionais
           </Link>
-          
+
           {!user && (
             <>
-              <Link to="/auth" className="text-gray-700 hover:text-brand-blue font-bold text-sm transition-colors">Entrar</Link>
-              <Link to="/pedir-orcamento" className="bg-brand-orange text-white px-7 py-3 rounded-full hover:bg-brand-lightOrange font-black text-sm transition-all shadow-lg hover:shadow-orange-200 active:scale-95 uppercase">
+              <Link to="/auth" className="text-gray-700 hover:text-brand-blue font-bold text-[20px] transition-colors">Entrar</Link>
+              <Link to="/pedir-orcamento" className="bg-brand-orange text-white px-7 py-3 rounded-full hover:bg-brand-lightOrange font-black text-[20px] transition-all shadow-lg hover:shadow-orange-200 active:scale-95 uppercase">
                 Pedir Orçamento Grátis
               </Link>
             </>
@@ -64,15 +64,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
                   <span className="text-xs font-black text-amber-800">{credits ?? 0} <span className="opacity-50">CR</span></span>
                 </Link>
               )}
-              
-              <Link to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} 
+
+              <Link to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"}
                 className="group flex items-center space-x-3 bg-gray-50 pr-4 pl-1.5 py-1.5 rounded-full border border-gray-100 hover:border-brand-blue/30 transition-all">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
                   {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 text-gray-400" />}
                 </div>
-                <span className="text-sm font-bold text-gray-800 group-hover:text-brand-blue transition-colors">{user.name.split(' ')[0]}</span>
+                <span className="text-[20px] font-bold text-gray-800 group-hover:text-brand-blue transition-colors">{user.name.split(' ')[0]}</span>
               </Link>
-              
+
               <button onClick={onLogout} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
                 <LogOut className="w-5 h-5" />
               </button>
@@ -93,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
             <Link to="/profissionais" onClick={closeMenu} className="flex items-center p-4 text-gray-800 font-black hover:bg-brand-blue/5 rounded-2xl">
               <Search className="w-5 h-5 mr-4 text-brand-blue" /> Encontrar Profissionais
             </Link>
-            
+
             {user ? (
               <div className="space-y-4">
                 <div className="p-5 bg-brand-bg rounded-[2rem] border border-gray-100">
