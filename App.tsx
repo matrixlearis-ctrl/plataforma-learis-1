@@ -14,6 +14,9 @@ import ProfileSettings from './pages/ProfileSettings';
 import RechargeCredits from './pages/RechargeCredits';
 import ProfessionalDirectory from './pages/ProfessionalDirectory';
 import PublicProfile from './pages/PublicProfile';
+import Terms from './pages/Terms';
+import TermsBanner from './components/TermsBanner';
+import ResetPassword from './pages/ResetPassword';
 import { User, UserRole, ProfessionalProfile, OrderRequest, OrderStatus } from './types';
 import { supabase } from './lib/supabase';
 import { Loader2 } from 'lucide-react';
@@ -31,21 +34,21 @@ const App: React.FC = () => {
       const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
       if (!error && data) {
         setOrders(data.map(o => ({
-          id: o.id, 
-          clientId: o.client_id, 
-          clientName: o.client_name, 
+          id: o.id,
+          clientId: o.client_id,
+          clientName: o.client_name,
           category: o.category,
-          description: o.description, 
+          description: o.description,
           phone: o.phone || '',
-          address: o.address || '', 
-          number: o.number || '', 
+          address: o.address || '',
+          number: o.number || '',
           complement: o.complement || '',
-          location: o.location, 
+          location: o.location,
           neighborhood: o.neighborhood || '',
-          deadline: o.deadline, 
-          status: o.status as OrderStatus, 
+          deadline: o.deadline,
+          status: o.status as OrderStatus,
           createdAt: o.created_at,
-          leadPrice: o.lead_price || 5, 
+          leadPrice: o.lead_price || 5,
           unlockedBy: o.unlocked_by || []
         })));
       }
@@ -57,10 +60,10 @@ const App: React.FC = () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
       if (!error && data) {
         setProfessionals(data.map(p => ({
-          id: p.id, userId: p.id, name: p.full_name || 'Profissional', 
+          id: p.id, userId: p.id, name: p.full_name || 'Profissional',
           avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
-          description: p.description || 'Profissional qualificado.', 
-          categories: p.categories || [], region: p.region || 'Brasil', 
+          description: p.description || 'Profissional qualificado.',
+          categories: p.categories || [], region: p.region || 'Brasil',
           rating: p.rating || 5, credits: p.credits || 0,
           completedJobs: p.completed_jobs || 0, phone: p.phone || ''
         })));
@@ -72,31 +75,31 @@ const App: React.FC = () => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (data) {
-        const newUser: User = { 
-          id: data.id, 
-          name: data.full_name || 'Usuário', 
-          email: email || '', 
-          role: data.role as UserRole, 
-          avatar: data.avatar_url 
+        const newUser: User = {
+          id: data.id,
+          name: data.full_name || 'Usuário',
+          email: email || '',
+          role: data.role as UserRole,
+          avatar: data.avatar_url
         };
         setUser(newUser);
         if (data.role === UserRole.PROFESSIONAL) {
-          setProProfile({ 
-            userId: data.id, 
-            description: data.description || '', 
-            categories: data.categories || [], 
-            region: data.region || '', 
-            rating: data.rating || 5, 
-            credits: data.credits || 0, 
-            completedJobs: data.completed_jobs || 0, 
-            phone: data.phone || '' 
+          setProProfile({
+            userId: data.id,
+            description: data.description || '',
+            categories: data.categories || [],
+            region: data.region || '',
+            rating: data.rating || 5,
+            credits: data.credits || 0,
+            completedJobs: data.completed_jobs || 0,
+            phone: data.phone || ''
           });
         }
         return newUser;
       }
       return null;
-    } catch (e) { 
-      console.error("Falha ao carregar perfil:", e); 
+    } catch (e) {
+      console.error("Falha ao carregar perfil:", e);
       return null;
     }
   };
@@ -109,9 +112,9 @@ const App: React.FC = () => {
           await fetchProfile(session.user.id, session.user.email);
         }
         await Promise.all([fetchOrders(), fetchProfessionals()]);
-      } catch (err) { 
+      } catch (err) {
         console.error("Erro no carregamento inicial:", err);
-      } finally { 
+      } finally {
         setLoading(false);
         setIsInitializing(false);
       }
@@ -122,6 +125,8 @@ const App: React.FC = () => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setProProfile(null);
+      } else if (event === 'PASSWORD_RECOVERY') {
+        window.location.hash = '/redefinir-senha';
       } else if (session) {
         const updatedUser = await fetchProfile(session.user.id, session.user.email);
         if (updatedUser) {
@@ -130,6 +135,14 @@ const App: React.FC = () => {
       }
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  // Detect recovery tokens in URL on mount
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes('type=recovery') || hash.includes('recovery_token')) {
+      window.location.hash = '/redefinir-senha';
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -163,6 +176,7 @@ const App: React.FC = () => {
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar user={user} onLogout={handleLogout} credits={proProfile?.credits} />
+        <TermsBanner />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home user={user} />} />
@@ -170,26 +184,26 @@ const App: React.FC = () => {
               <Navigate to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} replace />
             ) : <Auth />} />
             <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
-              const { error } = await supabase.from('orders').insert([{ 
-                client_id: user?.id || null, 
-                client_name: o.clientName, 
-                category: o.category, 
-                description: o.description, 
+              const { error } = await supabase.from('orders').insert([{
+                client_id: user?.id || null,
+                client_name: o.clientName,
+                category: o.category,
+                description: o.description,
                 phone: o.phone,
                 address: o.address,
                 number: o.number,
                 complement: o.complement,
-                location: o.location, 
-                neighborhood: o.neighborhood, 
-                deadline: o.deadline, 
-                status: o.status, 
-                lead_price: o.leadPrice 
+                location: o.location,
+                neighborhood: o.neighborhood,
+                deadline: o.deadline,
+                status: o.status,
+                lead_price: o.leadPrice
               }]);
               if (!error) await fetchOrders();
             }} />} />
             <Route path="/profissionais" element={<ProfessionalDirectory professionals={professionals} />} />
             <Route path="/perfil/:id" element={<PublicProfile professionals={professionals} />} />
-            
+
             <Route path="/cliente/dashboard" element={
               <ProtectedRoute role={UserRole.CLIENT}>
                 <CustomerDashboard user={user!} orders={orders} />
@@ -205,9 +219,9 @@ const App: React.FC = () => {
             <Route path="/profissional/leads" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-                  const { error } = await supabase.from('profiles').update({ 
-                    credits: p.credits, 
-                    completed_jobs: p.completedJobs 
+                  const { error } = await supabase.from('profiles').update({
+                    credits: p.credits,
+                    completed_jobs: p.completedJobs
                   }).eq('id', p.userId);
                   if (!error) setProProfile(p);
                 }} onUpdateOrder={async (o) => {
@@ -220,9 +234,9 @@ const App: React.FC = () => {
             <Route path="/profissional/recarregar" element={
               <ProtectedRoute role={UserRole.PROFESSIONAL}>
                 <RechargeCredits onAddCredits={async (amt) => {
-                   const newCredits = (proProfile?.credits || 0) + amt;
-                   await supabase.from('profiles').update({ credits: newCredits }).eq('id', user!.id);
-                   setProProfile(prev => prev ? {...prev, credits: newCredits} : null);
+                  const newCredits = (proProfile?.credits || 0) + amt;
+                  await supabase.from('profiles').update({ credits: newCredits }).eq('id', user!.id);
+                  setProProfile(prev => prev ? { ...prev, credits: newCredits } : null);
                 }} />
               </ProtectedRoute>
             } />
@@ -238,6 +252,9 @@ const App: React.FC = () => {
                 <AdminDashboard />
               </ProtectedRoute>
             } />
+
+            <Route path="/termos" element={<Terms />} />
+            <Route path="/redefinir-senha" element={<ResetPassword />} />
 
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
