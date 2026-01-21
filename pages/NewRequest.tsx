@@ -339,7 +339,6 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                         <p className="text-xs text-gray-400 font-bold mb-4">{pro.rating} ({pro.reviews} avaliações)</p>
                         <div className="space-y-2 mb-6 text-sm text-gray-500 font-bold w-full">
                           <div className="flex items-center justify-center"><Clock className="w-3 h-3 mr-2 text-brand-blue" /> {pro.exp} anos de experiência</div>
-                          <div className="flex items-center justify-center"><MapPin className="w-3 h-3 mr-2 text-brand-blue" /> {pro.loc}</div>
                         </div>
                         <div className="flex flex-wrap gap-2 justify-center mb-8">
                           {pro.tags.map(tag => (
