@@ -65,9 +65,21 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     { name: 'Mara da Silva', role: 'Arquiteta', rating: 5.0, reviews: 42, exp: 5, loc: 'Florianópolis, SC', tags: ['Projetos 3D', 'Interiores', 'Reformas'], img: '/images/Mara da Silva.jpg', icon: <Home className="w-4 h-4" /> },
   ];
 
-  // Estado para o carrossel infinito
+  // Estado para o carrossel infinito e responsividade
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
+  const [visibleCards, setVisibleCards] = useState(3);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) setVisibleCards(1);
+      else if (window.innerWidth < 1024) setVisibleCards(2);
+      else setVisibleCards(3);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (step === 3) {
@@ -300,11 +312,14 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
                 <div className="relative overflow-hidden w-full pb-10">
                   <div
-                    className={`flex gap-6 px-4 ${transitionEnabled ? 'transition-transform duration-700 ease-in-out' : ''}`}
-                    style={{ transform: `translateX(-${carouselIndex * (100 / 3)}%)` }}
+                    className={`flex gap-6 ${transitionEnabled ? 'transition-transform duration-700 ease-in-out' : ''}`}
+                    style={{ transform: `translateX(-${carouselIndex * (100 / visibleCards)}%)` }}
                   >
                     {[...proPreviews, ...proPreviews].map((pro, idx) => (
-                      <div key={idx} className="min-w-[calc(33.333%-1rem)] bg-white rounded-[2rem] border border-gray-100 shadow-lg p-8 flex flex-col items-center group hover:shadow-2xl transition-all">
+                      <div key={idx}
+                        className="bg-white rounded-[2rem] border border-gray-100 shadow-lg p-8 flex flex-col items-center group hover:shadow-2xl transition-all"
+                        style={{ minWidth: `calc(${100 / visibleCards}% - ${(6 * (visibleCards - 1)) / visibleCards}px)` }}
+                      >
                         <div className="relative mb-6">
                           <img
                             src={pro.img}
@@ -331,7 +346,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                             <span key={tag} className="bg-blue-50 text-brand-blue text-[11px] font-black uppercase px-3 py-1.5 rounded-full tracking-wider">{tag}</span>
                           ))}
                         </div>
-                        <button className="w-full flex items-center justify-center py-3 px-4 border-2 border-brand-blue text-brand-blue rounded-2xl font-black text-sm uppercase hover:bg-brand-blue hover:text-white transition-all group-hover:shadow-lg">
+                        <button className="w-full flex items-center justify-center py-3 px-4 border-2 border-brand-blue text-brand-blue rounded-2xl font-black text-[10px] uppercase hover:bg-brand-blue hover:text-white transition-all group-hover:shadow-lg">
                           <Send className="w-3 h-3 mr-2" /> Solicitar Orçamento
                         </button>
                       </div>
