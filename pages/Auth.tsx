@@ -7,13 +7,14 @@ import { supabase } from '../lib/supabase';
 const Auth: React.FC = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
-  
+  const [isReset, setIsReset] = useState(false);
+
   const [role, setRole] = useState<UserRole>(UserRole.CLIENT);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<{message: string, type: string} | null>(null);
+  const [error, setError] = useState<{ message: string, type: string } | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,15 +24,27 @@ const Auth: React.FC = () => {
     setSuccessMsg(null);
 
     try {
+      if (isReset) {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        });
+
+        if (resetError) throw resetError;
+
+        setSuccessMsg("LINK DE RECUPERAÇÃO ENVIADO PARA SEU E-MAIL!");
+        setLoading(false);
+        return;
+      }
+
       if (isLogin) {
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-        
+
         if (authError) {
           setError({ message: authError.message.includes('Invalid login') ? 'E-mail ou senha incorretos.' : authError.message, type: 'auth' });
           setLoading(false);
           return;
         }
-        
+
         if (!authData.user) throw new Error("Falha na autenticação.");
 
         const { data: profile, error: profileError } = await supabase
@@ -44,20 +57,20 @@ const Auth: React.FC = () => {
 
         const userRole = profile?.role || UserRole.CLIENT;
         setSuccessMsg("ACESSO CONFIRMADO! REDIRECIONANDO...");
-        
+
         setTimeout(() => {
           if (userRole === UserRole.PROFESSIONAL) {
             navigate('/profissional/dashboard');
-          } else if (userRole === UserRole.ADMIN) {
+          } else if (userRole === UserRole.ADMIN) { // Keep ADMIN role navigation
             navigate('/admin');
-          } else {
+          } else { // Original else block
             navigate('/cliente/dashboard');
           }
         }, 500);
 
       } else {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
-          email, 
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
           password,
           options: { data: { full_name: name, role: role } }
         });
@@ -73,7 +86,7 @@ const Auth: React.FC = () => {
             completed_jobs: 0,
             rating: 5.0
           });
-          
+
           if (insertError) throw insertError;
 
           setSuccessMsg("CONTA CRIADA COM SUCESSO!");
@@ -95,8 +108,12 @@ const Auth: React.FC = () => {
         <div className="h-4 bg-brand-orange shadow-md"></div>
         <div className="p-10 pt-12">
           <div className="text-center mb-10">
-            <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight uppercase">{isLogin ? 'Entrar' : 'Cadastrar'}</h2>
-            <p className="text-gray-400 font-bold mt-2">{isLogin ? 'Bem-vindo de volta à Samej' : 'Comece hoje mesmo'}</p>
+            <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight uppercase">
+              {isReset ? 'Recuperar' : isLogin ? 'Entrar' : 'Cadastrar'}
+            </h2>
+            <p className="text-gray-600 text-lg font-bold mt-2">
+              {isReset ? 'Digite seu e-mail para continuar' : isLogin ? 'Bem-vindo de volta à Samej' : 'Comece hoje mesmo'}
+            </p>
           </div>
 
           {error && (
@@ -113,41 +130,63 @@ const Auth: React.FC = () => {
             </div>
           )}
 
-          <div className="flex bg-brand-bg p-1.5 rounded-[2rem] mb-10 border border-gray-100">
-            <button onClick={() => setIsLogin(true)} className={`flex-1 py-4 rounded-[1.5rem] font-black transition-all text-xs uppercase tracking-widest ${isLogin ? 'bg-white shadow-xl text-brand-blue' : 'text-gray-400 hover:text-gray-600'}`}>Login</button>
-            <button onClick={() => setIsLogin(false)} className={`flex-1 py-4 rounded-[1.5rem] font-black transition-all text-xs uppercase tracking-widest ${!isLogin ? 'bg-white shadow-xl text-brand-blue' : 'text-gray-400 hover:text-gray-600'}`}>Cadastro</button>
-          </div>
+          {!isReset && (
+            <div className="flex bg-brand-bg p-1.5 rounded-[2rem] mb-10 border border-gray-100">
+              <button onClick={() => { setIsLogin(true); setIsReset(false); setError(null); setSuccessMsg(null); }} className={`flex-1 py-4 rounded-[1.5rem] font-black transition-all text-sm uppercase tracking-widest ${isLogin ? 'bg-white shadow-xl text-brand-blue' : 'text-gray-600 hover:text-gray-800'}`}>Login</button>
+              <button onClick={() => { setIsLogin(false); setIsReset(false); setError(null); setSuccessMsg(null); }} className={`flex-1 py-4 rounded-[1.5rem] font-black transition-all text-sm uppercase tracking-widest ${!isLogin ? 'bg-white shadow-xl text-brand-blue' : 'text-gray-600 hover:text-gray-800'}`}>Cadastro</button>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <>
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-4 rounded-2xl border-4 font-black text-[10px] uppercase tracking-widest transition-all ${role === UserRole.CLIENT ? 'border-brand-blue bg-blue-50 text-brand-blue shadow-lg shadow-blue-100' : 'border-gray-50 bg-gray-50 text-gray-400'}`}>SOU CLIENTE</button>
-                  <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-4 rounded-2xl border-4 font-black text-[10px] uppercase tracking-widest transition-all ${role === UserRole.PROFESSIONAL ? 'border-brand-orange bg-orange-50 text-brand-orange shadow-lg shadow-orange-100' : 'border-gray-50 bg-gray-50 text-gray-400'}`}>SOU PROFISSIONAL</button>
+                  <button type="button" onClick={() => setRole(UserRole.CLIENT)} className={`py-4 rounded-2xl border-4 font-black text-xs uppercase tracking-widest transition-all ${role === UserRole.CLIENT ? 'border-brand-blue bg-blue-50 text-brand-blue shadow-lg shadow-blue-100' : 'border-gray-50 bg-gray-50 text-gray-600'}`}>SOU CLIENTE</button>
+                  <button type="button" onClick={() => setRole(UserRole.PROFESSIONAL)} className={`py-4 rounded-2xl border-4 font-black text-xs uppercase tracking-widest transition-all ${role === UserRole.PROFESSIONAL ? 'border-brand-orange bg-orange-50 text-brand-orange shadow-lg shadow-orange-100' : 'border-gray-50 bg-gray-50 text-gray-600'}`}>SOU PROFISSIONAL</button>
                 </div>
                 <div className="relative">
                   <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="NOME COMPLETO" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-300" />
+                  <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="NOME COMPLETO" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-500" />
                 </div>
               </>
             )}
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="SEU E-MAIL" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-300" />
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="SEU E-MAIL" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-500" />
             </div>
-            <div className="relative">
-              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="SUA SENHA" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-300" />
-            </div>
-            
+            {!isReset && (
+              <div className="relative">
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="SUA SENHA" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-500" />
+              </div>
+            )}
+
             <button type="submit" disabled={loading} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-900/20 active:scale-95 disabled:opacity-50 transition-all uppercase tracking-tight mt-6 hover:bg-black">
-              {loading ? <Loader2 className="w-8 h-8 animate-spin mx-auto" /> : (isLogin ? 'ENTRAR AGORA' : 'CRIAR MINHA CONTA')}
+              {loading ? <Loader2 className="w-8 h-8 animate-spin mx-auto" /> : (isReset ? 'ENVIAR LINK' : isLogin ? 'ENTRAR AGORA' : 'CRIAR MINHA CONTA')}
             </button>
           </form>
 
-          <p className="text-center mt-10 text-xs font-bold text-gray-400">
-            {isLogin ? 'Esqueceu sua senha?' : 'Ao se cadastrar, você aceita nossos Termos de Uso.'}
-          </p>
+          <div className="text-center mt-10">
+            {isReset ? (
+              <button
+                onClick={() => setIsReset(false)}
+                className="text-sm font-bold text-brand-blue hover:text-brand-darkBlue transition-colors uppercase tracking-widest"
+              >
+                Voltar para o Login
+              </button>
+            ) : (
+              <p className="text-center text-sm font-bold text-gray-600">
+                {isLogin ? (
+                  <button
+                    onClick={() => { setIsReset(true); setError(null); setSuccessMsg(null); }}
+                    className="hover:text-brand-blue transition-colors"
+                  >
+                    Esqueceu sua senha?
+                  </button>
+                ) : 'Ao se cadastrar, você aceita nossos Termos de Uso.'}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, OrderStatus, OrderRequest } from '../types';
-import { 
-  Send, 
-  CheckCircle2, 
-  ChevronRight, 
-  Loader2, 
-  MapPin, 
-  AlertCircle, 
-  ArrowLeft, 
-  MessageSquare, 
-  Calendar, 
-  Phone, 
-  Home, 
+import {
+  Send,
+  CheckCircle2,
+  ChevronRight,
+  Loader2,
+  MapPin,
+  AlertCircle,
+  ArrowLeft,
+  MessageSquare,
+  Calendar,
+  Phone,
+  Home,
   User as UserIcon,
   Star,
   Clock,
@@ -34,7 +34,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const totalSteps = 5;
-  
+
   const [loadingCep, setLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,25 +57,50 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
   // Dados dos profissionais para o carrossel do Passo 3
   const proPreviews = [
-    { name: 'João Silva', role: 'Pedreiro', rating: 4.9, reviews: 127, exp: 15, loc: 'São Paulo, SP', tags: ['Alvenaria', 'Acabamentos', 'Reformas'], img: '/images/joao.jpg', icon: <Hammer className="w-4 h-4" /> },
-    { name: 'Tiago Menezes', role: 'Pintor', rating: 4.8, reviews: 89, exp: 12, loc: 'Rio de Janeiro, RJ', tags: ['Pintura Residencial', 'Textura', 'Verniz'], img: '/images/tiago.jpg', icon: <Paintbrush className="w-4 h-4" /> },
-    { name: 'Ricardo Santos', role: 'Eletricista', rating: 5.0, reviews: 156, exp: 20, loc: 'Belo Horizonte, MG', tags: ['Instalações', 'Manutenção', 'Emergência'], img: '/images/ricardo.jpg', icon: <Lightbulb className="w-4 h-4" /> },
-    { name: 'Francisco Lessa', role: 'Jardineiro', rating: 4.7, reviews: 64, exp: 10, loc: 'Curitiba, PR', tags: ['Paisagismo', 'Poda', 'Adubação'], img: '/images/francisco.jpg', icon: <Shovel className="w-4 h-4" /> },
-    { name: 'Pedro Lima', role: 'Encanador', rating: 4.9, reviews: 112, exp: 8, loc: 'Porto Alegre, RS', tags: ['Hidráulica', 'Reparos', 'Desentupimento'], img: '/images/pedro.jpg', icon: <Droplets className="w-4 h-4" /> },
-    { name: 'Mara da Silva', role: 'Arquiteta', rating: 5.0, reviews: 42, exp: 5, loc: 'Florianópolis, SC', tags: ['Projetos 3D', 'Interiores', 'Reformas'], img: '/images/mara.jpg', icon: <Home className="w-4 h-4" /> },
+    { name: 'João Silva', role: 'Pedreiro', rating: 4.9, reviews: 127, exp: 15, loc: 'São Paulo, SP', tags: ['Alvenaria', 'Acabamentos', 'Reformas'], img: '/images/João Silva.jpg', icon: <Hammer className="w-4 h-4" /> },
+    { name: 'Tiago Menezes', role: 'Pintor', rating: 4.8, reviews: 89, exp: 12, loc: 'Rio de Janeiro, RJ', tags: ['Pintura Residencial', 'Textura', 'Verniz'], img: '/images/Tiago Menezes.jpg', icon: <Paintbrush className="w-4 h-4" /> },
+    { name: 'Ricardo Santos', role: 'Eletricista', rating: 5.0, reviews: 156, exp: 20, loc: 'Belo Horizonte, MG', tags: ['Instalações', 'Manutenção', 'Emergência'], img: '/images/Ricardo Santos.jpg', icon: <Lightbulb className="w-4 h-4" /> },
+    { name: 'Francisco Lessa', role: 'Jardineiro', rating: 4.7, reviews: 64, exp: 10, loc: 'Curitiba, PR', tags: ['Paisagismo', 'Poda', 'Adubação'], img: '/images/Francisco Lessa.jpg', icon: <Shovel className="w-4 h-4" /> },
+    { name: 'Pedro Lima', role: 'Encanador', rating: 4.9, reviews: 112, exp: 8, loc: 'Porto Alegre, RS', tags: ['Hidráulica', 'Reparos', 'Desentupimento'], img: '/images/Pedro Lima.jpg', icon: <Droplets className="w-4 h-4" /> },
+    { name: 'Mara da Silva', role: 'Arquiteta', rating: 5.0, reviews: 42, exp: 5, loc: 'Florianópolis, SC', tags: ['Projetos 3D', 'Interiores', 'Reformas'], img: '/images/Mara da Silva.jpg', icon: <Home className="w-4 h-4" /> },
   ];
 
   // Estado para o carrossel infinito
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [transitionEnabled, setTransitionEnabled] = useState(true);
 
   useEffect(() => {
     if (step === 3) {
       const interval = setInterval(() => {
-        setCarouselIndex((prev) => (prev + 1) % proPreviews.length);
-      }, 4000);
+        setCarouselIndex((prev) => {
+          // Se chegamos ao final da lista duplicada (visual), reiniciamos
+          if (prev >= proPreviews.length) {
+            return 0; // Fallback, though logical reset happens in effect below
+          }
+          return prev + 1;
+        });
+      }, 3000);
       return () => clearInterval(interval);
     }
   }, [step, proPreviews.length]);
+
+  // Efeito para lidar com o reset "invisível"
+  useEffect(() => {
+    if (carouselIndex === proPreviews.length) {
+      // Estamos na cópia visual do primeiro item. 
+      // Esperamos a transição terminar, desativamos a transição e pulamos para o índice 0 real.
+      const timeout = setTimeout(() => {
+        setTransitionEnabled(false);
+        setCarouselIndex(0);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTransitionEnabled(true);
+          });
+        });
+      }, 700); // Tempo deve bater com a duration-700 do CSS
+      return () => clearTimeout(timeout);
+    }
+  }, [carouselIndex, proPreviews.length]);
 
   const maskPhone = (value: string) => {
     if (!value) return "";
@@ -241,16 +266,16 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="relative">
                     <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input type="text" placeholder="CEP" required maxLength={9} value={formData.cep} onChange={e => setFormData({ ...formData, cep: e.target.value })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                    <input type="text" placeholder="CEP" required maxLength={9} value={formData.cep} onChange={e => setFormData({ ...formData, cep: e.target.value })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
                     {loadingCep && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-brand-blue" />}
                   </div>
-                  <input type="text" placeholder="CIDADE / UF" readOnly required value={formData.location} className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-500 uppercase cursor-not-allowed" />
+                  <input type="text" placeholder="CIDADE / UF" readOnly required value={formData.location} className="w-full px-6 py-5 bg-gray-100 border-2 border-transparent rounded-3xl font-bold text-gray-700 uppercase cursor-not-allowed placeholder-gray-600" />
                 </div>
-                <input type="text" placeholder="RUA / LOGRADOURO" required value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
-                <input type="text" placeholder="BAIRRO" required value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                <input type="text" placeholder="RUA / LOGRADOURO" required value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
+                <input type="text" placeholder="BAIRRO" required value={formData.neighborhood} onChange={e => setFormData({ ...formData, neighborhood: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input type="text" placeholder="NÚMERO" required value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
-                  <input type="text" placeholder="COMPLEMENTO (OPCIONAL)" value={formData.complement} onChange={e => setFormData({ ...formData, complement: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                  <input type="text" placeholder="NÚMERO" required value={formData.number} onChange={e => setFormData({ ...formData, number: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
+                  <input type="text" placeholder="COMPLEMENTO (OPCIONAL)" value={formData.complement} onChange={e => setFormData({ ...formData, complement: e.target.value })} className="w-full px-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
                 </div>
               </div>
               <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all uppercase tracking-tight">Próximo Passo</button>
@@ -261,9 +286,9 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
               <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">O que precisa ser feito?</h2>
               <div className="relative">
-                <textarea rows={6} required placeholder="Descreva os detalhes do serviço..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none" />
+                <textarea rows={6} required placeholder="Descreva os detalhes do serviço..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none text-gray-900 placeholder-gray-600" />
               </div>
-              
+
               <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all uppercase">
                 Próximo Passo
               </button>
@@ -272,42 +297,42 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <div className="pt-20 border-t border-gray-100 text-center">
                 <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4 tracking-tight">Profissionais disponíveis na sua região</h2>
                 <p className="text-gray-500 font-bold mb-12">Conheça alguns dos profissionais que podem atender você</p>
-                
+
                 <div className="relative overflow-hidden w-full pb-10">
-                  <div 
-                    className="flex transition-transform duration-700 ease-in-out gap-6 px-4"
+                  <div
+                    className={`flex gap-6 px-4 ${transitionEnabled ? 'transition-transform duration-700 ease-in-out' : ''}`}
                     style={{ transform: `translateX(-${carouselIndex * (100 / 3)}%)` }}
                   >
                     {[...proPreviews, ...proPreviews].map((pro, idx) => (
                       <div key={idx} className="min-w-[calc(33.333%-1rem)] bg-white rounded-[2rem] border border-gray-100 shadow-lg p-8 flex flex-col items-center group hover:shadow-2xl transition-all">
                         <div className="relative mb-6">
-                           <img 
-                            src={pro.img} 
-                            alt={pro.name} 
-                            className="w-24 h-24 rounded-full object-cover border-4 border-brand-blue shadow-md" 
+                          <img
+                            src={pro.img}
+                            alt={pro.name}
+                            className="w-24 h-24 rounded-full object-cover border-4 border-brand-blue shadow-md"
                             onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${pro.name}/200`; }}
-                           />
+                          />
                         </div>
-                        <h3 className="text-xl font-black text-brand-darkBlue mb-1">{pro.name}</h3>
-                        <div className="flex items-center text-brand-blue font-bold text-xs uppercase mb-3">
-                           {pro.icon}
-                           <span className="ml-2">{pro.role}</span>
+                        <h3 className="text-[22px] font-black text-brand-darkBlue mb-1">{pro.name}</h3>
+                        <div className="flex items-center text-brand-blue font-bold text-sm uppercase mb-3">
+                          {pro.icon}
+                          <span className="ml-2">{pro.role}</span>
                         </div>
                         <div className="flex text-amber-400 mb-1">
                           {[...Array(5)].map((_, i) => <Star key={i} className={`w-4 h-4 fill-current ${i >= Math.floor(pro.rating) ? 'text-gray-200' : ''}`} />)}
                         </div>
-                        <p className="text-[10px] text-gray-400 font-bold mb-4">{pro.rating} ({pro.reviews} avaliações)</p>
-                        <div className="space-y-2 mb-6 text-xs text-gray-500 font-bold w-full">
-                           <div className="flex items-center justify-center"><Clock className="w-3 h-3 mr-2 text-brand-blue" /> {pro.exp} anos de experiência</div>
-                           <div className="flex items-center justify-center"><MapPin className="w-3 h-3 mr-2 text-brand-blue" /> {pro.loc}</div>
+                        <p className="text-xs text-gray-400 font-bold mb-4">{pro.rating} ({pro.reviews} avaliações)</p>
+                        <div className="space-y-2 mb-6 text-sm text-gray-500 font-bold w-full">
+                          <div className="flex items-center justify-center"><Clock className="w-3 h-3 mr-2 text-brand-blue" /> {pro.exp} anos de experiência</div>
+                          <div className="flex items-center justify-center"><MapPin className="w-3 h-3 mr-2 text-brand-blue" /> {pro.loc}</div>
                         </div>
                         <div className="flex flex-wrap gap-2 justify-center mb-8">
-                           {pro.tags.map(tag => (
-                             <span key={tag} className="bg-blue-50 text-brand-blue text-[9px] font-black uppercase px-3 py-1.5 rounded-full tracking-wider">{tag}</span>
-                           ))}
+                          {pro.tags.map(tag => (
+                            <span key={tag} className="bg-blue-50 text-brand-blue text-[11px] font-black uppercase px-3 py-1.5 rounded-full tracking-wider">{tag}</span>
+                          ))}
                         </div>
-                        <button className="w-full flex items-center justify-center py-3 px-4 border-2 border-brand-blue text-brand-blue rounded-2xl font-black text-xs uppercase hover:bg-brand-blue hover:text-white transition-all group-hover:shadow-lg">
-                           <Send className="w-3 h-3 mr-2" /> Solicitar Orçamento
+                        <button className="w-full flex items-center justify-center py-3 px-4 border-2 border-brand-blue text-brand-blue rounded-2xl font-black text-sm uppercase hover:bg-brand-blue hover:text-white transition-all group-hover:shadow-lg">
+                          <Send className="w-3 h-3 mr-2" /> Solicitar Orçamento
                         </button>
                       </div>
                     ))}
@@ -342,11 +367,11 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
               <div className="space-y-6">
                 <div className="relative">
                   <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="text" required placeholder="SEU NOME COMPLETO" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                  <input type="text" required placeholder="SEU NOME COMPLETO" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
                 </div>
                 <div className="relative">
                   <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="tel" required placeholder="WHATSAPP / CELULAR" value={formData.phone} onChange={e => setFormData({ ...formData, phone: maskPhone(e.target.value) })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase" />
+                  <input type="tel" required placeholder="WHATSAPP / CELULAR" value={formData.phone} onChange={e => setFormData({ ...formData, phone: maskPhone(e.target.value) })} className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-3xl font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase text-gray-900 placeholder-gray-600" />
                 </div>
               </div>
               <button type="submit" disabled={isSubmitting} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2.5rem] font-black text-2xl shadow-3xl active:scale-95 disabled:opacity-50 transition-all uppercase flex items-center justify-center">

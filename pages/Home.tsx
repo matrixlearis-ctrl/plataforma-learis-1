@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User } from '../types';
-import { 
-  Search, 
-  CheckCircle, 
-  Star, 
-  ArrowRight, 
-  Users, 
-  Coins, 
-  Smartphone, 
+import {
+  Search,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Users,
+  Coins,
+  Smartphone,
   UserPlus,
   ShieldCheck,
   Zap,
@@ -41,19 +41,19 @@ const Home: React.FC<HomeProps> = ({ user }) => {
     {
       name: "Clayton Amaral",
       role: "Cliente - São Paulo, SP",
-      avatar: "/images/clayton.jpg",
+      avatar: "/images/Clayton Amaral.jpg",
       content: "Excelente plataforma! Encontrei um profissional em menos de 1 hora e o serviço ficou impecável. Recomendo a todos que buscam qualidade e agilidade."
     },
     {
       name: "José Reis",
       role: "Pedreiro - Rio de Janeiro, RJ",
-      avatar: "/images/jose.jpg",
+      avatar: "/images/José Reis.jpg",
       content: "Como profissional, a Samej mudou minha rotina. Recebo clientes todos os dias direto no meu celular e meu faturamento cresceu muito."
     },
     {
       name: "Clara Almeida",
       role: "Cliente - Belo Horizonte, MG",
-      avatar: "/images/clara.jpg",
+      avatar: "/images/Clara Almeida.jpg",
       content: "O processo de pedir orçamento é muito simples. Os profissionais que me contataram foram super atenciosos e os preços bem competitivos."
     }
   ];
@@ -64,7 +64,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
       <section className="bg-brand-darkBlue text-white pt-24 pb-32 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-orange/20 rounded-full -mr-64 -mt-64 blur-[140px] animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full -ml-32 -mb-32 blur-[100px]"></div>
-        
+
         <div className="max-w-6xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center bg-white/10 border border-white/20 px-5 py-2 rounded-full mb-10 backdrop-blur-md">
             <Award className="text-brand-orange mr-2 w-4 h-4" />
@@ -72,27 +72,27 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
 
           <h1 className="text-5xl md:text-8xl font-black mb-8 leading-[0.95] tracking-tighter max-w-5xl mx-auto">
-            Sua casa, <span className="text-brand-orange italic">perfeita</span>. <br/>Sem complicações.
+            Sua casa, <span className="text-brand-orange italic">perfeita</span>. <br />Sem complicações.
           </h1>
           <p className="text-xl md:text-2xl text-blue-100/70 mb-14 max-w-2xl mx-auto font-medium">
             Conte com a gente para conectar você aos melhores profissionais e receba até 4 orçamentos gratuitos.
           </p>
-          
-          <form 
+
+          <form
             onSubmit={handleSearch}
             className="bg-white p-2 md:p-4 rounded-[3rem] shadow-3xl flex flex-col md:flex-row max-w-3xl mx-auto border-[10px] border-white/10 mb-12 transform hover:scale-[1.02] transition-transform"
           >
             <div className="flex-grow flex items-center px-8 py-5 md:py-0">
               <Search className="text-brand-blue mr-4 w-6 h-6" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="O que você precisa?" 
+                placeholder="O que você precisa?"
                 className="w-full py-4 text-gray-900 font-bold focus:outline-none placeholder-gray-400 bg-transparent text-xl uppercase"
               />
             </div>
-            <button 
+            <button
               type="submit"
               className="bg-brand-orange text-white px-14 py-6 rounded-[2.5rem] font-black hover:bg-brand-lightOrange transition-all text-center shadow-2xl active:scale-95 text-lg uppercase tracking-tight"
             >
@@ -113,17 +113,17 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24 space-y-4">
             <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue tracking-tighter">
-              Explore por <span className="text-brand-blue">Categorias</span>
+              Encontre o Profissional <span className="text-brand-blue">Que Você Precisa</span>
             </h2>
             <p className="text-lg text-gray-500 font-bold max-w-xl mx-auto uppercase tracking-tight">
-              Selecione o serviço desejado e conecte-se com especialistas.
+              Selecione o serviço desejado e receba até 4 orçamentos de profissionais
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {CATEGORIES.map((cat) => (
-              <Link 
-                key={cat.id} 
+              <Link
+                key={cat.id}
                 to={`/pedir-orcamento?category=${cat.id}`}
                 className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-blue-900/5 hover:shadow-2xl transition-all flex flex-col items-center text-center group active:scale-95"
               >
@@ -156,7 +156,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Descreva seu projeto</h3>
-              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">Conte-nos o que você precisa. Quanto mais detalhes, melhor será o orçamento que você receberá.</p>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Conte-nos o que você precisa. Quanto mais detalhes, melhor será o orçamento que você receberá.</p>
             </div>
             <div className="flex flex-col items-center text-center group">
               <div className="relative mb-8">
@@ -166,7 +166,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Encontramos profissionais</h3>
-              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">Nossa plataforma conecta você automaticamente com profissionais qualificados da sua região.</p>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Nossa plataforma conecta você automaticamente com profissionais qualificados da sua região.</p>
             </div>
             <div className="flex flex-col items-center text-center group">
               <div className="relative mb-8">
@@ -176,7 +176,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Receba orçamentos</h3>
-              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">Receba até 4 orçamentos gratuitos por email e WhatsApp.</p>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Receba até 4 orçamentos gratuitos por email e WhatsApp.</p>
             </div>
             <div className="flex flex-col items-center text-center group">
               <div className="relative mb-8">
@@ -186,7 +186,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Escolha e contrate</h3>
-              <p className="text-gray-500 font-medium leading-relaxed text-sm px-4">Compare preços, avalie perfis e escolha o profissional ideal. Negocie diretamente com ele!</p>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Compare preços, avalie perfis e escolha o profissional ideal. Negocie diretamente com ele!</p>
             </div>
           </div>
         </div>
@@ -194,28 +194,28 @@ const Home: React.FC<HomeProps> = ({ user }) => {
 
       {/* CTA Section - Para Profissionais */}
       <section className="py-24 px-4 bg-brand-darkBlue overflow-hidden relative">
-         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-brand-orange/10 rounded-full blur-[100px]"></div>
-         <div className="max-w-7xl mx-auto bg-brand-orange rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center gap-16 relative z-10 shadow-3xl">
-            <div className="md:w-3/5 space-y-8">
-              <h2 className="text-4xl md:text-6xl font-black leading-none tracking-tighter">
-                É um profissional? Conquiste mais clientes facilmente com a <span className="text-brand-darkBlue">Samej</span>.
-              </h2>
-              <p className="text-xl font-bold opacity-90 leading-relaxed max-w-lg">
-                Receba pedidos de orçamento direto no seu celular e feche novos negócios todos os dias.
-              </p>
-              <Link to="/auth" className="inline-flex items-center bg-brand-darkBlue text-white px-12 py-6 rounded-[2.5rem] font-black text-xl hover:scale-105 transition-all shadow-2xl active:scale-95 uppercase">
-                Sou Profissional
-                <ArrowRight className="ml-3 w-6 h-6" />
-              </Link>
-            </div>
-            <div className="md:w-2/5">
-              <img 
-                src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=2070&auto=format&fit=crop" 
-                alt="Profissional Ativo" 
-                className="rounded-[3rem] shadow-4xl border-8 border-white/20 transform md:rotate-3 hover:rotate-0 transition-transform duration-700"
-              />
-            </div>
-         </div>
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-brand-orange/10 rounded-full blur-[100px]"></div>
+        <div className="max-w-7xl mx-auto bg-brand-orange rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center gap-16 relative z-10 shadow-3xl">
+          <div className="md:w-3/5 space-y-8">
+            <h2 className="text-4xl md:text-6xl font-black leading-none tracking-tighter">
+              É um profissional? Conquiste mais clientes facilmente com a <span className="text-brand-darkBlue">Samej</span>.
+            </h2>
+            <p className="text-xl font-bold opacity-90 leading-relaxed max-w-lg">
+              Receba pedidos de orçamento direto no seu celular e feche novos negócios todos os dias.
+            </p>
+            <Link to="/auth" className="inline-flex items-center bg-brand-darkBlue text-white px-12 py-6 rounded-[2.5rem] font-black text-xl hover:scale-105 transition-all shadow-2xl active:scale-95 uppercase">
+              Sou Profissional
+              <ArrowRight className="ml-3 w-6 h-6" />
+            </Link>
+          </div>
+          <div className="md:w-2/5">
+            <img
+              src="/images/100.jpg"
+              alt="Profissional Ativo"
+              className="rounded-[3rem] shadow-4xl border-8 border-white/20 transform md:rotate-3 hover:rotate-0 transition-transform duration-700"
+            />
+          </div>
+        </div>
       </section>
 
       {/* Testimonials - O que nossos usuários dizem */}
@@ -228,9 +228,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                 <div className="flex items-center mb-6">
                   <div className="flex-shrink-0 mr-6">
                     <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-50 shadow-sm">
-                      <img 
-                        src={item.avatar} 
-                        alt={item.name} 
+                      <img
+                        src={item.avatar}
+                        alt={item.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.src = `https://picsum.photos/seed/${item.name}/200`;
@@ -239,8 +239,8 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-gray-900 leading-tight mb-1">{item.name}</h3>
-                    <p className="text-sm font-bold text-gray-400 mb-2">{item.role}</p>
+                    <h3 className="text-[22px] font-black text-gray-900 leading-tight mb-1">{item.name}</h3>
+                    <p className="text-[16px] font-bold text-gray-400 mb-2">{item.role}</p>
                     <div className="flex text-amber-400">
                       {[...Array(5)].map((_, j) => (
                         <Star key={j} className="w-4 h-4 fill-current" />
@@ -249,9 +249,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
                   </div>
                 </div>
                 <div className="pt-4 border-t border-gray-50">
-                   <p className="text-gray-600 italic font-medium leading-relaxed">
-                     "{item.content}"
-                   </p>
+                  <p className="text-gray-600 italic font-medium leading-relaxed text-[18px]">
+                    "{item.content}"
+                  </p>
                 </div>
               </div>
             ))}
