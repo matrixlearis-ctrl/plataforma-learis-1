@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, UserRole, ProfessionalProfile } from '../types';
-import { Camera, Shield, Bell, CreditCard, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react';
+import { Camera, Shield, Bell, CreditCard, ExternalLink, Loader2, CheckCircle2, FileText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface ProfileSettingsProps {
@@ -15,7 +15,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
     name: user.name,
     phone: profile?.phone || '',
     description: profile?.description || '',
-    region: profile?.region || ''
+    region: profile?.region || '',
+    document: user.document || ''
   });
 
   const handleSave = async (e: React.FormEvent) => {
@@ -30,7 +31,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
           full_name: formData.name,
           phone: formData.phone,
           description: formData.description,
-          region: formData.region
+          region: formData.region,
+          document: formData.document.replace(/\D/g, '')
         })
         .eq('id', user.id);
 
@@ -80,10 +82,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
               <div className="text-center md:text-left">
                 <h2 className="text-3xl font-black text-gray-900 tracking-tight">{user.name}</h2>
                 <div className="mt-3 flex flex-wrap gap-2 justify-center md:justify-start">
-                   <span className="bg-gray-100 text-gray-500 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">{user.role}</span>
-                   {user.role === UserRole.PROFESSIONAL && (
-                     <span className="bg-green-100 text-green-700 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">Conta Verificada</span>
-                   )}
+                  <span className="bg-gray-100 text-gray-500 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">{user.role}</span>
+                  {user.role === UserRole.PROFESSIONAL && (
+                    <span className="bg-green-100 text-green-700 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">Conta Verificada</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -91,43 +93,61 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
             <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
                 <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Nome Comercial / Completo</label>
-                <input 
-                  type="text" 
-                  value={formData.name} 
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900" 
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900"
                 />
               </div>
               <div>
                 <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Telefone WhatsApp</label>
-                <input 
-                  type="tel" 
-                  value={formData.phone} 
-                  onChange={e => setFormData({...formData, phone: e.target.value})}
-                  className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900" 
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900"
                 />
               </div>
-              
+
               {user.role === UserRole.PROFESSIONAL && (
                 <>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Descrição dos Serviços</label>
-                    <textarea 
-                      rows={5} 
-                      value={formData.description} 
-                      onChange={e => setFormData({...formData, description: e.target.value})}
+                    <textarea
+                      rows={5}
+                      value={formData.description}
+                      onChange={e => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Conte sobre sua experiência, especialidades e garantias..."
-                      className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900 resize-none" 
+                      className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900 resize-none"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Região Principal (Cidade/UF)</label>
-                    <input 
-                      type="text" 
-                      value={formData.region} 
-                      onChange={e => setFormData({...formData, region: e.target.value})}
-                      className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900" 
+                    <input
+                      type="text"
+                      value={formData.region}
+                      onChange={e => setFormData({ ...formData, region: e.target.value })}
+                      className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">CPF ou CNPJ</label>
+                    <input
+                      type="text"
+                      value={formData.document}
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 11) {
+                          setFormData({ ...formData, document: val.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').substring(0, 14) });
+                        } else {
+                          setFormData({ ...formData, document: val.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2').substring(0, 18) });
+                        }
+                      }}
+                      className="w-full p-4 bg-gray-100 border-2 border-transparent rounded-2xl outline-none font-medium text-gray-500 italic"
+                      readOnly
+                    />
+                    <p className="text-[10px] text-gray-400 mt-2 flex items-center"><FileText className="w-3 h-3 mr-1" /> Documento não pode ser alterado pelo painel.</p>
                   </div>
                 </>
               )}
@@ -140,8 +160,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
                     </span>
                   )}
                 </div>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   className="bg-gray-900 text-white px-10 py-4 rounded-2xl font-black text-sm hover:bg-black shadow-xl transition-all active:scale-95 flex items-center disabled:opacity-50"
                 >

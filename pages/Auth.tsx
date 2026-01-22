@@ -3,6 +3,58 @@ import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
 import { Loader2, AlertCircle, CheckCircle2, Lock, Mail, User as UserIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { CreditCard } from 'lucide-react';
+
+const validateCPF = (cpf: string) => {
+  cpf = cpf.replace(/[^\d]+/g, '');
+  if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+  const cpfDigits = cpf.split('').map(el => +el);
+  const rest = (count: number) => {
+    return (((cpfDigits.slice(0, count - 12).reduce((s, el, i) => s + el * (count - i), 0) * 10) % 11) % 10);
+  };
+  return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10];
+};
+
+const validateCNPJ = (cnpj: string) => {
+  cnpj = cnpj.replace(/[^\d]+/g, '');
+  if (cnpj.length !== 14 || !!cnpj.match(/(\d)\1{13}/)) return false;
+  const size = cnpj.length - 2;
+  const numbers = cnpj.substring(0, size);
+  const digits = cnpj.substring(size);
+  let sum = 0;
+  let pos = size - 7;
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(numbers.charAt(size - i)) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (result !== parseInt(digits.charAt(0))) return false;
+  sum = 0;
+  pos = size - 6;
+  for (let i = size + 1; i >= 1; i--) {
+    sum += parseInt(cnpj.charAt(size + 1 - i)) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  return result === parseInt(digits.charAt(1));
+};
+
+const maskDocument = (value: string) => {
+  value = value.replace(/\D/g, '');
+  if (value.length <= 11) {
+    return value
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .substring(0, 14);
+  }
+  return value
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2')
+    .substring(0, 18);
+};
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +65,7 @@ const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [document, setDocument] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<{ message: string, type: string } | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -69,6 +122,13 @@ const Auth: React.FC = () => {
         }, 500);
 
       } else {
+        if (role === UserRole.PROFESSIONAL) {
+          const cleanDoc = document.replace(/\D/g, '');
+          if (cleanDoc.length === 11 && !validateCPF(cleanDoc)) throw new Error("CPF Inválido.");
+          if (cleanDoc.length === 14 && !validateCNPJ(cleanDoc)) throw new Error("CNPJ Inválido.");
+          if (cleanDoc.length !== 11 && cleanDoc.length !== 14) throw new Error("Documento incompleto.");
+        }
+
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -82,6 +142,7 @@ const Auth: React.FC = () => {
             id: signUpData.user.id,
             full_name: name,
             role: role,
+            document: role === UserRole.PROFESSIONAL ? document.replace(/\D/g, '') : null,
             credits: role === UserRole.PROFESSIONAL ? 15 : 0,
             completed_jobs: 0,
             rating: 5.0
@@ -148,11 +209,17 @@ const Auth: React.FC = () => {
                   <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="NOME COMPLETO" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-500" />
                 </div>
+                {role === UserRole.PROFESSIONAL && (
+                  <div className="relative">
+                    <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input type="text" required value={document} onChange={e => setDocument(maskDocument(e.target.value))} placeholder="CPF OU CNPJ" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-500" />
+                  </div>
+                )}
               </>
             )}
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="SEU E-MAIL" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:text-gray-500" />
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="SEU E-MAIL" className="w-full pl-14 pr-6 py-5 bg-brand-bg border-2 border-transparent rounded-[1.5rem] font-bold text-gray-900 text-lg outline-none focus:border-brand-blue focus:bg-white transition-all placeholder:text-gray-500" />
             </div>
             {!isReset && (
               <div className="relative">
