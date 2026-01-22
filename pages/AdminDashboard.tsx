@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Users, 
   FileText, 
@@ -11,11 +12,12 @@ import {
   Settings,
   Link as LinkIcon,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  UserPlus
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'stats' | 'payments' | 'config'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'payments'>('stats');
   const [stripeConnected, setStripeConnected] = useState(false);
 
   const connectStripe = () => {
@@ -46,6 +48,12 @@ const AdminDashboard: React.FC = () => {
           className={`pb-4 text-sm font-bold transition-all ${activeTab === 'stats' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
         >
           Estatísticas
+        </button>
+        <button 
+          onClick={() => setActiveTab('users')}
+          className={`pb-4 text-sm font-bold transition-all ${activeTab === 'users' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+        >
+          Gerenciar Usuários
         </button>
         <button 
           onClick={() => setActiveTab('payments')}
@@ -169,6 +177,23 @@ const AdminDashboard: React.FC = () => {
         </>
       )}
 
+      {activeTab === 'users' && (
+        <div className="bg-white rounded-2xl border shadow-sm p-8">
+          <div className="text-center py-12">
+            <Users className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Gerenciamento de Usuários</h3>
+            <p className="text-gray-600 mb-6">Acesse o módulo completo de gerenciamento de usuários</p>
+            <Link 
+              to="/admin/usuarios" 
+              className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold"
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Abrir Gerenciador de Usuários
+            </Link>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'payments' && (
         <div className="bg-white rounded-3xl border shadow-xl p-10 max-w-3xl">
           <div className="flex items-center space-x-4 mb-8">
@@ -240,6 +265,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           )}
+        
         </div>
       )}
     </div>
