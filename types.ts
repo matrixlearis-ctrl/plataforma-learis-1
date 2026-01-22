@@ -17,6 +17,7 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  document?: string;
 }
 
 export interface ProfessionalProfile {

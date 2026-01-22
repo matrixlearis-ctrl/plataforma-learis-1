@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   region TEXT,
   phone TEXT,
   credits INTEGER DEFAULT 0,
+  document TEXT,
   rating DECIMAL(3,2) DEFAULT 5.0,
   completed_jobs INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
