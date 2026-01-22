@@ -168,6 +168,13 @@ const App: React.FC = () => {
 
   const ProtectedRoute = ({ children, role }: { children?: React.ReactNode, role?: UserRole }) => {
     if (!user) return <Navigate to="/auth" />;
+    
+    // Verificação especial para administrador específico
+    if (role === UserRole.ADMIN) {
+      const isAdminEmail = user.email === 'jamesribeiro413@gmail.com';
+      if (!isAdminEmail) return <Navigate to="/" />;
+    }
+    
     if (role && user.role !== role) return <Navigate to="/" />;
     return <>{children}</>;
   };
