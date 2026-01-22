@@ -8,6 +8,7 @@ import Auth from './pages/Auth';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ProfessionalDashboard from './pages/ProfessionalDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import UserManagement from './pages/UserManagement';
 import NewRequest from './pages/NewRequest';
 import ProfessionalLeads from './pages/ProfessionalLeads';
 import ProfileSettings from './pages/ProfileSettings';
@@ -257,6 +258,12 @@ const App: React.FC = () => {
             <Route path="/admin" element={
               <ProtectedRoute role={UserRole.ADMIN}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/usuarios" element={
+              <ProtectedRoute role={UserRole.ADMIN}>
+                <UserManagement />
               </ProtectedRoute>
             } />
 
