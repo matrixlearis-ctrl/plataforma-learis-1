@@ -29,6 +29,8 @@ interface ProfessionalLeadsProps {
 }
 
 const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, orders, onUpdateProfile, onUpdateOrder }) => {
+  console.log('ProfessionalLeads - Orders recebidos:', orders); // Debug
+  console.log('ProfessionalLeads - Profile:', profile); // Debug
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
 
   const buyLead = (order: OrderRequest) => {
