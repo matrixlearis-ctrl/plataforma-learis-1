@@ -32,17 +32,9 @@ const App: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      console.log('=== INICIANDO BUSCA DE PEDIDOS ==='); // Debug
-      console.log('Tentando acessar tabela: orders'); // Debug
-      
       const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-      console.log('Dados recebidos:', data); // Debug
-      console.log('Erro detalhado:', error); // Debug
-      console.log('Quantidade de registros:', data?.length || 0); // Debug
-      console.log('Tipo de dados:', typeof data); // Debug
-      console.log('É array?', Array.isArray(data)); // Debug
       if (!error && data) {
-        const mappedOrders = data.map(o => ({
+        setOrders(data.map(o => ({
           id: o.id,
           clientId: o.client_id,
           clientName: o.client_name,
@@ -59,12 +51,10 @@ const App: React.FC = () => {
           createdAt: o.created_at,
           leadPrice: o.lead_price || 5,
           unlockedBy: o.unlocked_by || []
-        }));
-        console.log('Pedidos mapeados:', mappedOrders); // Debug
-        setOrders(mappedOrders);
+        })));
       }
-    } catch (e) { 
-      console.error("Erro ao buscar pedidos:", e); 
+    } catch (e) {
+      console.error("Erro ao buscar pedidos:", e);
     }
   };
 
@@ -184,13 +174,13 @@ const App: React.FC = () => {
 
   const ProtectedRoute = ({ children, role }: { children?: React.ReactNode, role?: UserRole }) => {
     if (!user) return <Navigate to="/auth" />;
-    
+
     // Verificação especial para administrador específico
     if (role === UserRole.ADMIN) {
       const isAdminEmail = user.email === 'jamesribeiro413@gmail.com';
       if (!isAdminEmail) return <Navigate to="/" />;
     }
-    
+
     if (role && user.role !== role) return <Navigate to="/" />;
     return <>{children}</>;
   };
@@ -222,7 +212,13 @@ const App: React.FC = () => {
                 status: o.status,
                 lead_price: o.leadPrice
               }]);
-              if (!error) await fetchOrders();
+
+              if (!error) {
+                await fetchOrders();
+              } else {
+                console.error('Erro ao salvar pedido:', error);
+                throw error;
+              }
             }} />} />
             <Route path="/profissionais" element={<ProfessionalDirectory professionals={professionals} />} />
             <Route path="/perfil/:id" element={<PublicProfile professionals={professionals} />} />
@@ -275,7 +271,7 @@ const App: React.FC = () => {
                 <AdminDashboard />
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/usuarios" element={
               <ProtectedRoute role={UserRole.ADMIN}>
                 <UserManagement />
