@@ -32,9 +32,17 @@ const App: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
+      console.log('=== INICIANDO BUSCA DE PEDIDOS ==='); // Debug
+      console.log('Tentando acessar tabela: orders'); // Debug
+      
       const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      console.log('Dados recebidos:', data); // Debug
+      console.log('Erro detalhado:', error); // Debug
+      console.log('Quantidade de registros:', data?.length || 0); // Debug
+      console.log('Tipo de dados:', typeof data); // Debug
+      console.log('É array?', Array.isArray(data)); // Debug
       if (!error && data) {
-        setOrders(data.map(o => ({
+        const mappedOrders = data.map(o => ({
           id: o.id,
           clientId: o.client_id,
           clientName: o.client_name,
@@ -51,14 +59,21 @@ const App: React.FC = () => {
           createdAt: o.created_at,
           leadPrice: o.lead_price || 5,
           unlockedBy: o.unlocked_by || []
-        })));
+        }));
+        console.log('Pedidos mapeados:', mappedOrders); // Debug
+        setOrders(mappedOrders);
       }
-    } catch (e) { console.error("Erro ao buscar pedidos:", e); }
+    } catch (e) { 
+      console.error("Erro ao buscar pedidos:", e); 
+    }
   };
 
   const fetchProfessionals = async () => {
     try {
+      console.log('=== BUSCANDO PROFISSIONAIS ==='); // Debug
       const { data, error } = await supabase.from('profiles').select('*').eq('role', 'PROFESSIONAL');
+      console.log('Profissionais encontrados:', data?.length || 0); // Debug
+      console.log('Erro profissionais:', error); // Debug
       if (!error && data) {
         setProfessionals(data.map(p => ({
           id: p.id, userId: p.id, name: p.full_name || 'Profissional',
