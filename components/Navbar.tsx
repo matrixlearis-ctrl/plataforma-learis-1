@@ -65,7 +65,11 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
                 </Link>
               )}
 
-              <Link to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"}
+              <Link to={
+                user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" :
+                  user.role === UserRole.ADMIN ? "/admin" :
+                    "/cliente/dashboard"
+              }
                 className="group flex items-center space-x-3 bg-gray-50 pr-4 pl-1.5 py-1.5 rounded-full border border-gray-100 hover:border-brand-blue/30 transition-all">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
                   {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 text-gray-400" />}
@@ -98,7 +102,11 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
               <div className="space-y-4">
                 <div className="p-5 bg-brand-bg rounded-[2rem] border border-gray-100">
                   <p className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">MINHA CONTA</p>
-                  <Link to={user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"} onClick={closeMenu} className="flex items-center font-black text-gray-800 py-3">
+                  <Link to={
+                    user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" :
+                      user.role === UserRole.ADMIN ? "/admin" :
+                        "/cliente/dashboard"
+                  } onClick={closeMenu} className="flex items-center font-black text-gray-800 py-3">
                     <UserIcon className="w-5 h-5 mr-4 text-brand-blue" /> Painel Principal
                   </Link>
                   {user.role === UserRole.PROFESSIONAL && (
