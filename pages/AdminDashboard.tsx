@@ -1,27 +1,29 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  Users, 
-  FileText, 
-  TrendingUp, 
-  DollarSign, 
-  AlertCircle,
-  MoreVertical,
+import { Link, useSearchParams } from 'react-router-dom';
+import {
+  Users,
+  FileText,
+  TrendingUp,
+  DollarSign,
   ShieldAlert,
-  Settings,
+  MoreVertical,
   Link as LinkIcon,
   CheckCircle2,
   ExternalLink,
-  UserPlus
+  UserPlus,
+  AlertCircle
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'payments'>('stats');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = (searchParams.get('tab') as 'stats' | 'users' | 'payments') || 'stats';
   const [stripeConnected, setStripeConnected] = useState(false);
 
+  const setActiveTab = (tab: string) => {
+    setSearchParams({ tab });
+  };
+
   const connectStripe = () => {
-    // Simulação de redirecionamento para o Stripe Connect
     alert("Redirecionando para o fluxo de autorização do Stripe...");
     setTimeout(() => {
       setStripeConnected(true);
@@ -43,19 +45,19 @@ const AdminDashboard: React.FC = () => {
 
       {/* Tabs de Navegação */}
       <div className="flex border-b space-x-8">
-        <button 
+        <button
           onClick={() => setActiveTab('stats')}
           className={`pb-4 text-sm font-bold transition-all ${activeTab === 'stats' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
         >
           Estatísticas
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('users')}
           className={`pb-4 text-sm font-bold transition-all ${activeTab === 'users' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
         >
           Gerenciar Usuários
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('payments')}
           className={`pb-4 text-sm font-bold transition-all ${activeTab === 'payments' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
         >
@@ -183,8 +185,8 @@ const AdminDashboard: React.FC = () => {
             <Users className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">Gerenciamento de Usuários</h3>
             <p className="text-gray-600 mb-6">Acesse o módulo completo de gerenciamento de usuários</p>
-            <Link 
-              to="/admin/usuarios" 
+            <Link
+              to="/admin/usuarios"
               className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold"
             >
               <UserPlus className="w-5 h-5 mr-2" />
@@ -213,14 +215,14 @@ const AdminDashboard: React.FC = () => {
                 <div>
                   <h4 className="font-bold text-blue-900">Como funciona a conexão?</h4>
                   <p className="text-blue-800 text-sm leading-relaxed mt-1">
-                    A Samej utiliza o <strong>Stripe Connect</strong> para processar pagamentos. 
+                    A Samej utiliza o <strong>Stripe Connect</strong> para processar pagamentos.
                     Você precisa de uma conta Stripe ativa com o método de pagamento <strong>Pix</strong> habilitado nas configurações do Dashboard da Stripe.
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
-                <button 
+                <button
                   onClick={connectStripe}
                   className="bg-[#635bff] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#5851e0] transition-all shadow-xl flex items-center justify-center"
                 >
@@ -246,7 +248,7 @@ const AdminDashboard: React.FC = () => {
                   <span>Modo: Produção</span>
                   <span className="bg-green-100 text-green-700 px-2 py-1 rounded">LIVE</span>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-xl border font-mono text-xs text-gray-400">
+                <div className="p-4 bg-gray-50 rounded-xl border font-mono text-xs text-gray-400 break-all">
                   pk_live_************************************
                 </div>
               </div>
@@ -256,7 +258,7 @@ const AdminDashboard: React.FC = () => {
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Ver Dashboard Stripe
                 </button>
-                <button 
+                <button
                   onClick={() => setStripeConnected(false)}
                   className="text-red-500 text-sm font-bold hover:underline"
                 >
@@ -265,7 +267,6 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           )}
-        
         </div>
       )}
     </div>
