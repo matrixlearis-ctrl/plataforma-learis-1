@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center space-x-8">
-          <Link to="/profissionais" className="text-gray-700 hover:text-brand-blue font-bold text-[20px] transition-colors flex items-center">
+          <Link to="/pedir-orcamento" className="text-gray-700 hover:text-brand-blue font-bold text-[20px] transition-colors flex items-center">
             <Search className="w-4 h-4 mr-2" /> Encontrar Profissionais
           </Link>
 
@@ -94,7 +94,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
       {isMenuOpen && (
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b shadow-2xl z-50 animate-in slide-in-from-top duration-300">
           <div className="p-6 space-y-5">
-            <Link to="/profissionais" onClick={closeMenu} className="flex items-center p-4 text-gray-800 font-black hover:bg-brand-blue/5 rounded-2xl">
+            <Link to="/pedir-orcamento" onClick={closeMenu} className="flex items-center p-4 text-gray-800 font-black hover:bg-brand-blue/5 rounded-2xl">
               <Search className="w-5 h-5 mr-4 text-brand-blue" /> Encontrar Profissionais
             </Link>
 
