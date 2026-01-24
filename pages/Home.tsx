@@ -20,6 +20,8 @@ import {
   Handshake
 } from 'lucide-react';
 
+import ProfessionalSignupPopup from '../components/ProfessionalSignupPopup';
+
 interface HomeProps {
   user: User | null;
 }
@@ -27,6 +29,22 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ user }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+
+  React.useEffect(() => {
+    // Só mostramos o popup se o usuário não for profissional
+    if (user?.role === 'PROFESSIONAL') return;
+
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 2000); // 2 segundos de atraso
+
+    return () => clearTimeout(timer);
+  }, [user]);
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,6 +276,8 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
         </div>
       </section>
+
+      {showPopup && <ProfessionalSignupPopup onClose={handleClosePopup} />}
     </div>
   );
 };
