@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import ProfessionalSignupPopup from '../components/ProfessionalSignupPopup';
+import ServiceCarousel from '../components/ServiceCarousel';
 
 interface HomeProps {
   user: User | null;
@@ -125,6 +126,9 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
         </div>
       </section>
+
+      {/* Seção de Serviços Pedidos - Carrossel */}
+      <ServiceCarousel />
 
       {/* Categories Grid */}
       <section className="bg-brand-bg py-32 px-4">
