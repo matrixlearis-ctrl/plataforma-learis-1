@@ -8,7 +8,7 @@ const SERVICES = [
     { id: 'eletricista', name: 'Serviços de Eletricista', image: '/images/eletricista.jpg' },
     { id: 'telhado', name: 'Serviços de Telhado', image: '/images/telhado.jpg' },
     { id: 'pintura', name: 'Serviços de Pintura', image: '/images/pintura.jpg' },
-    { id: 'limpeza', name: 'Serviços de Limpeza', image: '/images/limpeza.jpg' },
+    { id: 'gesso', name: 'Serviços de Gesso e Drywall', image: '/images/gesso.jpg' },
     { id: 'jardinagem', name: 'Serviços de Jardinagem', image: '/images/jardinagem.jpg' },
 ];
 
