@@ -13,7 +13,6 @@ import NewRequest from './pages/NewRequest';
 import ProfessionalLeads from './pages/ProfessionalLeads';
 import ProfileSettings from './pages/ProfileSettings';
 import RechargeCredits from './pages/RechargeCredits';
-import ProfessionalDirectory from './pages/ProfessionalDirectory';
 import PublicProfile from './pages/PublicProfile';
 import Terms from './pages/Terms';
 import TermsBanner from './components/TermsBanner';
@@ -220,7 +219,6 @@ const App: React.FC = () => {
                 throw error;
               }
             }} />} />
-            <Route path="/profissionais" element={<ProfessionalDirectory professionals={professionals} />} />
             <Route path="/perfil/:id" element={<PublicProfile professionals={professionals} />} />
 
             <Route path="/cliente/dashboard" element={
