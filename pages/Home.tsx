@@ -49,7 +49,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/profissionais?search=${encodeURIComponent(searchTerm)}`);
+      navigate(`/pedir-orcamento?search=${encodeURIComponent(searchTerm)}`);
     } else {
       navigate('/pedir-orcamento');
     }
