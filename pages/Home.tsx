@@ -232,7 +232,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           </div>
           <div className="md:w-2/5">
             <img
-              src="/images/100.jpg"
+              src="/images/ima 10.png"
               alt="Profissional Ativo"
               className="rounded-[3rem] shadow-4xl border-8 border-white/20 transform md:rotate-3 hover:rotate-0 transition-transform duration-700"
             />
