@@ -29,6 +29,7 @@ export interface ProfessionalProfile {
   credits: number;
   completedJobs: number;
   phone: string;
+  portfolioUrls?: string[];
 }
 
 export interface OrderRequest {
@@ -48,4 +49,5 @@ export interface OrderRequest {
   createdAt: string;
   leadPrice: number;
   unlockedBy: string[];
+  imageUrl?: string;
 }

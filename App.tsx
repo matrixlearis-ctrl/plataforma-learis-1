@@ -49,7 +49,8 @@ const App: React.FC = () => {
           status: o.status as OrderStatus,
           createdAt: o.created_at,
           leadPrice: o.lead_price || 5,
-          unlockedBy: o.unlocked_by || []
+          unlockedBy: o.unlocked_by || [],
+          imageUrl: o.image_url
         })));
       }
     } catch (e) {
@@ -70,7 +71,8 @@ const App: React.FC = () => {
           description: p.description || 'Profissional qualificado.',
           categories: p.categories || [], region: p.region || 'Brasil',
           rating: p.rating || 5, credits: p.credits || 0,
-          completedJobs: p.completed_jobs || 0, phone: p.phone || ''
+          completedJobs: p.completed_jobs || 0, phone: p.phone || '',
+          portfolioUrls: p.portfolio_urls || []
         })));
       }
     } catch (e) { console.error("Erro ao buscar profissionais:", e); }
@@ -97,7 +99,8 @@ const App: React.FC = () => {
             rating: data.rating || 5,
             credits: data.credits || 0,
             completedJobs: data.completed_jobs || 0,
-            phone: data.phone || ''
+            phone: data.phone || '',
+            portfolioUrls: data.portfolio_urls || []
           });
         }
         return newUser;
@@ -209,7 +212,8 @@ const App: React.FC = () => {
                 neighborhood: o.neighborhood,
                 deadline: o.deadline,
                 status: o.status,
-                lead_price: o.leadPrice
+                lead_price: o.leadPrice,
+                image_url: o.imageUrl
               }]);
 
               if (!error) {
