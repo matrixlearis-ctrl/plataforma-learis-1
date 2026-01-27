@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { User, OrderStatus, OrderRequest } from '../types';
+import { compressImage, getStoragePath } from '../lib/imageUtils';
+import { supabase } from '../lib/supabase';
 import {
   Send,
   CheckCircle2,
@@ -21,7 +23,9 @@ import {
   Paintbrush,
   Lightbulb,
   Shovel,
-  Droplets
+  Droplets,
+  Camera,
+  X
 } from 'lucide-react';
 
 interface NewRequestProps {
@@ -37,6 +41,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
 
   const [loadingCep, setLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -51,7 +56,40 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     complement: '',
     location: '',
     deadline: '',
+    imageUrl: ''
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const compressed = await compressImage(file);
+      const path = getStoragePath('order-images', user?.id || 'anonymous', file.name);
+
+      const { data, error } = await supabase.storage
+        .from('order-images')
+        .upload(path, compressed);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('order-images')
+        .getPublicUrl(path);
+
+      setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao subir imagem.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+  };
 
   const [submitted, setSubmitted] = useState(false);
 
@@ -85,10 +123,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     if (step === 3) {
       const interval = setInterval(() => {
         setCarouselIndex((prev) => {
-          // Se chegamos ao final da lista duplicada (visual), reiniciamos
-          if (prev >= proPreviews.length) {
-            return 0; // Fallback, though logical reset happens in effect below
-          }
+          if (prev >= proPreviews.length) return 0;
           return prev + 1;
         });
       }, 3000);
@@ -96,11 +131,8 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
     }
   }, [step, proPreviews.length]);
 
-  // Efeito para lidar com o reset "invisível"
   useEffect(() => {
     if (carouselIndex === proPreviews.length) {
-      // Estamos na cópia visual do primeiro item. 
-      // Esperamos a transição terminar, desativamos a transição e pulamos para o índice 0 real.
       const timeout = setTimeout(() => {
         setTransitionEnabled(false);
         setCarouselIndex(0);
@@ -109,7 +141,7 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
             setTransitionEnabled(true);
           });
         });
-      }, 700); // Tempo deve bater com a duration-700 do CSS
+      }, 700);
       return () => clearTimeout(timeout);
     }
   }, [carouselIndex, proPreviews.length]);
@@ -204,7 +236,8 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
         status: OrderStatus.OPEN,
         createdAt: new Date().toISOString(),
         leadPrice: 5,
-        unlockedBy: []
+        unlockedBy: [],
+        imageUrl: formData.imageUrl
       };
       await onAddOrder(newOrder);
       setSubmitted(true);
@@ -297,8 +330,31 @@ const NewRequest: React.FC<NewRequestProps> = ({ user, onAddOrder }) => {
           {step === 3 && (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
               <h2 className="text-4xl font-black text-brand-darkBlue tracking-tight">O que precisa ser feito?</h2>
-              <div className="relative">
-                <textarea rows={6} required placeholder="Descreva os detalhes do serviço..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none text-gray-900 placeholder-gray-600" />
+
+              <div className="space-y-6">
+                <textarea rows={6} required placeholder="Descreva os detalhes do serviço..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-8 bg-brand-bg border-2 border-transparent rounded-[2.5rem] font-bold outline-none focus:border-brand-blue focus:bg-white transition-all uppercase placeholder:normal-case resize-none text-gray-900 placeholder-gray-600 shadow-inner" />
+
+                <div className="p-8 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    {formData.imageUrl ? (
+                      <div className="relative w-full max-w-[200px] aspect-video rounded-2xl overflow-hidden border-4 border-white shadow-xl">
+                        <img src={formData.imageUrl} className="w-full h-full object-cover" />
+                        <button onClick={removeImage} className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-xl shadow-lg hover:bg-red-600 transition-colors">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer group flex flex-col items-center">
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
+                          {uploadingImage ? <Loader2 className="w-8 h-8 animate-spin text-brand-blue" /> : <Camera className="w-8 h-8 text-brand-blue" />}
+                        </div>
+                        <span className="text-sm font-black text-brand-darkBlue uppercase tracking-tight">Anexar foto do serviço (Opcional)</span>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase mt-2 tracking-widest text-[#2b6be6]">As fotos do pedido expiram em 50 dias</p>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <button type="button" onClick={handleNext} className="w-full bg-brand-darkBlue text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all uppercase">

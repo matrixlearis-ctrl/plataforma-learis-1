@@ -2,22 +2,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { User, ProfessionalProfile } from '../types';
-import { 
-  Users, 
-  CheckCircle, 
-  TrendingUp, 
-  Coins, 
+import {
+  Users,
+  CheckCircle,
+  TrendingUp,
+  Coins,
   ArrowRight,
-  Star
+  Star,
+  Camera,
+  User as UserIcon
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
 } from 'recharts';
 
 interface ProfessionalDashboardProps {
@@ -41,13 +43,22 @@ const ProfessionalDashboard: React.FC<ProfessionalDashboardProps> = ({ user, pro
           <h1 className="text-3xl font-bold text-gray-900">Olá, {user.name}</h1>
           <p className="text-gray-500">Este é o resumo da sua atividade na Samej.</p>
         </div>
-        <Link 
-          to="/profissional/leads" 
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg flex items-center"
-        >
-          Procurar Pedidos
-          <ArrowRight className="ml-2 w-5 h-5" />
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            to="/configuracoes"
+            className="bg-white text-gray-700 border-2 border-gray-100 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 shadow-sm flex items-center transition-all"
+          >
+            <Camera className="mr-2 w-5 h-5 text-brand-blue" />
+            Editar Perfil / Fotos
+          </Link>
+          <Link
+            to="/profissional/leads"
+            className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg flex items-center"
+          >
+            Procurar Pedidos
+            <ArrowRight className="ml-2 w-5 h-5" />
+          </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -62,7 +73,7 @@ const ProfessionalDashboard: React.FC<ProfessionalDashboardProps> = ({ user, pro
           <p className="text-sm text-gray-500 font-medium">Saldo de Créditos</p>
           <p className="text-2xl font-bold text-gray-900">{profile?.credits}</p>
         </div>
-        
+
         <div className="bg-white p-6 rounded-2xl border shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
@@ -104,9 +115,9 @@ const ProfessionalDashboard: React.FC<ProfessionalDashboardProps> = ({ user, pro
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
-                <Tooltip 
-                  cursor={{fill: '#f3f4f6'}} 
-                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                <Tooltip
+                  cursor={{ fill: '#f3f4f6' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Bar dataKey="leads" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>

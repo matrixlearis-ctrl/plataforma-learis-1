@@ -3,7 +3,7 @@ import React from 'react';
 import { User, OrderStatus, OrderRequest } from '../types';
 import { CATEGORIES } from '../constants';
 import { Link } from 'react-router-dom';
-import { Clock, ChevronRight, MessageSquare, Plus } from 'lucide-react';
+import { Clock, ChevronRight, MessageSquare, Plus, Camera } from 'lucide-react';
 
 interface CustomerDashboardProps {
   user: User;
@@ -20,9 +20,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, orders }) =
           <h1 className="text-3xl font-bold text-gray-900">Meus Pedidos</h1>
           <p className="text-gray-500">Acompanhe o status das suas solicitações.</p>
         </div>
-        <Link to="/pedir-orcamento" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg flex items-center transition-all">
-          <Plus className="w-5 h-5 mr-2" />Novo Pedido
-        </Link>
+        <div className="flex gap-4">
+          <Link to="/configuracoes" className="bg-white text-gray-700 border-2 border-gray-100 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 shadow-sm flex items-center transition-all">
+            <Camera className="w-5 h-5 mr-2 text-brand-blue" />Editar Perfil
+          </Link>
+          <Link to="/pedir-orcamento" className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg flex items-center transition-all">
+            <Plus className="w-5 h-5 mr-2" />Novo Pedido
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6">

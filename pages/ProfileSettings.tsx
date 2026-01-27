@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { User, UserRole, ProfessionalProfile } from '../types';
-import { Camera, Shield, Bell, CreditCard, ExternalLink, Loader2, CheckCircle2, FileText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { compressImage, getStoragePath } from '../lib/imageUtils';
+import { Camera, Shield, Bell, CreditCard, ExternalLink, Loader2, CheckCircle2, FileText, X, PlusCircle } from 'lucide-react';
 
 interface ProfileSettingsProps {
   user: User;
@@ -10,14 +11,99 @@ interface ProfileSettingsProps {
 
 const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [portfolioUploading, setPortfolioUploading] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
+  const [portfolio, setPortfolio] = useState<string[]>(profile?.portfolioUrls || []);
+
   const [formData, setFormData] = useState({
     name: user.name,
     phone: profile?.phone || '',
     description: profile?.description || '',
     region: profile?.region || '',
-    document: user.document || ''
+    document: user.document || '',
+    avatar: user.avatar || ''
   });
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const compressed = await compressImage(file);
+      const path = getStoragePath('avatars', user.id, file.name);
+
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(path, compressed);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(path);
+
+      // Atualiza banco e estado
+      await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+      setFormData(prev => ({ ...prev, avatar: publicUrl }));
+      alert("Foto de perfil atualizada!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao subir imagem.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handlePortfolioUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPortfolioUploading(index);
+    try {
+      const compressed = await compressImage(file);
+      const path = getStoragePath('portfolio', user.id, file.name);
+
+      const { data, error } = await supabase.storage
+        .from('portfolio')
+        .upload(path, compressed);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('portfolio')
+        .getPublicUrl(path);
+
+      const newPortfolio = [...portfolio];
+      newPortfolio[index] = publicUrl;
+
+      // Atualiza banco
+      const { error: dbError } = await supabase
+        .from('profiles')
+        .update({ portfolio_urls: newPortfolio })
+        .eq('id', user.id);
+
+      if (dbError) throw dbError;
+
+      setPortfolio(newPortfolio);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao subir imagem de portfólio.");
+    } finally {
+      setPortfolioUploading(null);
+    }
+  };
+
+  const removePortfolioImage = async (index: number) => {
+    const newPortfolio = portfolio.filter((_, i) => i !== index);
+    try {
+      await supabase.from('profiles').update({ portfolio_urls: newPortfolio }).eq('id', user.id);
+      setPortfolio(newPortfolio);
+    } catch (err) {
+      alert("Erro ao remover imagem.");
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,11 +159,17 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
             <div className="flex flex-col md:flex-row items-center gap-10 mb-12 border-b pb-12 border-gray-50">
               <div className="relative group">
                 <div className="w-32 h-32 rounded-[2rem] bg-gray-100 overflow-hidden border-4 border-white shadow-2xl transition-transform group-hover:scale-105">
-                  <img src={user.avatar || `https://picsum.photos/seed/${user.id}/200`} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={formData.avatar || `https://picsum.photos/seed/${user.id}/200`} alt="Avatar" className="w-full h-full object-cover" />
+                  {uploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                  )}
                 </div>
-                <button className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-3 rounded-2xl shadow-xl hover:bg-blue-700 transition-all border-4 border-white">
+                <label className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-3 rounded-2xl shadow-xl hover:bg-blue-700 transition-all border-4 border-white cursor-pointer">
                   <Camera className="w-5 h-5" />
-                </button>
+                  <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                </label>
               </div>
               <div className="text-center md:text-left">
                 <h2 className="text-3xl font-black text-gray-900 tracking-tight">{user.name}</h2>
@@ -148,6 +240,51 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
                       readOnly
                     />
                     <p className="text-[10px] text-gray-400 mt-2 flex items-center"><FileText className="w-3 h-3 mr-1" /> Documento não pode ser alterado pelo painel.</p>
+                  </div>
+
+                  <div className="md:col-span-2 pt-8 border-t border-gray-50">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-lg font-black text-gray-900 tracking-tight">Portfólio de Serviços</h3>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Até 6 fotos. Expira em 120 dias.</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="relative aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 overflow-hidden group/img">
+                          {portfolio[i] ? (
+                            <>
+                              <img src={portfolio[i]} className="w-full h-full object-cover transition-transform group-hover/img:scale-105" />
+                              <button
+                                onClick={() => removePortfolioImage(i)}
+                                className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity shadow-lg"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                              {portfolioUploading === i ? (
+                                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                              ) : (
+                                <>
+                                  <PlusCircle className="w-6 h-6 text-gray-300 mb-2" />
+                                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Adicionar</span>
+                                </>
+                              )}
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => handlePortfolioUpload(i, e)}
+                                disabled={portfolioUploading !== null}
+                              />
+                            </label>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </>
               )}
