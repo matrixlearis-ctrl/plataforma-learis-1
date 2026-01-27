@@ -65,6 +65,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
                 </Link>
               )}
 
+              <Link to="/configuracoes" className="text-gray-400 hover:text-brand-blue transition-all p-2 rounded-full hover:bg-brand-blue/5">
+                <PlusCircle className="w-5 h-5 rotate-45" /> {/* Gear icon equivalent or PlusCircle rotated */}
+              </Link>
+
               <Link to={
                 user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" :
                   user.role === UserRole.ADMIN ? "/admin" :
@@ -108,6 +112,9 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, credits }) => {
                         "/cliente/dashboard"
                   } onClick={closeMenu} className="flex items-center font-black text-gray-800 py-3">
                     <UserIcon className="w-5 h-5 mr-4 text-brand-blue" /> Painel Principal
+                  </Link>
+                  <Link to="/configuracoes" onClick={closeMenu} className="flex items-center font-black text-gray-800 py-3">
+                    <PlusCircle className="w-5 h-5 mr-4 text-brand-blue rotate-45" /> Configurações / Fotos
                   </Link>
                   {user.role === UserRole.PROFESSIONAL && (
                     <Link to="/profissional/recarregar" onClick={closeMenu} className="flex items-center font-black text-brand-orange py-3">
