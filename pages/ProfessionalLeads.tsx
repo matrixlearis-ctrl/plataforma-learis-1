@@ -108,7 +108,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
             <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
               <Loader2 className="w-10 h-10 text-gray-200 animate-spin" />
             </div>
-            <p className="text-gray-400 font-black uppercase tracking-widest text-sm">Buscando novas solicitações...</p>
+            <p className="text-gray-600 font-black uppercase tracking-widest text-sm">Buscando novas solicitações...</p>
           </div>
         ) : (
           orders.map(order => {
@@ -128,14 +128,14 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                       <div>
                         <div className="flex flex-wrap items-center gap-3 mb-2">
                           <span className="text-[10px] font-black text-brand-blue bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest">{categoryObj?.name || 'Serviço'}</span>
-                          <div className="flex items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          <div className="flex items-center text-[10px] font-black text-gray-600 uppercase tracking-widest">
                             <Clock className="w-3 h-3 mr-1" /> Postado em {timeAgo}
                           </div>
                         </div>
                         <h3 className="text-2xl md:text-4xl font-black text-brand-darkBlue uppercase tracking-tight leading-none">
                           {unlocked ? order.clientName : `Pedido de Orçamento`}
                         </h3>
-                        <p className="text-lg text-gray-500 font-bold mt-2 flex items-center">
+                        <p className="text-lg text-gray-700 font-bold mt-2 flex items-center">
                           <MapPin className="w-5 h-5 mr-2 text-brand-blue" />
                           {order.location} {order.neighborhood ? `• ${order.neighborhood}` : ''}
                         </p>
@@ -158,23 +158,23 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                     <div className="mb-12 grid grid-cols-1 lg:grid-cols-2 gap-10 animate-in slide-in-from-top-4 duration-500">
                       <div className="space-y-6">
                         <div className="bg-brand-bg p-8 rounded-[3rem] border-2 border-brand-orange/20 shadow-inner">
-                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-4">Dados do Cliente</p>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-4">Dados do Cliente</p>
                           <div className="flex items-center gap-6 mb-6">
                             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md">
                               <Phone className="w-8 h-8 text-brand-orange" />
                             </div>
                             <div>
-                              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">WhatsApp</p>
+                              <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1">WhatsApp</p>
                               <p className="font-black text-brand-darkBlue text-4xl tracking-tighter leading-none">{order.phone}</p>
                             </div>
                           </div>
                           <div className="space-y-2 border-t border-white/50 pt-6">
-                            <p className="text-sm font-bold text-gray-700 uppercase">
-                              <span className="text-gray-400">Endereço:</span> {order.address}, {order.number}
+                            <p className="text-sm font-bold text-gray-800 uppercase">
+                              <span className="text-gray-600">Endereço:</span> {order.address}, {order.number}
                             </p>
                             {order.complement && (
-                              <p className="text-sm font-bold text-gray-700 uppercase">
-                                <span className="text-gray-400">Complemento:</span> {order.complement}
+                              <p className="text-sm font-bold text-gray-800 uppercase">
+                                <span className="text-gray-600">Complemento:</span> {order.complement}
                               </p>
                             )}
                           </div>
@@ -207,7 +207,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                     <div className="mb-12">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div className="bg-gray-50 p-8 rounded-[2.5rem] border border-gray-100">
-                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Urgência</p>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-2">Urgência</p>
                           <p className="font-black text-brand-orange uppercase text-sm flex items-center">
                             <Zap className="w-4 h-4 mr-2 fill-current" /> {getDeadlineLabel(order.deadline)}
                           </p>
@@ -219,8 +219,8 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
                             </div>
                           )}
                           <div>
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Prévia do Projeto</p>
-                            <p className="font-bold text-gray-500 line-clamp-2 italic uppercase text-sm">
+                            <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-2">Prévia do Projeto</p>
+                            <p className="font-bold text-gray-800 line-clamp-2 italic uppercase text-sm">
                               "{order.description}"
                             </p>
                           </div>
@@ -229,17 +229,25 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
 
                       {/* Botão de Compra */}
                       <div className="flex flex-col md:flex-row items-center justify-between pt-10 border-t-2 border-gray-50 gap-8">
-                        <div className="flex items-center text-blue-300 font-bold text-sm">
-                          <Lock className="w-5 h-5 mr-3" />
-                          <span>O cliente aguarda até 4 orçamentos. Seja um deles!</span>
+                        <div className="flex items-center text-gray-700 font-bold text-sm">
+                          <Lock className="w-5 h-5 mr-3 text-brand-blue" />
+                          <span>
+                            {order.unlockedBy.length >= 4
+                              ? 'Limite de 4 orçamentos atingido.'
+                              : order.unlockedBy.length > 0
+                                ? `${order.unlockedBy.length} de 4 profissionais já compraram. Seja o próximo!`
+                                : 'Aguardando interessados. Seja o primeiro!'}
+                          </span>
                         </div>
                         <button
                           onClick={() => buyLead(order)}
-                          disabled={purchasingId === order.id}
-                          className="w-full md:w-auto bg-brand-darkBlue text-white px-16 py-7 rounded-[2.5rem] font-black text-xl hover:bg-black flex items-center justify-center transition-all shadow-3xl active:scale-95 disabled:opacity-50 uppercase tracking-tighter"
+                          disabled={purchasingId === order.id || order.unlockedBy.length >= 4}
+                          className={`w-full md:w-auto px-16 py-7 rounded-[2.5rem] font-black text-xl flex items-center justify-center transition-all shadow-3xl active:scale-95 disabled:opacity-50 uppercase tracking-tighter ${order.unlockedBy.length >= 4 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-brand-darkBlue text-white hover:bg-black'}`}
                         >
                           {purchasingId === order.id ? (
                             <Loader2 className="w-8 h-8 animate-spin" />
+                          ) : order.unlockedBy.length >= 4 ? (
+                            'Esgotado'
                           ) : (
                             <>
                               Ver Contatos do Cliente
@@ -253,7 +261,7 @@ const ProfessionalLeads: React.FC<ProfessionalLeadsProps> = ({ user, profile, or
 
                   {unlocked && (
                     <div className="text-center pt-6 border-t border-gray-50">
-                      <p className="text-[10px] text-gray-300 font-black uppercase tracking-[0.4em]">Parceiro Oficial Samej</p>
+                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.4em]">Parceiro Oficial Samej</p>
                     </div>
                   )}
                 </div>
