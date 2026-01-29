@@ -240,6 +240,53 @@ const Home: React.FC<HomeProps> = ({ user }) => {
         </div>
       </section>
 
+      {/* Como funciona para o Profissional */}
+      <section className="bg-white py-24 px-4 border-t border-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-black text-brand-darkBlue text-center mb-20 tracking-tighter uppercase">
+            Como funciona a <span className="text-brand-orange">Samej</span> para o Profissional?
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <Smartphone className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                Pedidos chegando no seu perfil
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <Search className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                Veja todos os pedidos de graça, e invista apenas nos que gostar.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <Coins className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                Compre créditos no aplicativo para desbloquear os contatos dos clientes.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <CheckCircle className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                100% do valor do serviço é seu. E sem mensalidade!
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials - O que nossos usuários dizem */}
       <section className="bg-brand-bg py-32 px-4">
         <div className="max-w-7xl mx-auto">
