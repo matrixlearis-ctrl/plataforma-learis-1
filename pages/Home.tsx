@@ -174,7 +174,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               <div className="relative mb-8">
                 <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">1</div>
                 <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
-                  <Edit3 className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                  <img src="/images/lapis.png" alt="Lápis" className="w-14 h-14 object-contain transition-all duration-300" />
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Descreva seu projeto</h3>
@@ -184,17 +184,17 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               <div className="relative mb-8">
                 <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">2</div>
                 <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
-                  <Search className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                  <img src="/images/lupa.png" alt="Lupa" className="w-14 h-14 object-contain transition-all duration-300" />
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Encontramos profissionais</h3>
-              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Nossa plataforma conecta você automaticamente com profissionais qualificados da sua região.</p>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Nossa plataforma conecta você automaticamente with profissionais qualificados da sua região.</p>
             </div>
             <div className="flex flex-col items-center text-center group">
               <div className="relative mb-8">
                 <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">3</div>
                 <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
-                  <Mail className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                  <img src="/images/orçamento.png" alt="Orçamento" className="w-14 h-14 object-contain transition-all duration-300" />
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Receba orçamentos</h3>
@@ -204,7 +204,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
               <div className="relative mb-8">
                 <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">4</div>
                 <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
-                  <Handshake className="w-12 h-12 text-[#2b6be6] group-hover:text-white transition-colors duration-300" />
+                  <img src="/images/ok.png" alt="OK" className="w-14 h-14 object-contain transition-all duration-300" />
                 </div>
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Escolha e contrate</h3>
@@ -250,7 +250,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
             <div className="flex flex-col items-center text-center group">
               <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
-                <Smartphone className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+                <img src="/images/celular.png" alt="Celular" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
                 Pedidos chegando no seu perfil
@@ -259,7 +259,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
 
             <div className="flex flex-col items-center text-center group">
               <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
-                <Search className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+                <img src="/images/lupa.png" alt="Lupa" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
                 Veja todos os pedidos de graça, e invista apenas nos que gostar.
@@ -268,7 +268,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
 
             <div className="flex flex-col items-center text-center group">
               <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
-                <Coins className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+                <img src="/images/moeda.png" alt="Moeda" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
                 Compre créditos no aplicativo para desbloquear os contatos dos clientes.
@@ -277,7 +277,7 @@ const Home: React.FC<HomeProps> = ({ user }) => {
 
             <div className="flex flex-col items-center text-center group">
               <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
-                <CheckCircle className="w-10 h-10 text-brand-blue group-hover:scale-110 transition-transform" />
+                <img src="/images/ok.png" alt="OK" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
                 100% do valor do serviço é seu. E sem mensalidade!
