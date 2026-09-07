@@ -54,4 +54,8 @@ $$;
 GRANT SELECT ON public.profile_contacts, public.profile_contact_visibility TO anon, authenticated;
 GRANT ALL  ON public.profile_contacts, public.profile_contact_visibility TO service_role;
 
+-- is_contact_visible é SECURITY DEFINER: não deve ser chamável por anon.
+REVOKE ALL ON FUNCTION public.is_contact_visible(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_contact_visible(uuid) TO authenticated;
+
 COMMIT;

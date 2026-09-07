@@ -134,8 +134,25 @@ BEGIN
   RETURN v_balance;
 END $$;
 
+-- 5. FK payments.subscription_id (após subscriptions existir; idempotente) ----------
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'payments_subscription_fk' AND conrelid = 'public.payments'::regclass) THEN
+    ALTER TABLE public.payments
+      ADD CONSTRAINT payments_subscription_fk FOREIGN KEY (subscription_id)
+      REFERENCES public.subscriptions(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
 GRANT SELECT ON public.subscriptions TO authenticated;
 GRANT ALL ON public.subscriptions, public.credits_ledger TO service_role;
 -- RLS em payments/subscriptions adicionada em 010.
+
+-- SEGURANÇA (FALHA #3 corrigida): add_credits/spend_credits são SECURITY DEFINER
+-- e o EXECUTE padrão (PUBLIC) permitiria qualquer client fabricar saldo.
+REVOKE ALL ON FUNCTION public.add_credits(uuid, integer, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.spend_credits(uuid, integer, text, text, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.add_credits(uuid, integer, text, text, text, uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.spend_credits(uuid, integer, text, text, uuid) TO service_role;
 
 COMMIT;

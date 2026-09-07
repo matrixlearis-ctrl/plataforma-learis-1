@@ -114,8 +114,94 @@ CREATE POLICY profiles_insert_self
 
 CREATE POLICY profiles_update_self
   ON public.profiles FOR UPDATE
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+  USING (auth.uid() = id OR public.is_admin(auth.uid()))
+  WITH CHECK (auth.uid() = id OR public.is_admin(auth.uid()));
+
+-- =========================================================================
+-- D2. RLS — PERFIS ESPECIALIZADOS E CONTATOS (PII) -------------------------
+-- FALHA #2 corrigida: tabelas com PII (phone/whatsapp/cpf/cnpj/email) não
+-- tinham RLS — grants de 003/004 deixariam tudo legível por anon.
+-- Leitura pública passa a viver em VIEWs sem PII; tabela = só dono/ADMIN.
+-- =========================================================================
+ALTER TABLE public.professional_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY pro_profiles_select_self_admin
+  ON public.professional_profiles FOR SELECT
+  USING (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY pro_profiles_insert_self
+  ON public.professional_profiles FOR INSERT
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY pro_profiles_update_self
+  ON public.professional_profiles FOR UPDATE
+  USING (profile_id = auth.uid() OR public.is_admin(auth.uid()))
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY pro_profiles_delete_admin
+  ON public.professional_profiles FOR DELETE
+  USING (public.is_admin(auth.uid()));
+
+ALTER TABLE public.company_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY comp_profiles_select_self_admin
+  ON public.company_profiles FOR SELECT
+  USING (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY comp_profiles_insert_self
+  ON public.company_profiles FOR INSERT
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY comp_profiles_update_self
+  ON public.company_profiles FOR UPDATE
+  USING (profile_id = auth.uid() OR public.is_admin(auth.uid()))
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY comp_profiles_delete_admin
+  ON public.company_profiles FOR DELETE
+  USING (public.is_admin(auth.uid()));
+
+ALTER TABLE public.profile_contacts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY contacts_select_owner_or_visible
+  ON public.profile_contacts FOR SELECT
+  USING (
+    profile_id = auth.uid()
+    OR public.is_admin(auth.uid())
+    OR public.is_contact_visible(id)
+  );
+CREATE POLICY contacts_insert_self
+  ON public.profile_contacts FOR INSERT
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY contacts_update_self
+  ON public.profile_contacts FOR UPDATE
+  USING (profile_id = auth.uid() OR public.is_admin(auth.uid()))
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+CREATE POLICY contacts_delete_self
+  ON public.profile_contacts FOR DELETE
+  USING (profile_id = auth.uid() OR public.is_admin(auth.uid()));
+
+ALTER TABLE public.profile_contact_visibility ENABLE ROW LEVEL SECURITY;
+CREATE POLICY cv_select_owner_admin
+  ON public.profile_contact_visibility FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM public.profile_contacts c WHERE c.id = profile_contact_visibility.profile_contact_id AND c.profile_id = auth.uid())
+    OR public.is_admin(auth.uid())
+  );
+CREATE POLICY cv_insert_owner
+  ON public.profile_contact_visibility FOR INSERT
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profile_contacts c WHERE c.id = profile_contact_visibility.profile_contact_id AND c.profile_id = auth.uid())
+    OR public.is_admin(auth.uid())
+  );
+
+-- VIEWs públicas SEM PII (front v2 usa estas para cards/diretórios)
+CREATE OR REPLACE VIEW public.public_professionals AS
+SELECT
+  id, profile_id, profession, specialties, experience_years, formation,
+  description, city, state, created_at
+FROM public.professional_profiles
+WHERE active = true;
+
+CREATE OR REPLACE VIEW public.public_companies AS
+SELECT
+  id, profile_id, company_name, description, logo_url, cover_url,
+  city, state, website, social_links, team, created_at
+FROM public.company_profiles
+WHERE active = true;
+
+GRANT SELECT ON public.public_professionals, public.public_companies TO anon, authenticated;
 
 -- =========================================================================
 -- E. RLS — ORDERS (legada): mantida até front v2; hardening em 911 opcional --
@@ -309,9 +395,15 @@ CREATE POLICY messages_insert_sender
   WITH CHECK (
     sender_id = auth.uid()
     AND public.effective_permission(auth.uid(), 'can_send_messages')
-    AND NOT EXISTS (SELECT 1 FROM public.blocks b
-                    WHERE (b.blocker_id = auth.uid() AND b.blocked_id = sender_id)
-                       OR (b.blocker_id = sender_id))
+    AND NOT EXISTS (
+      SELECT 1
+      FROM public.conversation_participants cp_other
+      JOIN public.blocks b
+        ON (b.blocker_id = sender_id AND b.blocked_id = cp_other.profile_id)
+        OR (b.blocker_id = cp_other.profile_id AND b.blocked_id = sender_id)
+      WHERE cp_other.conversation_id = messages.conversation_id
+        AND cp_other.profile_id <> sender_id
+    )
   );
 CREATE POLICY messages_delete_own
   ON public.messages FOR DELETE
@@ -336,7 +428,7 @@ CREATE POLICY cs_insert_company
 ALTER TABLE public.portfolio_items ENABLE ROW LEVEL SECURITY;
 CREATE POLICY portfolio_select
   ON public.portfolio_items FOR SELECT
-  USING (status = 'published' AND owner_id <> auth.uid() OR owner_id = auth.uid() OR public.is_admin(auth.uid()));
+  USING (status = 'published' OR owner_id = auth.uid() OR public.is_admin(auth.uid()));
 CREATE POLICY portfolio_insert
   ON public.portfolio_items FOR INSERT
   WITH CHECK (owner_id = auth.uid() AND public.effective_permission(auth.uid(), 'can_publish'));
@@ -412,7 +504,6 @@ CREATE POLICY plans_select ON public.plans FOR SELECT USING (active OR public.is
 
 ALTER TABLE public.plan_permissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY plan_permissions_select ON public.plan_permissions FOR SELECT USING (true);
-ALTER TABLE public.plan_permissions ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY ss_select ON public.system_settings FOR SELECT USING (true);
@@ -459,7 +550,7 @@ DO $$
 DECLARE t TEXT;
 BEGIN
   FOREACH t IN ARRAY ARRAY['profiles','plans','subscriptions','posts','comments','reels','stories',
-                           'conversations','conversation_participants','portfolio_items','quote_requests',
+                           'conversations','portfolio_items','quote_requests',
                            'reports','admin_users','professional_profiles','company_profiles',
                            'profile_contacts','profile_contact_visibility','payments']
   LOOP

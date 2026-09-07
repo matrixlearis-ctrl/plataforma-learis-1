@@ -157,23 +157,28 @@ END $$;
 
 -- 7. effective_permission(): autoridade única de permissões ---------------
 -- Retorna se o perfil (pela role/plano) possui a permissão.
--- ADMIN/SUPER_ADMIN recebem tudo (is_admin() definida na migration 009).
+-- ADMIN/SUPER_ADMIN recebem tudo (is_admin() criada na migration 009).
+-- OBS(ordem de execução): implementada em plpgsql para a referência a
+-- public.is_admin() (009) ser resolvida em runtime e não no CREATE FUNCTION.
 CREATE OR REPLACE FUNCTION public.effective_permission(p_profile uuid, p_permission text)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
-  SELECT
-    CASE
-      WHEN p_profile = auth.uid() AND public.is_admin(p_profile) THEN true
-      ELSE COALESCE(
-        (SELECT pp.allowed
-           FROM public.plan_permissions pp
-           JOIN public.profiles      pr ON pr.plan_id = pp.plan_id
-          WHERE pr.id = p_profile AND pp.permission = p_permission),
-        false)
-    END;
-$$;
+DECLARE
+  v_allowed boolean;
+BEGIN
+  IF p_profile = auth.uid() AND public.is_admin(p_profile) THEN
+    RETURN true;
+  END IF;
+  SELECT pp.allowed INTO v_allowed
+    FROM public.plan_permissions pp
+    JOIN public.profiles pr ON pr.plan_id = pp.plan_id
+   WHERE pr.id = p_profile AND pp.permission = p_permission;
+  RETURN COALESCE(v_allowed, false);
+END $$;
 
 -- Grants básicos
 GRANT SELECT ON public.plans, public.plan_permissions TO anon, authenticated;

@@ -30,10 +30,10 @@
 | plans | público (active) | ADMIN | ADMIN | ADMIN |
 | plan_permissions | público | ADMIN | ADMIN | ADMIN |
 | system_settings | público | — | ADMIN | — |
-| professional_profiles | público | próprio | próprio | ADMIN/preservação |
-| company_profiles | público | próprio | próprio | ADMIN/preservação |
-| profile_contacts | próprio/ADMIN (via is_contact_visible) | próprio | próprio | próprio/ADMIN |
-| profile_contact_visibility | próprio/ADMIN | próprio | próprio | próprio/ADMIN |
+| professional_profiles | próprio/ADMIN (público SEM PII via `public_professionals`) | próprio | próprio | ADMIN/preservação |
+| company_profiles | próprio/ADMIN (público SEM PII via `public_companies`) | próprio | próprio | ADMIN/preservação |
+| profile_contacts | próprio/ADMIN/visível (`is_contact_visible`) | próprio | próprio | próprio/ADMIN |
+| profile_contact_visibility | próprio/ADMIN | próprio | próprio | ADMIN |
 | posts | published/não-deletado OU autor OU ADMIN | autor (can_publish) | autor/ADMIN | autor/ADMIN |
 | post_media | via post | via post do autor | — | autor/ADMIN |
 | comments | published/ADMIN | autor | autor/ADMIN | autor/ADMIN |
@@ -53,7 +53,7 @@
 | blocks | envolvidos/ADMIN | próprio (bloqueador) | — | próprio/ADMIN |
 | conversations | participantes | criador | — | ADMIN |
 | conversation_participants | participantes | é participante (self) | self | ADMIN |
-| messages | participantes | remetente (can_send_messages + não-bloqueado) | — | remetente/ADMIN |
+| messages | participantes | remetente (can_send_messages + não-bloqueado p/ todos os outros participantes) | — | remetente/ADMIN |
 | service_categories | público (active) | ADMIN | ADMIN | ADMIN |
 | services | público (active) | ADMIN | ADMIN | ADMIN |
 | professional_services | público | próprio | próprio | próprio/ADMIN |
@@ -67,6 +67,10 @@
 | admin_users | ADMIN | ADMIN | ADMIN | ADMIN |
 | admin_logs | ADMIN | backend | backend | ADMIN |
 | reports | ADMIN | repórter | ADMIN | ADMIN |
+| public_profiles | público (sem PII) | — | — | — |
+| public_professionals | público (sem PII) | — | — | — |
+| public_companies | público (sem PII) | — | — | — |
+| public_quote_requests | público (cards sem PII) | — | — | — |
 
 ## Funções/segurança
 | Função | Executor | Escopo |

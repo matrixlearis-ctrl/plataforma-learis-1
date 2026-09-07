@@ -85,7 +85,11 @@ AS $$
   WHERE a.profile_id = p_profile AND a.active;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO anon, authenticated;
+-- EXECUTE controlado: definer-functions só devem ser invocáveis por quem precisa.
+-- is_admin/has_admin_permission: públicos para clientes autenticados (só retornam boolean).
+REVOKE ALL ON FUNCTION public.is_admin(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.has_admin_permission(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.has_admin_permission(uuid, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.effective_permission(uuid, text) TO anon, authenticated;
 GRANT ALL ON public.admin_users, public.admin_logs, public.reports TO service_role;
