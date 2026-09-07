@@ -1,0 +1,347 @@
+
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { CATEGORIES } from '../constants';
+import { User } from '../types';
+import {
+  Search,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Users,
+  Coins,
+  Smartphone,
+  UserPlus,
+  ShieldCheck,
+  Zap,
+  Award,
+  Edit3,
+  Mail,
+  Handshake
+} from 'lucide-react';
+
+import ProfessionalSignupPopup from '../components/ProfessionalSignupPopup';
+import ServiceCarousel from '../components/ServiceCarousel';
+
+interface HomeProps {
+  user: User | null;
+}
+
+const Home: React.FC<HomeProps> = ({ user }) => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+
+  React.useEffect(() => {
+    // Só mostramos o popup se o usuário não for profissional
+    if (user?.role === 'PROFESSIONAL') return;
+
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 2000); // 2 segundos de atraso
+
+    return () => clearTimeout(timer);
+  }, [user]);
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/pedir-orcamento?search=${encodeURIComponent(searchTerm)}`);
+    } else {
+      navigate('/pedir-orcamento');
+    }
+  };
+
+  const testimonials = [
+    {
+      name: "Clayton Amaral",
+      role: "Cliente - São Paulo, SP",
+      avatar: "/images/Clayton Amaral.jpg",
+      content: "Excelente plataforma! Encontrei um profissional em menos de 1 hora e o serviço ficou impecável. Recomendo a todos que buscam qualidade e agilidade."
+    },
+    {
+      name: "José Reis",
+      role: "Pedreiro - Rio de Janeiro, RJ",
+      avatar: "/images/José Reis.jpg",
+      content: "Como profissional, a Samej mudou minha rotina. Recebo clientes todos os dias direto no meu celular e meu faturamento cresceu muito."
+    },
+    {
+      name: "Clara Almeida",
+      role: "Cliente - Belo Horizonte, MG",
+      avatar: "/images/Clara Almeida.jpg",
+      content: "O processo de pedir orçamento é muito simples. Os profissionais que me contataram foram super atenciosos e os preços bem competitivos."
+    }
+  ];
+
+  return (
+    <div className="flex flex-col">
+      {/* Hero Section - Estilo Habitissimo Premium */}
+      <section className="bg-brand-darkBlue text-white pt-24 pb-32 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-orange/20 rounded-full -mr-64 -mt-64 blur-[140px] animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full -ml-32 -mb-32 blur-[100px]"></div>
+
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center px-6 py-2.5 rounded-full mb-10 backdrop-blur-xl relative group border border-amber-500/40 bg-black/60 shadow-[0_0_30px_rgba(251,191,36,0.25)] transition-all duration-500">
+            {/* Anéis de expansão dourados (sem sumir) */}
+            <div className="absolute inset-0 rounded-full bg-amber-400/20 animate-pulse scale-[1.05]"></div>
+            <div className="absolute -inset-1 rounded-full border border-amber-500/30 animate-pulse delay-75" style={{ animationDuration: '2.5s' }}></div>
+            <div className="absolute -inset-2 rounded-full border border-amber-500/10 animate-pulse delay-150" style={{ animationDuration: '3.5s' }}></div>
+
+            <div className="relative z-10 flex items-center">
+              <Award className="text-amber-400 mr-2.5 w-4 h-4 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)]" />
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] bg-gradient-to-r from-yellow-100 via-amber-400 to-yellow-100 bg-clip-text text-transparent font-black">
+                Líder em orçamentos online
+              </span>
+            </div>
+          </div>
+
+          <h1 className="text-5xl md:text-8xl font-black mb-8 leading-[0.95] tracking-tighter max-w-5xl mx-auto">
+            Encontre os melhores <br /> <span className="text-brand-orange italic">Profissionais</span> da sua Região
+          </h1>
+          <p className="text-xl md:text-2xl text-blue-100/70 mb-14 max-w-2xl mx-auto font-medium">
+            Conte com a gente para conectar você aos melhores profissionais e receba até 4 orçamentos gratuitos.
+          </p>
+
+          <form
+            onSubmit={handleSearch}
+            className="bg-white p-2 md:p-4 rounded-[3rem] shadow-3xl flex flex-col md:flex-row max-w-3xl mx-auto border-[10px] border-white/10 mb-12 transform hover:scale-[1.02] transition-transform"
+          >
+            <div className="flex-grow flex items-center px-8 py-5 md:py-0">
+              <Search className="text-brand-blue mr-4 w-6 h-6" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="O que você precisa?"
+                className="w-full py-4 text-gray-900 font-bold focus:outline-none placeholder-gray-400 bg-transparent text-xl uppercase"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-brand-orange text-white px-14 py-6 rounded-[2.5rem] font-black hover:bg-brand-lightOrange transition-all text-center shadow-2xl active:scale-95 text-lg uppercase tracking-tight"
+            >
+              Pedir Orçamento
+            </button>
+          </form>
+
+          <div className="flex flex-wrap justify-center gap-10 text-blue-100/60 font-black text-[10px] uppercase tracking-widest">
+            <div className="flex items-center"><Zap className="w-4 h-4 mr-2 text-brand-orange" /> Rápido e Grátis</div>
+            <div className="flex items-center"><ShieldCheck className="w-4 h-4 mr-2 text-brand-orange" /> Profissionais Ativos</div>
+            <div className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-brand-orange" /> Sem Compromisso</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Seção de Serviços Pedidos - Carrossel */}
+      <ServiceCarousel />
+
+      {/* Categories Grid */}
+      <section className="bg-brand-bg py-32 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24 space-y-4">
+            <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue tracking-tighter">
+              Encontre o Profissional <span className="text-brand-blue">Que Você Precisa</span>
+            </h2>
+            <p className="text-lg text-gray-500 font-bold max-w-xl mx-auto uppercase tracking-tight">
+              Selecione o serviço desejado e receba até 4 orçamentos de profissionais
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.id}
+                to={['cuidadores-de-idosos', 'churrasqueiro-em-domicilio', 'massagista-a-domicilio', 'cozinheiras-em-domicilio', 'diarista', 'arquitetos', 'motorista-particular', 'maquiagem-a-domicilio', 'massagista', 'acompanhante-hospitalar', 'personal-trainer', 'detetives-particulares', 'buffet-em-domicilio', 'adestrador-de-cachorro'].includes(cat.id)
+                  ? `/servico/${cat.id}`
+                  : `/pedir-orcamento?category=${cat.id}`}
+                className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-blue-900/5 hover:shadow-2xl transition-all flex flex-col items-center text-center group active:scale-95"
+              >
+                <div className="w-24 h-24 bg-brand-bg text-brand-blue rounded-[2rem] flex items-center justify-center mb-8 group-hover:bg-brand-orange group-hover:text-white transition-all duration-500 shadow-inner group-hover:rotate-6">
+                  {React.cloneElement(cat.icon as React.ReactElement<any>, { className: "w-10 h-10" })}
+                </div>
+                <span className="font-black text-gray-800 text-xl group-hover:text-brand-orange transition-colors leading-tight mb-2">
+                  {cat.name}
+                </span>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ver Profissionais</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Como Funciona Section */}
+      <section className="bg-white py-24 px-4 border-t border-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue text-center mb-20 tracking-tight">
+            Como Funciona?
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">1</div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <img src="/images/lapis.png" alt="Desenho de um lápis simbolizando descrição de projeto" className="w-14 h-14 object-contain transition-all duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Descreva seu projeto</h3>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Conte-nos o que você precisa. Quanto mais detalhes, melhor será o orçamento que você receberá.</p>
+            </div>
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">2</div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <img src="/images/lupa.png" alt="Lupa simbolizando busca de profissionais qualificados" className="w-14 h-14 object-contain transition-all duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Encontramos profissionais</h3>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Nossa plataforma conecta você automaticamente with profissionais qualificados da sua região.</p>
+            </div>
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">3</div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <img src="/images/orçamento.png" alt="Papel de orçamento simbolizando recebimento de propostas" className="w-14 h-14 object-contain transition-all duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Receba orçamentos</h3>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Receba até 4 orçamentos gratuitos por email e WhatsApp.</p>
+            </div>
+            <div className="flex flex-col items-center text-center group">
+              <div className="relative mb-8">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#2b6be6] rounded-full flex items-center justify-center text-white font-black text-sm z-10 border-4 border-white shadow-md">4</div>
+                <div className="w-32 h-32 bg-white border-2 border-gray-100 group-hover:bg-[#2b6be6] group-hover:border-transparent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+                  <img src="/images/ok.png" alt="Ícone de check simbolizando escolha e contratação final" className="w-14 h-14 object-contain transition-all duration-300" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-4 group-hover:text-[#2b6be6] transition-colors">Escolha e contrate</h3>
+              <p className="text-gray-800 font-medium leading-relaxed text-[17px] px-4">Compare preços, avalie perfis e escolha o profissional ideal. Negocie diretamente com ele!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Para Profissionais */}
+      <section className="py-24 px-4 bg-brand-darkBlue overflow-hidden relative">
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-brand-orange/10 rounded-full blur-[100px]"></div>
+        <div className="max-w-7xl mx-auto bg-brand-orange rounded-[4rem] p-12 md:p-24 text-white flex flex-col md:flex-row items-center gap-16 relative z-10 shadow-3xl">
+          <div className="md:w-3/5 space-y-8">
+            <h2 className="text-4xl md:text-6xl font-black leading-none tracking-tighter">
+              É um profissional? Conquiste mais clientes facilmente com a <span className="text-brand-darkBlue">Samej</span>.
+            </h2>
+            <p className="text-xl font-bold opacity-90 leading-relaxed max-w-lg">
+              Receba pedidos de orçamento direto no seu celular e feche novos negócios todos os dias.
+            </p>
+            <Link to="/auth" className="inline-flex items-center bg-brand-darkBlue text-white px-12 py-6 rounded-[2.5rem] font-black text-xl hover:scale-105 transition-all shadow-2xl active:scale-95 uppercase">
+              Sou Profissional
+              <ArrowRight className="ml-3 w-6 h-6" />
+            </Link>
+          </div>
+          <div className="md:w-2/5">
+            <img
+              src="/images/ima 10.png"
+              alt="Profissional Ativo"
+              className="rounded-[3rem] shadow-4xl border-8 border-white/20 transform md:rotate-3 hover:rotate-0 transition-transform duration-700"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Como funciona para o Profissional */}
+      <section className="bg-white py-24 px-4 border-t border-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-black text-brand-darkBlue text-center mb-20 tracking-tighter uppercase">
+            Como funciona a <span className="text-brand-orange">Samej</span> para o Profissional?
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <img src="/images/celular.png" alt="Celular" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                Pedidos chegando no seu perfil
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <img src="/images/lupa.png" alt="Lupa" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                Veja todos os pedidos de graça, e invista apenas nos que gostar.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <img src="/images/moeda.png" alt="Moeda" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                Compre créditos no aplicativo para desbloquear os contatos dos clientes.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 mb-6 rounded-3xl bg-gray-50 flex items-center justify-center border-2 border-transparent group-hover:bg-brand-orange/5 group-hover:border-brand-orange/20 transition-all duration-500 shadow-sm group-hover:shadow-md">
+                <img src="/images/ok.png" alt="OK" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-gray-800 font-bold text-lg leading-tight px-6 uppercase tracking-tight">
+                100% do valor do serviço é seu. E sem mensalidade!
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials - O que nossos usuários dizem */}
+      <section className="bg-brand-bg py-32 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-16 text-center tracking-tight">O que nossos usuários dizem</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {testimonials.map((item, idx) => (
+              <div key={idx} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex flex-col">
+                <div className="flex items-center mb-6">
+                  <div className="flex-shrink-0 mr-6">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-50 shadow-sm">
+                      <img
+                        src={item.avatar}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://picsum.photos/seed/${item.name}/200`;
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-[22px] font-black text-gray-900 leading-tight mb-1">{item.name}</h3>
+                    <p className="text-[16px] font-bold text-gray-400 mb-2">{item.role}</p>
+                    <div className="flex text-amber-400">
+                      {[...Array(5)].map((_, j) => (
+                        <Star key={j} className="w-4 h-4 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-gray-50">
+                  <p className="text-gray-600 italic font-medium leading-relaxed text-[18px]">
+                    "{item.content}"
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {showPopup && <ProfessionalSignupPopup onClose={handleClosePopup} />}
+    </div>
+  );
+};
+
+export default Home;
