@@ -25,4 +25,18 @@ dist-ssr
 
 # Supabase and Environment
 .env
+.env.*
+!.env.example
 supabase/.temp
+
+# Credenciais / segredos (NUNCA versionar)
+chaves*.txt
+*chaves*.txt
+*_credentials*.txt
+*.pem
+*.key
+
+# Rascunhos/artefatos locais (não versionar)
+image/
+*.pdf
+ChatGPT Image *.png

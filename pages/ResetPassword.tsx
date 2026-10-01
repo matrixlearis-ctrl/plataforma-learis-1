@@ -95,7 +95,7 @@ const ResetPassword: React.FC = () => {
             if (resetError) throw resetError;
 
             setSuccess(true);
-            setTimeout(() => navigate('/auth'), 3000);
+            setTimeout(() => navigate('/feed'), 3000);
         } catch (err: any) {
             console.error("Erro no update:", err);
             setError(err.message || "Erro ao atualizar senha.");

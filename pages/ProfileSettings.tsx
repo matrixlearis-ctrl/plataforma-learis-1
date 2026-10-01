@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { User, UserRole, ProfessionalProfile } from '../types';
 import { supabase } from '../lib/supabase';
-import { compressImage, getStoragePath } from '../lib/imageUtils';
-import { Camera, Shield, Bell, CreditCard, ExternalLink, Loader2, CheckCircle2, FileText, X, PlusCircle } from 'lucide-react';
+import { compressImage } from '../lib/imageUtils';
+import { uploadPostImage } from '../lib/uploads';
+import { Camera, Shield, Bell, CreditCard, ExternalLink, Loader2, CheckCircle2, FileText, X, PlusCircle, Mail } from 'lucide-react';
 
 interface ProfileSettingsProps {
   user: User;
@@ -16,6 +17,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
   const [portfolioUploading, setPortfolioUploading] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
   const [portfolio, setPortfolio] = useState<string[]>(profile?.portfolioUrls || []);
+  const isProOrCompany = user.role === UserRole.PROFESSIONAL || user.role === UserRole.COMPANY;
 
   const [formData, setFormData] = useState({
     name: user.name,
@@ -35,6 +37,37 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
     profession: profile?.profession || ''
   });
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (!mounted || !data) return;
+      setFormData((prev) => ({
+        ...prev,
+        name: data.full_name || prev.name,
+        phone: data.phone || prev.phone,
+        description: data.description || prev.description,
+        region: data.region || prev.region,
+        document: data.document || prev.document,
+        avatar: data.avatar_url || prev.avatar,
+        cep: data.cep || prev.cep,
+        address: data.address || prev.address,
+        number: data.number || prev.number,
+        complement: data.complement || prev.complement,
+        neighborhood: data.neighborhood || prev.neighborhood,
+        city: data.city || prev.city,
+        state: data.state || prev.state,
+        experience: data.experience || prev.experience,
+        profession: data.profession || prev.profession,
+      }));
+    })();
+    return () => { mounted = false; };
+  }, [user.id]);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -42,21 +75,11 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
     setUploadingAvatar(true);
     try {
       const compressed = await compressImage(file);
-      const path = getStoragePath('avatars', user.id, file.name);
-
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(path, compressed);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(path);
+      const uploaded = await uploadPostImage(compressed, `${user.id}/avatar-${Date.now()}.jpg`);
 
       // Atualiza banco e estado
-      await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
-      setFormData(prev => ({ ...prev, avatar: publicUrl }));
+      await supabase.from('profiles').update({ avatar_url: uploaded.url }).eq('id', user.id);
+      setFormData(prev => ({ ...prev, avatar: uploaded.url }));
       alert("Foto de perfil atualizada!");
     } catch (err) {
       console.error(err);
@@ -73,20 +96,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
     setPortfolioUploading(index);
     try {
       const compressed = await compressImage(file);
-      const path = getStoragePath('portfolio', user.id, file.name);
-
-      const { data, error } = await supabase.storage
-        .from('portfolio')
-        .upload(path, compressed);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('portfolio')
-        .getPublicUrl(path);
+      const uploaded = await uploadPostImage(compressed, `${user.id}/portfolio-${Date.now()}-${index}.jpg`);
 
       const newPortfolio = [...portfolio];
-      newPortfolio[index] = publicUrl;
+      newPortfolio[index] = uploaded.url;
 
       // Atualiza banco
       const { error: dbError } = await supabase
@@ -221,11 +234,21 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
                     className="w-full p-4 bg-gray-50 border-2 border-gray-50 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-gray-900"
                   />
                 </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">E-mail de Login</label>
+                  <input
+                    type="email"
+                    value={user.email}
+                    readOnly
+                    className="w-full p-4 bg-gray-100 border-2 border-transparent rounded-2xl outline-none font-medium text-gray-500 italic"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-2 flex items-center"><Mail className="w-3 h-3 mr-1" /> E-mail usado para entrar na plataforma.</p>
+                </div>
 
-                {user.role === UserRole.PROFESSIONAL && (
+                {isProOrCompany && (
                   <>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Descrição dos Serviços</label>
+                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">{user.role === UserRole.COMPANY ? 'Descrição da Empresa' : 'Descrição dos Serviços'}</label>
                       <textarea
                         rows={5}
                         value={formData.description}
@@ -244,7 +267,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">CPF ou CNPJ</label>
+                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">{user.role === UserRole.COMPANY ? 'CNPJ' : 'CPF ou CNPJ'}</label>
                       <input
                         type="text"
                         value={formData.document}
@@ -312,7 +335,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, profile }) => {
 
                     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
                       <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Profissão Atual</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">{user.role === UserRole.COMPANY ? 'Ramo Empresarial' : 'Profissão Atual'}</label>
                         <input
                           type="text"
                           value={formData.profession}

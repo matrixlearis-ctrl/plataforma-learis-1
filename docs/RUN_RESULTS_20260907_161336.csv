@@ -1,0 +1,269 @@
+﻿# SAMEJ SOCIAL STAGING TESTS — 20260907_161336
+sep=,
+1;01 anon lê plans (público);RLS;FAIL;falhou: set_config  
+-------------
+ {role:anon}
+(1 linha)
+
+psql.exe : ERROR:  permission denied for function is_admin
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  permiss...nction is_admin:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+CONTEXTO:  SQL expression "NOT EXISTS (SELECT 1 FROM public.plans WHERE active)"
+PL/pgSQL function inline_code_block line 1 at IF
+2;02 anon NÃO lê profiles (PII);RLS;FAIL;houve acesso indevido: set_config  
+-------------
+ {role:anon}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "role" is invalid.
+CONTEXTO:  JSON data, line 1: {role...
+SQL expression "EXISTS (SELECT 1 FROM public.profiles)"
+PL/pgSQL function inline_code_block line 1 at IF
+3;03 user NÃO altera role;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+4;04 user NÃO altera plan_id;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+5;05 user NÃO altera credits;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+6;06 user NÃO altera verified;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+7;07 user NÃO altera featured;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+8;08 user NÃO altera account_status;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+9;09 OTHER NÃO lê dados do FREE;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:33333333-3333-4333-8333-333333333333,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+SQL expression "EXISTS (SELECT 1 FROM public.profiles WHERE id='11111111-1111-4111-8111-111111111111')"
+PL/pgSQL function inline_code_block line 1 at IF
+10;10 user NÃO fabrica créditos (add_credits);RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  permission denied for function add_credits
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  permiss...ion add_credits:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+11;11 gastar sem saldo é bloqueado (backend);RLS;PASS;acesso permitido
+12;12 OTHER NÃO vê contatos do FREE;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:33333333-3333-4333-8333-333333333333,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+SQL expression "EXISTS (SELECT 1 FROM public.profile_contacts WHERE profile_id='11111111-1111-4111-8111-111111111111')"
+PL/pgSQL function inline_code_block line 1 at IF
+13;13 FREE VÊ contatos do PRO;RLS;FAIL;falhou: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+SQL expression "NOT EXISTS (SELECT 1 FROM public.profile_contacts WHERE 
+profile_id='22222222-2222-4222-8222-222222222222' AND type='phone')"
+PL/pgSQL function inline_code_block line 1 at IF
+14;14 exceção administrativa visível;RLS;FAIL;falhou: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+SQL expression "NOT EXISTS (SELECT 1 FROM public.profile_contacts WHERE 
+profile_id='33333333-3333-4333-8333-333333333333' AND type='phone')"
+PL/pgSQL function inline_code_block line 1 at IF
+15;15 mensagem em conversa sem participação;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  infinite recursion detected in policy for relation "conversation_participants"
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  infinit...n_participants":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+16;16 OTHER NÃO vê PII (prof_profiles/company);RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  invalid input syntax for type json
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  invalid...x for type json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETALHE:  Token "sub" is invalid.
+CONTEXTO:  JSON data, line 1: {sub...
+SQL expression "EXISTS (SELECT 1 FROM public.professional_profiles WHERE 
+profile_id='44444444-4444-4444-8444-444444444444')
+  OR EXISTS (SELECT 1 FROM public.company_profiles)"
+PL/pgSQL function inline_code_block line 2 at IF
+17;17 user NÃO manipula payments de terceiros;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  new row violates row-level security policy for table "payments"
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  new row...able "payments":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+18;18 user NÃO cria subscriptions;RLS;FAIL;houve acesso indevido: set_config                           
+---------------------------------------------------------------
+ {sub:11111111-1111-4111-8111-111111111111,role:authenticated}
+(1 linha)
+
+psql.exe : ERROR:  new row violates row-level security policy for table "subscriptions"
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  new row..."subscriptions":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+19;DB-1 definer: authenticated SEM EXECUTE add/spend;RLS;PASS;acesso permitido
+20;DB-2 definer: is_admin responde certo;RLS;PASS;acesso permitido
+21;DB-3 effective_permission (PRO can_receive_leads);RLS;PASS;acesso permitido
+22;DB-4 is_contact_visible (PRO true / FREE false);RLS;PASS;acesso permitido
+23;DB-5 spend_credits aceita tipo boost;RLS;PASS;acesso permitido
+24;DB-6 ledger: cadeia monotônica (invariante);RLS;PASS;acesso permitido
+25;DB-7 unique gateway_payment_id bloqueia dupla;RLS;PASS;acesso permitido
+26;ORD-1 anon NÃO acessa PII (ESPERADO FAIL atê 911);RLS;FAIL;houve acesso indevido: set_config  
+-------------
+ {role:anon}
+(1 linha)
+
+psql.exe : ERROR:  leak
+No C:\Users\James Silva\AppData\Local\Temp\opencode\run_staging_tests_bom.ps1:25 caractere:3
++   & psql @a *> $errFile
++   ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR:  leak:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+CONTEXTO:  PL/pgSQL function inline_code_block line 1 at RAISE
+F1;security_definer_v21.sql;SUITE;PASS;exit 0
+F2;credits_ledger_v21.sql;SUITE;PASS;exit 0
+F3;migrate_client_user_v21.sql;SUITE;PASS;exit 0
+F4;orders_pii_v21.sql;SUITE;PASS;exit 0

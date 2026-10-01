@@ -95,6 +95,11 @@ WHERE deleted_at IS NULL;
 
 GRANT SELECT ON public.public_profiles TO anon, authenticated;
 
+-- is_admin é avaliado dentro de várias policies; sem EXECUTE para anon o
+-- próprio SELECT errorizaria (permission denied) para visitantes. A função é
+-- STABLE SECURITY DEFINER e null-safe: com auth.uid() nulo devolve false.
+GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO anon;
+
 -- =========================================================================
 -- D. RLS — PROFILES (correção da política aberta) ---------------------------
 -- =========================================================================
@@ -371,11 +376,19 @@ CREATE POLICY conversations_insert_owner
   WITH CHECK (true);
 
 ALTER TABLE public.conversation_participants ENABLE ROW LEVEL SECURITY;
+-- helper SECURITY DEFINER (owner postgres, dono da tabela -> sem re-aplicar RLS):
+-- evita a recursão infinita de policy que consulta a própria tabela.
+CREATE OR REPLACE FUNCTION public.is_conversation_participant(p_conv uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS
+$fn$ SELECT EXISTS (SELECT 1 FROM public.conversation_participants cp
+                   WHERE cp.conversation_id = p_conv AND cp.profile_id = auth.uid()) $fn$;
+GRANT EXECUTE ON FUNCTION public.is_conversation_participant(uuid) TO anon, authenticated;
+DROP POLICY IF EXISTS conv_participants_select ON public.conversation_participants;
 CREATE POLICY conv_participants_select
   ON public.conversation_participants FOR SELECT
   USING (
     profile_id = auth.uid()
-    OR EXISTS (SELECT 1 FROM public.conversation_participants me WHERE me.conversation_id = conversation_participants.conversation_id AND me.profile_id = auth.uid())
+    OR public.is_conversation_participant(conversation_participants.conversation_id)
   );
 CREATE POLICY conv_participants_insert_self
   ON public.conversation_participants FOR INSERT
@@ -395,6 +408,9 @@ CREATE POLICY messages_insert_sender
   WITH CHECK (
     sender_id = auth.uid()
     AND public.effective_permission(auth.uid(), 'can_send_messages')
+    AND EXISTS (SELECT 1 FROM public.conversation_participants me_s
+                WHERE me_s.conversation_id = messages.conversation_id
+                  AND me_s.profile_id = auth.uid())
     AND NOT EXISTS (
       SELECT 1
       FROM public.conversation_participants cp_other

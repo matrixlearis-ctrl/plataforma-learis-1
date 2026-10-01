@@ -1,96 +1,34 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Auth from './pages/Auth';
-import CustomerDashboard from './pages/CustomerDashboard';
-import ProfessionalDashboard from './pages/ProfessionalDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import UserManagement from './pages/UserManagement';
-import OrderManagement from './pages/OrderManagement';
-import NewRequest from './pages/NewRequest';
-import ProfessionalLeads from './pages/ProfessionalLeads';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import SocialShell from './components/social/SocialShell';
+import Landing from './pages/Landing';
 import ProfileSettings from './pages/ProfileSettings';
-import RechargeCredits from './pages/RechargeCredits';
-import PublicProfile from './pages/PublicProfile';
 import Terms from './pages/Terms';
-import TermsBanner from './components/TermsBanner';
 import ResetPassword from './pages/ResetPassword';
-import JobOffers from './pages/JobOffers';
-import JobDetails from './pages/JobDetails';
-import ServicePage from './pages/ServicePage';
-import { User, UserRole, ProfessionalProfile, OrderRequest, OrderStatus } from './types';
+import Feed from './pages/Feed';
+import CreatePost from './pages/CreatePost';
+import PostDetail from './pages/PostDetail';
+import SocialProfile from './pages/SocialProfile';
+import ProfessionalsPage from './pages/Professionals';
+import CompaniesPage from './pages/Companies';
+import Business from './pages/Business';
+import SearchPage from './pages/SearchPage';
+import ProfileRedirect from './pages/ProfileRedirect';
+import Signup from './pages/Signup';
+import RoleChoice from './pages/RoleChoice';
+import { User, UserRole, ProfessionalProfile } from './types';
 import { supabase } from './lib/supabase';
 import { Loader2 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [pendingRole, setPendingRole] = useState(false);
   const [proProfile, setProProfile] = useState<ProfessionalProfile | null>(null);
-  const [orders, setOrders] = useState<OrderRequest[]>([]);
   const [isReady, setIsReady] = useState(false); // Substitui loading/isInitializing por um único estado
-  const [professionals, setProfessionals] = useState<(ProfessionalProfile & { name: string, avatar: string, id: string })[]>([]);
   const navigate = useNavigate();
+  const location = useLocation();
   const hasInitialized = React.useRef(false);
-
-  const fetchOrders = async () => {
-    try {
-      // Opção 2: Limite de Dados - Buscamos apenas os 20 mais recentes para ser mais rápido
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (!error && data) {
-        setOrders(data.map(o => ({
-          id: o.id,
-          clientId: o.client_id,
-          clientName: o.client_name,
-          category: o.category,
-          description: o.description,
-          phone: o.phone || '',
-          address: o.address || '',
-          number: o.number || '',
-          complement: o.complement || '',
-          location: o.location,
-          neighborhood: o.neighborhood || '',
-          deadline: o.deadline,
-          status: o.status as OrderStatus,
-          createdAt: o.created_at,
-          leadPrice: o.lead_price || 5,
-          unlockedBy: o.unlocked_by || [],
-          imageUrl: o.image_url
-        })));
-      }
-    } catch (e) {
-      console.error("Erro ao buscar pedidos:", e);
-    }
-  };
-
-  const fetchProfessionals = async () => {
-    try {
-      // Limitamos a 50 profissionais para a busca inicial
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'PROFESSIONAL')
-        .limit(50);
-
-      if (!error && data) {
-        setProfessionals(data.map(p => ({
-          id: p.id, userId: p.id, name: p.full_name || 'Profissional',
-          avatar: p.avatar_url || `https://picsum.photos/seed/${p.id}/200`,
-          description: p.description || 'Profissional qualificado.',
-          categories: p.categories || [], region: p.region || 'Brasil',
-          rating: p.rating || 5, credits: p.credits || 0,
-          completedJobs: p.completed_jobs || 0, phone: p.phone || '',
-          portfolioUrls: p.portfolio_urls || []
-        })));
-      }
-    } catch (e) { console.error("Erro ao buscar profissionais:", e); }
-  };
 
   const fetchProfile = async (userId: string, email?: string) => {
     try {
@@ -150,17 +88,26 @@ const App: React.FC = () => {
         if (mounted) {
           setUser(null);
           setProProfile(null);
+          setPendingRole(false);
           setIsReady(true);
         }
         return;
       }
 
       if (session?.user) {
-        const updatedUser = await fetchProfile(session.user.id, session.user.email);
-        if (mounted && updatedUser) {
-          fetchOrders();
-          fetchProfessionals();
+        const meta = session.user.user_metadata || {};
+        let updatedUser = await fetchProfile(session.user.id, session.user.email);
+        if (!updatedUser) {
+          const fullName = meta.full_name || [meta.first_name, meta.last_name].filter(Boolean).join(' ') || 'Usuário';
+          await supabase.from('profiles').upsert({
+            id: session.user.id,
+            full_name: fullName,
+            role: 'USER',
+            phone: meta.phone || null,
+          });
+          updatedUser = await fetchProfile(session.user.id, session.user.email);
         }
+        if (mounted) setPendingRole(meta.signup_pending === 'role');
       }
 
       if (mounted) {
@@ -222,7 +169,7 @@ const App: React.FC = () => {
   }
 
   const ProtectedRoute = ({ children, role }: { children?: React.ReactNode, role?: UserRole }) => {
-    if (!user) return <Navigate to="/auth" />;
+    if (!user) return <Navigate to="/" />;
 
     // Verificação especial para administrador específico
     if (role === UserRole.ADMIN) {
@@ -234,141 +181,70 @@ const App: React.FC = () => {
     return <>{children}</>;
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar user={user} onLogout={handleLogout} credits={proProfile?.credits} />
-      <TermsBanner />
-      <main className="flex-grow">
+  const SOCIAL_PREFIXES = ['/feed', '/publicar', '/post/', '/social/', '/profile', '/professionals', '/companies', '/negocios', '/busca', '/search'];
+  const isSocialPath = (path: string): boolean =>
+    SOCIAL_PREFIXES.some((p) => path === p || path.startsWith(p));
+
+  if (user && pendingRole && location.pathname !== '/escolher-perfil') {
+    return <Navigate to="/escolher-perfil" replace />;
+  }
+
+  if (location.pathname === '/escolher-perfil') {
+    return user ? <RoleChoice user={user} /> : <Navigate to="/criar-conta" replace />;
+  }
+
+  if (location.pathname === '/') {
+    return user ? <Navigate to="/feed" replace /> : <Landing user={user} />;
+  }
+
+  if (location.pathname === '/criar-conta') {
+    return user ? <Navigate to="/feed" replace /> : <Signup />;
+  }
+
+  if (location.pathname === '/auth' && location.search.includes('tab=register')) {
+    return <Navigate to="/criar-conta" replace />;
+  }
+
+  if (isSocialPath(location.pathname)) {
+    return (
+      <SocialShell user={user} onLogout={handleLogout}>
         <Routes>
-          <Route path="/" element={<Home user={user} />} />
-          <Route path="/auth" element={user ? (
-            <Navigate to={
-              user.role === UserRole.ADMIN ? "/admin" :
-                user.role === UserRole.PROFESSIONAL ? "/profissional/dashboard" : "/cliente/dashboard"
-            } replace />
-          ) : <Auth />} />
-          <Route path="/pedir-orcamento" element={<NewRequest user={user} onAddOrder={async (o) => {
-            const { error } = await supabase.from('orders').insert([{
-              client_id: user?.id || null,
-              client_name: o.clientName,
-              category: o.category,
-              description: o.description,
-              phone: o.phone,
-              address: o.address,
-              number: o.number,
-              complement: o.complement,
-              location: o.location,
-              neighborhood: o.neighborhood,
-              deadline: o.deadline,
-              status: o.status,
-              lead_price: o.leadPrice,
-              image_url: o.imageUrl
-            }]);
-
-            if (!error) {
-              await fetchOrders();
-            } else {
-              console.error('Erro ao salvar pedido:', error);
-              throw error;
-            }
-          }} />} />
-          <Route path="/perfil/:id" element={<PublicProfile professionals={professionals} />} />
-
-          <Route path="/cliente/dashboard" element={
-            <ProtectedRoute role={UserRole.CLIENT}>
-              <CustomerDashboard user={user!} orders={orders} />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/profissional/dashboard" element={
-            <ProtectedRoute role={UserRole.PROFESSIONAL}>
-              <ProfessionalDashboard
-                user={user!}
-                profile={proProfile}
-                onUpdateProfile={async (p: ProfessionalProfile) => {
-                  const { error } = await supabase.from('profiles').update({
-                    full_name: p.name,
-                    description: p.description,
-                    region: p.region,
-                    phone: p.phone,
-                    avatar_url: p.avatar,
-                    portfolio_urls: p.portfolioUrls,
-                    cep: p.cep,
-                    address: p.address,
-                    number: p.number,
-                    complement: p.complement,
-                    neighborhood: p.neighborhood,
-                    city: p.city,
-                    state: p.state,
-                    experience: p.experience,
-                    profession: p.profession
-                  }).eq('id', p.userId);
-                  if (!error) setProProfile(p);
-                }}
-              />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/profissional/leads" element={
-            <ProtectedRoute role={UserRole.PROFESSIONAL}>
-              <ProfessionalLeads user={user!} profile={proProfile} orders={orders} onUpdateProfile={async (p) => {
-                const { error } = await supabase.from('profiles').update({
-                  credits: p.credits,
-                  completed_jobs: p.completedJobs
-                }).eq('id', p.userId);
-                if (!error) setProProfile(p);
-              }} onUpdateOrder={async (o) => {
-                const { error } = await supabase.from('orders').update({ unlocked_by: o.unlockedBy }).eq('id', o.id);
-                if (!error) await fetchOrders();
-              }} />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/profissional/recarregar" element={
-            <ProtectedRoute role={UserRole.PROFESSIONAL}>
-              <RechargeCredits user={user!} onAddCredits={async (amt) => {
-                const newCredits = (proProfile?.credits || 0) + amt;
-                await supabase.from('profiles').update({ credits: newCredits }).eq('id', user!.id);
-                setProProfile(prev => prev ? { ...prev, credits: newCredits } : null);
-              }} />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/configuracoes" element={
+          <Route path="/feed" element={<Feed user={user} />} />
+          <Route path="/publicar" element={
             <ProtectedRoute>
-              <ProfileSettings user={user!} profile={proProfile} />
+              <CreatePost user={user!} />
             </ProtectedRoute>
           } />
-
-          <Route path="/admin" element={
-            <ProtectedRoute role={UserRole.ADMIN}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/admin/usuarios" element={
-            <ProtectedRoute role={UserRole.ADMIN}>
-              <UserManagement />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/admin/pedidos" element={
-            <ProtectedRoute role={UserRole.ADMIN}>
-              <OrderManagement />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/trabalhos" element={<JobOffers />} />
-          <Route path="/trabalhos/:id" element={<JobDetails user={user} profile={proProfile} onUpdateProfile={(p: ProfessionalProfile) => setProProfile(p)} />} />
-          <Route path="/servico/:slug" element={<ServicePage />} />
-          <Route path="/termos" element={<Terms />} />
-          <Route path="/redefinir-senha" element={<ResetPassword />} />
-
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/post/:id" element={<PostDetail user={user} />} />
+          <Route path="/social/:id" element={<SocialProfile user={user} />} />
+          <Route path="/profile" element={<ProfileRedirect user={user} />} />
+          <Route path="/professionals" element={<ProfessionalsPage />} />
+          <Route path="/companies" element={<CompaniesPage />} />
+          <Route path="/negocios" element={<Business user={user} />} />
+          <Route path="/busca" element={<SearchPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="*" element={<Navigate to="/feed" replace />} />
         </Routes>
-      </main>
-      <Footer />
-    </div>
+      </SocialShell>
+    );
+  }
+
+  if (location.pathname === '/configuracoes') {
+    return (
+      <SocialShell user={user} onLogout={handleLogout}>
+        <ProtectedRoute>
+          <ProfileSettings user={user!} profile={proProfile} />
+        </ProtectedRoute>
+      </SocialShell>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/termos" element={<Terms />} />
+      <Route path="/redefinir-senha" element={<ResetPassword />} />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 };
 

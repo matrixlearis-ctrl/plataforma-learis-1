@@ -109,6 +109,7 @@ END $$;
 CREATE OR REPLACE FUNCTION public.spend_credits(
   p_profile uuid,
   p_amount  integer,
+  p_type    text DEFAULT 'lead_spend',
   p_reason  text DEFAULT NULL,
   p_ref_type text DEFAULT NULL,
   p_ref_id  uuid DEFAULT NULL
@@ -121,6 +122,9 @@ AS $$
 DECLARE
   v_balance integer;
 BEGIN
+  IF NOT p_type IN ('lead_spend','boost','refund','expiry','admin_adjust') THEN
+    RAISE EXCEPTION 'tipo inválido para débito: %', p_type;
+  END IF;
   IF p_amount <= 0 THEN RAISE EXCEPTION 'amount deve ser positivo'; END IF;
   SELECT COALESCE(credits, 0) INTO v_balance FROM public.profiles WHERE id = p_profile;
   IF v_balance IS NULL THEN RAISE EXCEPTION 'perfil não encontrado'; END IF;
@@ -130,7 +134,7 @@ BEGIN
   INSERT INTO public.credits_ledger
     (profile_id, type, amount, balance_after, reference_type, reference_id, reason)
   VALUES
-    (p_profile, 'lead_spend', -p_amount, v_balance, p_ref_type, p_ref_id, p_reason);
+    (p_profile, p_type, -p_amount, v_balance, p_ref_type, p_ref_id, p_reason);
   RETURN v_balance;
 END $$;
 
@@ -151,8 +155,8 @@ GRANT ALL ON public.subscriptions, public.credits_ledger TO service_role;
 -- SEGURANÇA (FALHA #3 corrigida): add_credits/spend_credits são SECURITY DEFINER
 -- e o EXECUTE padrão (PUBLIC) permitiria qualquer client fabricar saldo.
 REVOKE ALL ON FUNCTION public.add_credits(uuid, integer, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION public.spend_credits(uuid, integer, text, text, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.spend_credits(uuid, integer, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.add_credits(uuid, integer, text, text, text, uuid) TO service_role;
-GRANT EXECUTE ON FUNCTION public.spend_credits(uuid, integer, text, text, uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.spend_credits(uuid, integer, text, text, text, uuid) TO service_role;
 
 COMMIT;
