@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const MP_ACCESS_TOKEN = Deno.env.get("MP_ACCESS_TOKEN")
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")
 
 serve(async (req) => {
     // Configuração de CORS
@@ -33,7 +34,7 @@ serve(async (req) => {
                 payer: {
                     email: payer.email,
                 },
-                notification_url: "https://vhtbnptfxilcukytuoba.supabase.co/functions/v1/mercadopago-webhook",
+                notification_url: `${SUPABASE_URL}/functions/v1/mercadopago-webhook`,
             }),
         })
 
